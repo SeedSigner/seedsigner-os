@@ -1,0 +1,26 @@
+From c0510445f16f61a3d9c7c3288c07922917b5c92c Mon Sep 17 00:00:00 2001
+From: DesobedienteTecnologico
+ <52879067+DesobedienteTecnologico@users.noreply.github.com>
+Date: Tue, 19 Oct 2021 08:27:03 +0000
+Subject: [PATCH] PATH fixed by hand
+
+---
+ pyzbar/zbar_library.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/pyzbar/zbar_library.py b/pyzbar/zbar_library.py
+index b63108c..1b7ebc6 100644
+--- a/pyzbar/zbar_library.py
++++ b/pyzbar/zbar_library.py
+@@ -60,7 +60,7 @@ def load():
+             dependencies, libzbar = load_objects(Path(__file__).parent)
+     else:
+         # Assume a shared library on the path
+-        path = find_library('zbar')
++        path = "/usr/lib/python3.10/site-packages/zbar.so"
+         if not path:
+             raise ImportError('Unable to find zbar shared library')
+         libzbar = cdll.LoadLibrary(path)
+-- 
+2.25.1
+

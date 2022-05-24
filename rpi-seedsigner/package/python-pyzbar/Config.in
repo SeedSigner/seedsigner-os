@@ -1,0 +1,9 @@
+config BR2_PACKAGE_PYTHON_PYZBAR
+	bool "python-pyzbar"
+	help
+        Read one-dimensional barcodes and QR codes from Python 2 and 3. 
+        pyzbar fork with additions/modifications for compatibility with SeedSigner software.
+
+
+	  https://github.com/SeedSigner/pyzbar
+    

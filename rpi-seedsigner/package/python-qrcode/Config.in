@@ -1,0 +1,7 @@
+config BR2_PACKAGE_PYTHON_QRCODE
+	bool "python-qrcode"
+	help
+      Generate QR codes.
+
+	  https://pypi.org/project/qrcode/
+    
