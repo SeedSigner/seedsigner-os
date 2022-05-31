@@ -16,10 +16,26 @@
 </p>
 
 
-## Purpose
+## ✅ Purpose
 
 The goal of this project is to make the easiest, fastest, safer and most painless way to build a custom OS that runs <a href="https://seedsigner.com">SeedSigner</a>. For that reason we have pick <a href="https://www.buildroot.org">Buildroot</a>.
 
+## 🛂 Security
+1. **SeedSigner OS boots from RAM**. So, once you see the SeedSigner splash screen, you can release the MicroSD and keep using the device!
+2. **No** /rootfs partition on MicroSD
+3. Many Kernel modules disabled by default:
+  - Networking and Bluetooth
+  - I2C
+  - Serial
+  - USB
+  - Pulse-Width Modulation (PWM)
+  - ...
+4. **NO** HDMI
+5. **NO** Serial connection TTL
+6. **NO** Software that can try to use or access to the wireless, audio, RF...
+7. We will have only **/boot** partition in our MicroSD. In which is located a zImage file **(read-only)** that contains the Linux Kernel and RootFS
+8. Images are not reproducible. Unique hash in every compilation
+9. ...
 
 ## 🛠 Building
 
@@ -32,7 +48,7 @@ git clone --recursive https://github.com/DesobedienteTecnologico/seedsigner-os.g
 ```bash
 cd seedsigner-os/build_workdir/
 ```
-3. Use builder to build the image:
+3. Use ./builder to build the image:
 ```bash
 ./builder -i
 ```
