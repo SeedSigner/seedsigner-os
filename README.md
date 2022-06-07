@@ -42,7 +42,7 @@ The goal of this project is to make the easiest, fastest, safer and most painles
 #### 🔧 Steps to build an image:
 1. Clone the repository in your machine:
 ```bash
-git clone --recursive https://github.com/DesobedienteTecnologico/seedsigner-os.git
+git clone --recursive https://github.com/SeedSigner/seedsigner-os.git
 ```
 2. Go to the work directory:
 ```bash
