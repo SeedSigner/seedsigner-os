@@ -24,7 +24,7 @@ build_image() {
         
         if [ ! -f $custom_rootfs/opt/ ]; then
             # Download SeedSigner from GitHub and put into rootfs
-            git clone -b "0.5.0-ram" $seedsigner_sw $custom_rootfs/opt/
+            git clone -b "0.5.1-ram" $seedsigner_sw $custom_rootfs/opt/
                 
             # Delete unnecessary files to save space
             rm -rf $custom_rootfs/opt/.git 
