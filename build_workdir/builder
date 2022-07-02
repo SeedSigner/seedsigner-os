@@ -30,6 +30,7 @@ build_user_image() {
         
         if [ ! -f $user_rootfs/opt/ ]; then
             # Download SeedSigner from GitHub and put into rootfs
+
             git clone -b "0.5.1-ram" $seedsigner_app $user_rootfs/opt/
                 
             # Delete unnecessary files to save space
