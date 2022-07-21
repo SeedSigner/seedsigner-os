@@ -111,9 +111,9 @@ while getopts 'iph' OPTION; do
     h)
 echo -e "Help menu:
 
-./build -i          [Build SeedSigner OS | Random root password]
-./build -i root     [Build SeedSigner OS | Custom root password]
-./build -i dev      [Build SeedSigner OS Developer version | Custom root password]" 
+./builder -i          [Build SeedSigner OS | Random root password]
+./builder -i root     [Build SeedSigner OS | Custom root password]
+./builder -i dev      [Build SeedSigner OS Developer version | Custom root password]" 
       ;;
   esac
 done
