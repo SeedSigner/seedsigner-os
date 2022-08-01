@@ -25,6 +25,7 @@ The goal of this project is to make the easiest, fastest, safer and most painles
 2. **No** /rootfs partition on MicroSD
 3. Many Kernel modules disabled by default:
   - Networking and Bluetooth
+  - SWAP
   - I2C
   - Serial
   - USB
