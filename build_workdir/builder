@@ -90,6 +90,7 @@ while getopts 'iph' OPTION; do
         if [ -z $2 ]; then
         # Replace root password
         sed -i "12s/.*/BR2_TARGET_GENERIC_ROOT_PASSWD="\"$random_password\""/" $user_defconfig
+
         build_user_image  
         
         elif [ $2 == "root" ]; then
@@ -97,6 +98,7 @@ while getopts 'iph' OPTION; do
         read -s -p "Type Password: " root_password
         # Replace root password
         sed -i "12s/.*/BR2_TARGET_GENERIC_ROOT_PASSWD="\"$root_password\""/" $user_defconfig
+
         build_user_image 
                 
         elif [ $2 == "dev" ]; then
