@@ -30,7 +30,6 @@ build_user_image() {
         
         if [ ! -f $user_rootfs/opt/ ]; then
             # Download SeedSigner from GitHub and put into rootfs
-
             git clone -b "0.5.1-ram" $seedsigner_app $user_rootfs/opt/
                 
             # Delete unnecessary files to save space
@@ -90,14 +89,16 @@ while getopts 'iph' OPTION; do
     i)
         if [ -z $2 ]; then
         # Replace root password
-        sed -i "13s/.*/BR2_TARGET_GENERIC_ROOT_PASSWD="\"$random_password\""/" $user_defconfig
+        sed -i "12s/.*/BR2_TARGET_GENERIC_ROOT_PASSWD="\"$random_password\""/" $user_defconfig
+
         build_user_image  
         
         elif [ $2 == "root" ]; then
         # Ask for a password
         read -s -p "Type Password: " root_password
         # Replace root password
-        sed -i "13s/.*/BR2_TARGET_GENERIC_ROOT_PASSWD="\"$root_password\""/" $user_defconfig
+        sed -i "12s/.*/BR2_TARGET_GENERIC_ROOT_PASSWD="\"$root_password\""/" $user_defconfig
+
         build_user_image 
                 
         elif [ $2 == "dev" ]; then
