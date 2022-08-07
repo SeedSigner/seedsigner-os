@@ -17,7 +17,7 @@ index a291c02..2f51070 100644
      packages=find_namespace_packages("src", include=["*"]),
      package_dir={"": "src"},
 -    package_data={"embit": ["util/prebuilt/*"]},
-+    package_data={"embit": ["util/prebuilt/libsecp256k1_linux_armv7l.so"]},
++    package_data={"embit": ["util/prebuilt/libsecp256k1_linux_arm*"]},
      classifiers=[
          "Programming Language :: Python :: 3",
          "License :: OSI Approved :: MIT License",
