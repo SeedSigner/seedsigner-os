@@ -5,9 +5,9 @@ DEVNAME="/dev/$MDEV"
 if [ $ACTION == "add" ] && [ -n "$DEVNAME" ]; then
     mkdir -p /mnt/microsd
     mount $DEVNAME /mnt/microsd
-    echo "add|/mnt/microsd" | nc -w 0 -U "/tmp/mdev_socket"
+    echo -n "add" > /tmp/mdev_fifo
 elif [ $ACTION == "remove" ] && [ -n "$DEVNAME" ]; then
     umount /mnt/microsd
     rmdir /mnt/microsd
-    echo "remove|/mnt/microsd" | nc -w 0 -U "/tmp/mdev_socket"
+    echo -n "remove" > /tmp/mdev_fifo
 fi
