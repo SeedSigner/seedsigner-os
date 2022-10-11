@@ -80,5 +80,5 @@ Because we are cross-compiling with Buildroot, we need certains tools for that t
 Usually, Debian based OS have all dependences already installed by default. But using this command you can install the main packages in case needed:
 
 ```bash
-sudo apt update && sudo apt install make binutils build-essential gcc g++ patch gzip bzip2 perl tar cpio unzip rsync file bc
+sudo apt update && sudo apt install make binutils build-essential gcc g++ patch gzip bzip2 perl tar cpio unzip rsync file bc libssl-dev
 ```
