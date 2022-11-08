@@ -4,8 +4,8 @@
 seedsigner_app_repo="https://github.com/SeedSigner/seedsigner.git"
 seedsigner_app_repo_branch="0.5.1-ram"
 config_name="${1:-pi0}"
-config_dir="../${config_name}"
-rootfs_overlay="${config_dir}/board/raspberrypi/rootfs-overlay"
+config_dir="./${config_name}"
+rootfs_overlay="./rootfs-overlay"
 config_file="${config_dir}/configs/pi0"
 cur_dir_name=${PWD##*/}
 cur_dir=$(pwd)
@@ -28,7 +28,7 @@ fi
 # Setup external tree
 rm -rf "${cur_dir}/../../output"
 mkdir -p "${cur_dir}/../../output"
-make BR2_EXTERNAL="${config_dir}/" O="${cur_dir}/../../output" -C ../buildroot/ 2> /dev/null > /dev/null
+make BR2_EXTERNAL="../${config_dir}/" O="${cur_dir}/../../output" -C ./buildroot/ # 2> /dev/null > /dev/null
 
 # remove previous opt seedsigner app repo code if it already exists
 rm -fr ${rootfs_overlay}/opt/

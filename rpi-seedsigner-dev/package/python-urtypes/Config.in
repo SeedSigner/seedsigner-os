@@ -1,8 +1,0 @@
-config BR2_PACKAGE_PYTHON_URTYPES
-	bool "python-urtypes"
-	help
-      Python implementation of the Blockchain Commons UR Types specification 
-
-
-	  https://github.com/jreesun/urtypes
-    
