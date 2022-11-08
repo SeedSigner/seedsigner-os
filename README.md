@@ -49,9 +49,23 @@ git clone --recursive https://github.com/SeedSigner/seedsigner-os.git
 ```bash
 cd seedsigner-os
 ```
-3. Build images using dockerUse ./builder to build the image:
+3. Build images using docker-compose (this will take a long time 1-8 hours, depending on PC):
 ```bash
-SS_ARGS="--pi0 --no-clean" docker-compose up
+docker-compose up
+```
+
+#### Additional helpful build commands
+```bash
+SS_ARGS="--pi0 --dev --keep-alive" docker-compose up --build
+```
+```bash
+docker rm -f seedsigner-os-build-images-1
+```
+```bash
+docker build . -t ss
+```
+```bash
+docker run -v $(pwd)/opt:/opt -v $(pwd)/images:/images --name ss ss:latest --pi0-dev
 ```
 
 The final image **seedsigner_os.img** is going to be located under **images/** with a name matching the architecture and branch name
@@ -76,8 +90,8 @@ busybox-menuconfig
 ```
 
 ## 📑 <a href="https://www.buildroot.org/downloads/manual/manual.html#requirement">Requirements</a>
-Because we are cross-compiling with Buildroot, we need certains tools for that task.
-Usually, Debian based OS have all dependences already installed by default. But using this command you can install the main packages in case needed:
+If you are not using the docker image, then these build tools will be required for cross-compiling with Buildroot.
+This single command will install required dependencies for a debian based linux os.
 
 ```bash
 sudo apt update && sudo apt install make binutils build-essential gcc g++ patch gzip bzip2 perl tar cpio unzip rsync file bc libssl-dev

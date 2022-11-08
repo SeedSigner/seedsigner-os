@@ -83,7 +83,7 @@ build_image() {
   
   if [ -f "${build_dir}/images/seedsigner_os.img" ] && [ -d "${image_dir}" ]; then
     mv -f "${build_dir}/images/seedsigner_os.img" "${image_dir}/seedsigner_os.${seedsigner_app_repo_branch}.${config_name}.img"
-    gzip "${image_dir}/seedsigner_os.${seedsigner_app_repo_branch}.${config_name}.img"
+    gzip -f "${image_dir}/seedsigner_os.${seedsigner_app_repo_branch}.${config_name}.img"
     mv -f "${build_dir}/images" "${image_dir}/seedsigner_os.${seedsigner_app_repo_branch}.${config_name}"
   fi
   
