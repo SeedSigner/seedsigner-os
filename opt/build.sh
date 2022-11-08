@@ -19,15 +19,16 @@ if [ ! -d "${config_dir}" ]; then
   exit 1
 fi
 
-# clean up previous build if Makefile exists in /data/build dir
-if [ -f "${cur_dir}/Makefile" ]; then
-  make clean
-  rm .br2* Makefile
-fi
+# clean up previous build if Makefile exists in /opt/build dir
+# if [ -f "${cur_dir}/Makefile" ]; then
+#   make clean
+#   rm .br2* Makefile
+# fi
 
 # Setup external tree
-mkdir -p /make_output
-make BR2_EXTERNAL="${config_dir}/" O="${cur_dir}/../../make_output" -C ../buildroot/ 2> /dev/null > /dev/null
+rm -rf "${cur_dir}/../../output"
+mkdir -p "${cur_dir}/../../output"
+make BR2_EXTERNAL="${config_dir}/" O="${cur_dir}/../../output" -C ../buildroot/ 2> /dev/null > /dev/null
 
 # remove previous opt seedsigner app repo code if it already exists
 rm -fr ${rootfs_overlay}/opt/
@@ -46,8 +47,8 @@ rm -rf ${rootfs_overlay}/opt/enclosures
 rm -rf ${rootfs_overlay}/opt/seedsigner_pubkey.gpg 
 rm -rf ${rootfs_overlay}/opt/setup.py
 
+cd "${cur_dir}/../../output"
 make ${config_name}_defconfig
-
 make
 
 exit 0

@@ -1,4 +1,0 @@
-# Ignore all except: .gitignore and builder
-*
-!.gitignore
-!builder
