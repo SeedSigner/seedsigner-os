@@ -87,6 +87,7 @@ build_image() {
     mv -f "${build_dir}/images" "${image_dir}/seedsigner_os.${seedsigner_app_repo_branch}.${config_name}"
   fi
   
+  cd - # return to previous working directory
 }
 
 ###
@@ -187,4 +188,3 @@ if ! [ -z $KEEPALIVE ]; then
 fi
 
 exit 0
-
