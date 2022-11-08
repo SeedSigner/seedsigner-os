@@ -35,11 +35,5 @@ RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
 RUN echo "LANG=en_US.UTF-8" > /etc/locale.conf
 RUN locale-gen en_US.UTF-8
 
-# RUN mkdir -p /data
-# WORKDIR /data/build
-
-ENTRYPOINT ["tail", "-f", "/dev/null"]
-
-# Entry script - This will also run terminator
-# COPY entrypoint.sh /usr/local/bin/
-# ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+WORKDIR /opt
+ENTRYPOINT ["./build.sh"]

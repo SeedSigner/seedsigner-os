@@ -40,24 +40,24 @@ The goal of this project is to make the easiest, fastest, safer and most painles
 
 ## 🛠 Building
 
-#### 🔧 Steps to build an image:
+#### 🔧 Steps to build an image using docker:
 1. Clone the repository in your machine:
 ```bash
 git clone --recursive https://github.com/SeedSigner/seedsigner-os.git
 ```
-2. Go to the work directory:
+2. Go into the repo directory:
 ```bash
-cd seedsigner-os/build_workdir/
+cd seedsigner-os
 ```
-3. Use ./builder to build the image:
+3. Build images using dockerUse ./builder to build the image:
 ```bash
-./builder -i
+SS_ARGS="--pi0 --no-clean" docker-compose up
 ```
 
-The final image **seedsigner_os.img** is going to be located under **build_workdir/images/**
+The final image **seedsigner_os.img** is going to be located under **images/** with a name matching the architecture and branch name
 
-### ℹ️ ./builder help
-You can see the different build options with `./builder -h`
+### ℹ️ ./build.sh help
+You can see the different build options with `./build.sh -h`
 
 ## 📝 <a href="https://www.buildroot.org/downloads/manual/manual.html#_buildroot_quick_start">See and modify configurations</a>
 Buildroot:
