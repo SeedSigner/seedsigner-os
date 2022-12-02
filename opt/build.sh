@@ -12,7 +12,8 @@ help()
   
   Pi Board: (only one allowed)
   -a, --all         Build for all supported pi boards
-      --pi0         Build for pi0, pi0w, and pi2
+      --pi0         Build for pi0 and pi0w
+      --pi2         Build for pi2
       --pi02w       Build for pi02w and pi3
       --pi4         Build for pi4 and pi4cmio (Not Implemented Yet)
   
@@ -119,6 +120,9 @@ while (( "$#" )); do
   --pi0)
     PI0_FLAG=0; ((ARCH_CNT=ARCH_CNT+1)); shift
     ;;
+   --pi2)
+    PI2_FLAG=0; ((ARCH_CNT=ARCH_CNT+1)); shift
+    ;;
   --pi02w)
     PI02W_FLAG=0; ((ARCH_CNT=ARCH_CNT+1)); shift
     ;;
@@ -210,6 +214,12 @@ fi
 if ! [ -z ${PI0_FLAG} ]; then
   build_image "pi0${DEVARG}" "${CLEAN_ARG}" "${SKIPREPO_ARG}"
 fi
+
+# Build only for pi2
+if ! [ -z ${PI2_FLAG} ]; then
+  build_image "pi2${DEVARG}" "${CLEAN_ARG}" "${SKIPREPO_ARG}"
+fi
+
 
 # build for pi02w
 if ! [ -z ${PI02W_FLAG} ]; then
