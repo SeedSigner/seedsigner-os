@@ -208,6 +208,7 @@ fi
 if ! [ -z ${ALL_FLAG} ]; then
   build_image "pi0${DEVARG}" "clean" "${SKIPREPO_ARG}"
   build_image "pi02w${DEVARG}" "clean" "${SKIPREPO_ARG}"
+  build_image "pi2${DEVARG}" "${CLEAN_ARG}" "${SKIPREPO_ARG}"
 fi
 
 # Build only for pi0, pi0w, and pi1
