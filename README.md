@@ -40,24 +40,38 @@ The goal of this project is to make the easiest, fastest, safer and most painles
 
 ## 🛠 Building
 
-#### 🔧 Steps to build an image:
+#### 🔧 Steps to build an image using docker:
 1. Clone the repository in your machine:
 ```bash
 git clone --recursive https://github.com/SeedSigner/seedsigner-os.git
 ```
-2. Go to the work directory:
+2. Go into the repo directory:
 ```bash
-cd seedsigner-os/build_workdir/
+cd seedsigner-os
 ```
-3. Use ./builder to build the image:
+3. Build images using docker-compose (this will take a long time 1-8 hours, depending on PC):
 ```bash
-./builder -i
+docker-compose up
 ```
 
-The final image **seedsigner_os.img** is going to be located under **build_workdir/images/**
+#### Additional helpful build commands
+```bash
+SS_ARGS="--pi0 --dev --keep-alive" docker-compose up --build
+```
+```bash
+docker rm -f seedsigner-os-build-images-1
+```
+```bash
+docker build . -t ss
+```
+```bash
+docker run -v $(pwd)/opt:/opt -v $(pwd)/images:/images --name ss ss:latest --pi0-dev
+```
 
-### ℹ️ ./builder help
-You can see the different build options with `./builder -h`
+The final image **seedsigner_os.img** is going to be located under **images/** with a name matching the architecture and branch name
+
+### ℹ️ ./build.sh help
+You can see the different build options with `./build.sh -h`
 
 ## 📝 <a href="https://www.buildroot.org/downloads/manual/manual.html#_buildroot_quick_start">See and modify configurations</a>
 Buildroot:
@@ -76,8 +90,8 @@ busybox-menuconfig
 ```
 
 ## 📑 <a href="https://www.buildroot.org/downloads/manual/manual.html#requirement">Requirements</a>
-Because we are cross-compiling with Buildroot, we need certains tools for that task.
-Usually, Debian based OS have all dependences already installed by default. But using this command you can install the main packages in case needed:
+If you are not using the docker image, then these build tools will be required for cross-compiling with Buildroot.
+This single command will install required dependencies for a debian based linux os.
 
 ```bash
 sudo apt update && sudo apt install make binutils build-essential gcc g++ patch gzip bzip2 perl tar cpio unzip rsync file bc libssl-dev

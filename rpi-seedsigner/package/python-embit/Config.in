@@ -1,7 +1,0 @@
-config BR2_PACKAGE_PYTHON_EMBIT
-	bool "python-embit"
-	help
-      yet another bitcoin library
-
-	  https://pypi.org/project/embit
-      Yeah SeedSigner!    

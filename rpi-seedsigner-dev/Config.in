@@ -1,7 +1,0 @@
-    source "$BR2_EXTERNAL_RPI_SEEDSIGNER_DEV_MIN_PATH/package/python-urtypes/Config.in"
-    source "$BR2_EXTERNAL_RPI_SEEDSIGNER_DEV_MIN_PATH/package/python-pyzbar/Config.in"
-    source "$BR2_EXTERNAL_RPI_SEEDSIGNER_DEV_MIN_PATH/package/python-mock/Config.in"
-    source "$BR2_EXTERNAL_RPI_SEEDSIGNER_DEV_MIN_PATH/package/python-embit/Config.in"
-    source "$BR2_EXTERNAL_RPI_SEEDSIGNER_DEV_MIN_PATH/package/python-picamera/Config.in"
-    source "$BR2_EXTERNAL_RPI_SEEDSIGNER_DEV_MIN_PATH/package/python-qrcode/Config.in" 
-
