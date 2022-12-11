@@ -19,46 +19,45 @@
 
 A custom linux based operating system built to manage software running on airgapped Bitcoin signing device. SeedSigner is both the project name and [application](http://github.com/SeedSigner/seedsigner/) running on airgapped hardware. This custom operating system, like all operating systems, manages the hardware resources and provides them to the application code. It's currently designed to run on common Raspberry Pi hardware with [accessories](https://github.com/SeedSigner/seedsigner/#shopping-list). The goal of SeedSigner OS is to provide an easy, fast, and secure way to build microSD card image to securely run [SeedSigner](https://seedsigner.com) code.
 
-<br>
 
 ## ⚙️ Under the Hood
 
 SeedSigner OS is built using [Buildroot](https://www.buildroot.org). Buildroot is a simple, efficient and easy-to-use tool to generate embedded Linux systems through cross-compilation. SeedSigner OS does not fork Buildroot, but uses Buildroot with custom configurations to build microSD card images tailor made for running SeedSigner.
 
-<br>
 
 ## 🛂 Security
 
 SeedSigner OS is built to reduce the attack surface area and enable additional application functionality. The OS is an order of magnatude smaller in size than Raspberry Pi OS (which is what typically is used to run software on a Pi device). Here are a list of some security and functional advantages of using SeedSigner OS.
 
-1. Boots 100% from RAM. This means, once you see the SeedSigner splash screen, you can remove the microSD card because no disk I/O is needed after boot!
-2. One FAT32 partition on the microSD card
-3. Removes these standard Raspberry Pi OS Kernel modules:
-  - Networking and Bluetooth
-  - SWAP
-  - I2C
-  - Serial
-  - USB
-  - Pulse-Width Modulation (PWM)
-4. NO HDMI support
-5. NO Serial connection TTL support
-6. NO Software supporting any wireless or networking chips
-7. A single read only zImage file on the boot partition containing the entire Linux kernel and filesystem
+- Boots 100% from RAM. This means, once you see the SeedSigner splash screen, you can remove the microSD card because no disk I/O is needed after boot!
+- One FAT32 partition on the microSD card
+- Removes these standard Raspberry Pi OS Kernel modules:
+   - Networking and Bluetooth
+   - SWAP
+   - I2C
+   - Serial
+   - USB
+   - Pulse-Width Modulation (PWM)
+- NO HDMI support
+- NO Serial connection TTL support
+- NO Software supporting any wireless or networking chips
+- A single read only zImage file on the boot partition containing the entire Linux kernel and filesystem
 
-<br><br>
 
 # 🛠 Building
 
 ## 🐳 Using Docker
 
-### Dependencies
+Easiest way to build SeedSigner OS is using docker. This keeps the build process repeatable and the build system clean.
+
+### Build Dependencies
 
 * [Docker Compose](https://docs.docker.com/compose/install/)
 * [Docker](https://docs.docker.com/get-docker/)
 
 ### Steps to build using docker-compose
 
-1. Clone the repository in your machine:
+- Clone the repository in your machine:
   ```bash
   git clone --recursive https://github.com/SeedSigner/seedsigner-os.git
   ```
@@ -77,12 +76,9 @@ This command will build a docker image from the Dockerfile and in the background
   docker container list --all
   ```
 
-#### Note:
 Run ```SS_ARGS="--help" docker-compose up``` to see the possible build options you can pass in via the SS_ARGS env variable.
 
-<br>
-
-### Output Images
+### Image Location and Naming
 
 By default, the docker-compose.yml is configured to create a container volume to the images directory in the repo. This is where all the image files are written out after the container completes building the OS from source. The images are named following this convension:
 
@@ -91,9 +87,6 @@ By default, the docker-compose.yml is configured to create a container volume to
 Example name for a pi0 built off the 0.5.2 branch would be named:
 
 `seedsigner_os.0.5.2.pi0.img.gz`
-
-
-### Supported Boards and images to use
 
 Here is a table Raspberry Pi boards to image filenames/configs
 
@@ -106,7 +99,6 @@ Here is a table Raspberry Pi boards to image filenames/configs
 |Raspberry Pi 3 Model B |`seedsigner_os.<tag>.pi02w.img.gz` |
 |Raspberry Pi 4 Model B |`seedsigner_os.<tag>.pi4.img.gz`   |
 
-<br>
 
 ## 📑 Using Debian/Ubuntu (without docker)
 
@@ -123,7 +115,7 @@ cd opt
 ./build --pi0
 ```
 
-You can see the different build options with `./build.sh -h`
+You can see the different build options with `./build.sh --help`
 
 ## Customizing buildroot configurations
 
