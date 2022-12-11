@@ -57,18 +57,18 @@ Easiest way to build SeedSigner OS is using docker. This keeps the build process
 
 ### Steps to build using docker-compose
 
-- Clone the repository in your machine:
-  ```bash
-  git clone --recursive https://github.com/SeedSigner/seedsigner-os.git
-  ```
+1. Clone the repository in your machine:
+   ```bash
+   git clone --recursive https://github.com/SeedSigner/seedsigner-os.git
+   ```
 2. Go into the repo directory:
-  ```bash
-  cd seedsigner-os
-  ```
+   ```bash
+   cd seedsigner-os
+   ```
 3. Build images using docker-compose (expect this to take more than 1 hour). You can change the `--pi0` option to the board type you wish to build or use `--all` to build all images types.
-  ```bash
-  SS_ARGS="--pi0" docker-compose up -d
-  ```
+   ```bash
+   SS_ARGS="--pi0" docker-compose up -d
+   ```
 
 This command will build a docker image from the Dockerfile and in the background (as a daemon) run a container used to compile SeedSigner OS. You can monitor the seedsigner-os-build-images container in Docker Dashboard (if using Docker Desktop) or by running the docker contain list command waiting for the container to complete with an Exit (0) status. The container will create the image(s) in the images directory.
 
