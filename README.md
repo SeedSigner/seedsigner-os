@@ -101,7 +101,7 @@ Here is a table Raspberry Pi boards to image filenames/configs
 
 ### Development cycle using docker
 
-Each time the `docker-compose up` command runs a full build from scratch is performed. To have faster development cycles you'll likely want to avoid building the OS from scratch each time. You can avoid recreating the docker image/container a few different ways. One way is to pass the options `--skip-build` and `--keep-alive` to the `SS_ARGS` env variable when running `docker-compse ip -d`. This will cause the container to skip build steps but keep the container running in the background until you explicitly stop it. You can then launch a shell session into the container and work interactively running any specific build commands you desire.
+Each time the `docker-compose up` command runs a full build from scratch is performed. To have faster development cycles you'll likely want to avoid building the OS from scratch each time. You can avoid recreating the docker image/container a few different ways. One way is to pass the options `--skip-build` and `--keep-alive` to the `SS_ARGS` env variable when running `docker-compse up -d`. This will cause the container to skip build steps but keep the container running in the background until you explicitly stop it. You can then launch a shell session into the container and work interactively running any specific build commands you desire.
 
 Using docker-compose will build the image and launch the container
 ```bash
@@ -122,7 +122,7 @@ Or you can use any of the Buildroot customization commands like `make menuconfig
 
 ## Developement Configs
 
-Each board also has a developer configuration (dev config). Inside the `/opt` folder are all the build configs for each board matching the name of the build script option. The dev configs are built to work on each board but enable many of the kernel features of the board used to access and troubleshoot. This also makes this the image built less secure, so please do not use with real funds.
+Each board also has a developer configuration (dev config). Inside the `/opt` folder are all the build configs for each board matching the name of the build script option. The dev configs are built to work on each board but enable many of the kernel and OS features needed for development. This also makes this the image built less secure, so please do not use with real funds. Dev configs are only used when the `--dev` option is passed in to the build.sh script.
 
 ## 📑 Using Debian/Ubuntu (without docker)
 
