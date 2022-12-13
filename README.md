@@ -120,6 +120,10 @@ Once you are in the container you can use the build script directly
 
 Or you can use any of the Buildroot customization commands like `make menuconfig` or `linux-menuconfig` 
 
+## Developement Configs
+
+Each board also has a developer configuration (dev config). Inside the `/opt` folder are all the build configs for each board matching the name of the build script option. The dev configs are built to work on each board but enable many of the kernel features of the board used to access and troubleshoot. This also makes this the image built less secure, so please do not use with real funds.
+
 ## 📑 Using Debian/Ubuntu (without docker)
 
 If you are not using the docker image, then these build tools will be required for cross-compiling with Buildroot. This is only tested and expected to work on a debian based OS using apt package manager (not MacOS). This single command will install required dependencies for a debian based linux os.
