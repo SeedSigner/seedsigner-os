@@ -82,23 +82,43 @@ Run ```SS_ARGS="--help" docker-compose up``` to see the possible build options y
 
 By default, the docker-compose.yml is configured to create a container volume to the images directory in the repo. This is where all the image files are written out after the container completes building the OS from source. The images are named following this convension:
 
-`seedsigner_os.<app_repo_branch>.<board_config>.img.gz`
+`seedsigner_os.<app_repo_branch>.<board_config>.img`
 
 Example name for a pi0 built off the 0.5.2 branch would be named:
 
-`seedsigner_os.0.5.2.pi0.img.gz`
+`seedsigner_os.0.5.2.pi0.img`
 
 Here is a table Raspberry Pi boards to image filenames/configs
 
-| Board                 | Image Name                        |
-| --------------------- | --------------------------------- |
-|Raspberry Pi Zero      |`seedsigner_os.<tag>.pi0.img.gz`   |
-|Raspberry Pi Zero W    |`seedsigner_os.<tag>.pi0.img.gz`   |
-|Raspberry Pi 2 Model B |`seedsigner_os.<tag>.pi2.img.gz`   |
-|Raspberry Pi Zero 2 W  |`seedsigner_os.<tag>.pi02w.img.gz` |
-|Raspberry Pi 3 Model B |`seedsigner_os.<tag>.pi02w.img.gz` |
-|Raspberry Pi 4 Model B |`seedsigner_os.<tag>.pi4.img.gz`   |
+| Board                 | Image Name                        | Build Script Option |
+| --------------------- | --------------------------------- | ------------------- |
+|Raspberry Pi Zero      |`seedsigner_os.<tag>.pi0.img`      | --pi0               |
+|Raspberry Pi Zero W    |`seedsigner_os.<tag>.pi0.img`      | --pi0               |
+|Raspberry Pi 2 Model B |`seedsigner_os.<tag>.pi2.img`      | --pi2               |
+|Raspberry Pi Zero 2 W  |`seedsigner_os.<tag>.pi02w.img`    | --pi02w             |
+|Raspberry Pi 3 Model B |`seedsigner_os.<tag>.pi02w.img`    | --pi02w             |
+|Raspberry Pi 4 Model B |`seedsigner_os.<tag>.pi4.img`      | --pi4               |
 
+### Development cycle using docker
+
+Each time the `docker-compose up` command runs a full build from scratch is performed. To have faster development cycles you'll likely want to avoid building the OS from scratch each time. You can avoid recreating the docker image/container a few different ways. One way is to pass the options `--skip-build` and `--keep-alive` to the `SS_ARGS` env variable when running `docker-compse ip -d`. This will cause the container to skip build steps but keep the container running in the background until you explicitly stop it. You can then launch a shell session into the container and work interactively running any specific build commands you desire.
+
+Using docker-compose will build the image and launch the container
+```bash
+SS_ARGS="--skip-build --keep-alive" docker-compose up -d
+```
+
+Start a shell session inside the container by running
+```bash
+docker exec -it seedsigner-os-build-images-1 /bin/bash
+```
+
+Once you are in the container you can use the build script directly
+```bash
+./build.sh --pi0 --app-repo=https://github.com/seedsigner/seedsigner.git --app-branch=dev --no-clean
+```
+
+Or you can use any of the Buildroot customization commands like `make menuconfig` or `linux-menuconfig` 
 
 ## 📑 Using Debian/Ubuntu (without docker)
 
