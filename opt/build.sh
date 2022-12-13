@@ -18,14 +18,20 @@ help()
       --pi4         Build for pi4 and pi4cmio (Not Implemented Yet)
   
   Options:
-  -h, --help        Display a help screen and quit
+  -h, --help        Display a help screen and quit 
       --dev         Builds developer version of images
       --no-clean    Leave previous build, target, and output files
       --skip-repo   Skip pulling repo, assume rootfs-overlay/opt is populated with app code
       --app-repo    Build image with not official seedsigner github repo
       --app-branch  Build image with repo branch other than default
-      --keep-alive  Keeps container/script running after completeing"
+      --keep-alive  Keeps container/script running after completeing
+      --skip-build  Used generally with keep-alive to run an interactive container"
   exit 2
+}
+
+tail_endless() {
+  echo "Running 'tail -f /dev/null' to keep script alive"
+  tail -f /dev/null
 }
 
 download_app_repo() {
@@ -135,6 +141,9 @@ while (( "$#" )); do
   --keep-alive)
     KEEPALIVE=0; shift
     ;;
+  --skip-build)
+    SKIPBUILD=0; shift
+    ;;
   --dev)
     DEVBUILD=0; shift
     ;;
@@ -166,6 +175,14 @@ fi
 if [ $ARCH_CNT -gt 1 ]; then
   echo "Invalid number of architecture arguments" >&2
   exit 3
+fi
+
+# if skip build and check for endless
+if ! [ -z $SKIPBUILD ]; then
+  if ! [ -z $KEEPALIVE ]; then
+    tail_endless
+  fi
+  exit 0
 fi
 
 # Check for --no-clean argument to pass clean/no-clean to build_image function
@@ -229,7 +246,7 @@ fi
 
 # if build.sh makes it this far without errors, and --keep-alive flag is set, then keep container/script running
 if ! [ -z $KEEPALIVE ]; then
-  tail -f /dev/null
+  tail_endless
 fi
 
 exit 0
