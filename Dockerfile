@@ -8,7 +8,8 @@ lsb-release \
 git \
 wget \
 make \
-binutils \gcc \
+binutils \
+gcc \
 g++ \
 patch \
 gzip \
@@ -22,7 +23,8 @@ file \
 bc \
 libssl-dev \
 vim \
-build-essential 
+build-essential \ 
+libncurses-dev
 
 # Locale
 RUN locale-gen en_US.UTF-8  
