@@ -21,3 +21,6 @@ boot_delay=0
 
 # Overclock de Rpi
 force_turbo=1
+
+# Enable dwc2 to create gadget
+dtoverlay=dwc2
