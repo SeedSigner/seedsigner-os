@@ -4,6 +4,7 @@
 
 start() {
     # Enable kernel modules
+    modprobe g_ether
     modprobe aes_arm
     modprobe aes_generic
     modprobe cmac
