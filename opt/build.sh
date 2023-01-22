@@ -122,6 +122,9 @@ while (( "$#" )); do
   --pi02w)
     PI02W_FLAG=0; ((ARCH_CNT=ARCH_CNT+1)); shift
     ;;
+   --pi4)
+    PI4_FLAG=0; ((ARCH_CNT=ARCH_CNT+1)); shift
+    ;;
   --no-clean)
     NOCLEAN=0; shift
     ;;
@@ -204,6 +207,7 @@ fi
 if ! [ -z ${ALL_FLAG} ]; then
   build_image "pi0${DEVARG}" "clean" "${SKIPREPO_ARG}"
   build_image "pi02w${DEVARG}" "clean" "${SKIPREPO_ARG}"
+  build_image "pi4${DEVARG}" "clean" "${SKIPREPO_ARG}"
 fi
 
 # Build only for pi0, pi0w, and pi1
@@ -215,6 +219,12 @@ fi
 if ! [ -z ${PI02W_FLAG} ]; then
   build_image "pi02w${DEVARG}" "${CLEAN_ARG}" "${SKIPREPO_ARG}"
 fi
+
+# build for pi4
+if ! [ -z ${PI4_FLAG} ]; then
+  build_image "pi4${DEVARG}" "${CLEAN_ARG}" "${SKIPREPO_ARG}"
+fi
+
 
 # if build.sh makes it this far without errors, and --keep-alive flag is set, then keep container/script running
 if ! [ -z $KEEPALIVE ]; then
