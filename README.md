@@ -12,68 +12,141 @@
   <a href="" title="Twitter">
   <img src="https://img.shields.io/twitter/follow/seedsigner?style=social">
   </a>
-  
 </p>
 
 
-## ✅ Purpose
+# ✅ About
 
-The goal of this project is to make the easiest, fastest, safer and most painless way to build a custom OS that runs <a href="https://seedsigner.com">SeedSigner</a>. For that reason we have pick <a href="https://www.buildroot.org">Buildroot</a>.
+A custom linux based operating system built to manage software running on airgapped Bitcoin signing device. SeedSigner is both the project name and [application](http://github.com/SeedSigner/seedsigner/) running on airgapped hardware. This custom operating system, like all operating systems, manages the hardware resources and provides them to the application code. It's currently designed to run on common Raspberry Pi hardware with [accessories](https://github.com/SeedSigner/seedsigner/#shopping-list). The goal of SeedSigner OS is to provide an easy, fast, and secure way to build microSD card image to securely run [SeedSigner](https://seedsigner.com) code.
+
+
+## ⚙️ Under the Hood
+
+SeedSigner OS is built using [Buildroot](https://www.buildroot.org). Buildroot is a simple, efficient and easy-to-use tool to generate embedded Linux systems through cross-compilation. SeedSigner OS does not fork Buildroot, but uses Buildroot with custom configurations to build microSD card images tailor made for running SeedSigner.
+
 
 ## 🛂 Security
-1. **SeedSigner OS boots from RAM**. So, once you see the SeedSigner splash screen, you can release the MicroSD and keep using the device!
-2. **No** /rootfs partition on MicroSD
-3. Many Kernel modules disabled by default:
-  - Networking and Bluetooth
-  - SWAP
-  - I2C
-  - Serial
-  - USB
-  - Pulse-Width Modulation (PWM)
-  - ...
-4. **NO** HDMI
-5. **NO** Serial connection TTL
-6. **NO** Software that can try to use or access to the wireless, audio, RF...
-7. We will have only **/boot** partition in our MicroSD. In which is located a zImage file **(read-only)** that contains the Linux Kernel and RootFS
-8. Images are not reproducible. Unique hash in every compilation
-9. ...
 
-## 🛠 Building
+SeedSigner OS is built to reduce the attack surface area and enable additional application functionality. The OS is an order of magnatude smaller in size than Raspberry Pi OS (which is what typically is used to run software on a Pi device). Here are a list of some security and functional advantages of using SeedSigner OS.
 
-#### 🔧 Steps to build an image using docker:
+- Boots 100% from RAM. This means, once you see the SeedSigner splash screen, you can remove the microSD card because no disk I/O is needed after boot!
+- One FAT32 partition on the microSD card
+- Removes these standard Raspberry Pi OS Kernel modules:
+   - Networking and Bluetooth
+   - SWAP
+   - I2C
+   - Serial
+   - USB
+   - Pulse-Width Modulation (PWM)
+- NO HDMI support
+- NO Serial connection TTL support
+- NO Software supporting any wireless or networking chips
+- A single read only zImage file on the boot partition containing the entire Linux kernel and filesystem
+
+
+# 🛠 Building
+
+## 🐳 Using Docker
+
+Easiest way to build SeedSigner OS is using docker. This keeps the build process repeatable and the build system clean.
+
+### Build Dependencies
+
+* [Docker Compose](https://docs.docker.com/compose/install/)
+* [Docker](https://docs.docker.com/get-docker/)
+
+### Steps to build using docker-compose
+
 1. Clone the repository in your machine:
-```bash
-git clone --recursive https://github.com/SeedSigner/seedsigner-os.git
-```
+   ```bash
+   git clone --recursive https://github.com/SeedSigner/seedsigner-os.git
+   ```
 2. Go into the repo directory:
+   ```bash
+   cd seedsigner-os
+   ```
+3. Build images using docker-compose (expect this to take more than 1 hour). You can change the `--pi0` option to the board type you wish to build or use `--all` to build all images types.
+   ```bash
+   SS_ARGS="--pi0" docker-compose up -d
+   ```
+
+This command will build a docker image from the Dockerfile and in the background (as a daemon) run a container used to compile SeedSigner OS. You can monitor the seedsigner-os-build-images container in Docker Dashboard (if using Docker Desktop) or by running the docker contain list command waiting for the container to complete with an Exit (0) status. The container will create the image(s) in the images directory.
+
+  ```bash
+  docker container list --all
+  ```
+
+Run ```SS_ARGS="--help" docker-compose up``` to see the possible build options you can pass in via the SS_ARGS env variable.
+
+### Image Location and Naming
+
+By default, the docker-compose.yml is configured to create a container volume to the images directory in the repo. This is where all the image files are written out after the container completes building the OS from source. The images are named following this convension:
+
+`seedsigner_os.<app_repo_branch>.<board_config>.img`
+
+Example name for a pi0 built off the 0.5.2 branch would be named:
+
+`seedsigner_os.0.5.2.pi0.img`
+
+Here is a table Raspberry Pi boards to image filenames/configs
+
+| Board                 | Image Name                        | Build Script Option |
+| --------------------- | --------------------------------- | ------------------- |
+|Raspberry Pi Zero      |`seedsigner_os.<tag>.pi0.img`      | --pi0               |
+|Raspberry Pi Zero W    |`seedsigner_os.<tag>.pi0.img`      | --pi0               |
+|Raspberry Pi 2 Model B |`seedsigner_os.<tag>.pi2.img`      | --pi2               |
+|Raspberry Pi Zero 2 W  |`seedsigner_os.<tag>.pi02w.img`    | --pi02w             |
+|Raspberry Pi 3 Model B |`seedsigner_os.<tag>.pi02w.img`    | --pi02w             |
+|Raspberry Pi 4 Model B |`seedsigner_os.<tag>.pi4.img`      | --pi4               |
+
+### Development cycle using docker
+
+Each time the `docker-compose up` command runs a full build from scratch is performed. To have faster development cycles you'll likely want to avoid building the OS from scratch each time. You can avoid recreating the docker image/container a few different ways. One way is to pass the options `--skip-build` and `--keep-alive` to the `SS_ARGS` env variable when running `docker-compse up -d`. This will cause the container to skip build steps but keep the container running in the background until you explicitly stop it. You can then launch a shell session into the container and work interactively running any specific build commands you desire.
+
+Using docker-compose will build the image and launch the container
 ```bash
-cd seedsigner-os
-```
-3. Build images using docker-compose (this will take a long time 1-8 hours, depending on PC):
-```bash
-docker-compose up
+SS_ARGS="--skip-build --keep-alive" docker-compose up -d
 ```
 
-#### Additional helpful build commands
+Start a shell session inside the container by running
 ```bash
-SS_ARGS="--pi0 --dev --keep-alive" docker-compose up --build
-```
-```bash
-docker rm -f seedsigner-os-build-images-1
-```
-```bash
-docker build . -t ss
-```
-```bash
-docker run -v $(pwd)/opt:/opt -v $(pwd)/images:/images --name ss ss:latest --pi0-dev
+docker exec -it seedsigner-os-build-images-1 /bin/bash
 ```
 
-The final image **seedsigner_os.img** is going to be located under **images/** with a name matching the architecture and branch name
+Once you are in the container you can use the build script directly
+```bash
+./build.sh --pi0 --app-repo=https://github.com/seedsigner/seedsigner.git --app-branch=dev --no-clean
+```
 
-### ℹ️ ./build.sh help
-You can see the different build options with `./build.sh -h`
+Or you can use any of the Buildroot customization commands like `make menuconfig` or `linux-menuconfig` 
 
-## 📝 <a href="https://www.buildroot.org/downloads/manual/manual.html#_buildroot_quick_start">See and modify configurations</a>
+## Developement Configs
+
+Each board also has a developer configuration (dev config). Inside the `/opt` folder are all the build configs for each board matching the name of the build script option. The dev configs are built to work on each board but enable many of the kernel and OS features needed for development. This also makes this the image built less secure, so please do not use with real funds. Dev configs are only used when the `--dev` option is passed in to the build.sh script.
+
+## 📑 Using Debian/Ubuntu (without docker)
+
+If you are not using the docker image, then these build tools will be required for cross-compiling with Buildroot. This is only tested and expected to work on a debian based OS using apt package manager (not MacOS). This single command will install required dependencies for a debian based linux os.
+
+```bash
+sudo apt update && sudo apt install make binutils build-essential gcc g++ patch gzip bzip2 perl tar cpio unzip rsync file bc libssl-dev
+```
+
+Then to build to image(s), run the build script passing in the desired options
+
+```bash
+cd opt
+./build --pi0
+```
+
+You can see the different build options with `./build.sh --help`
+
+## Customizing buildroot configurations
+
+See the Buildroot [quick start guide](https://www.buildroot.org/downloads/manual/manual.html#_buildroot_quick_start) first
+
+### Common Buildroot customization commands:
+
 Buildroot:
 ```bash
 make menuconfig
@@ -89,10 +162,29 @@ Busybox:
 busybox-menuconfig
 ```
 
-## 📑 <a href="https://www.buildroot.org/downloads/manual/manual.html#requirement">Requirements</a>
-If you are not using the docker image, then these build tools will be required for cross-compiling with Buildroot.
-This single command will install required dependencies for a debian based linux os.
+## SeedSignerOS Layers
 
-```bash
-sudo apt update && sudo apt install make binutils build-essential gcc g++ patch gzip bzip2 perl tar cpio unzip rsync file bc libssl-dev
-```
+Kernel and User space all built from scratch.
+
+![Image Showing SeedSignerOS Layers](docs/img/ssos_layers.png?raw=true "SeedSignerOS Layers")
+
+1. First layer is the hardware. Normally this is the raspberry pi board, camera, LCD Waveshare HAT, and microSD card.
+2. Second layer is the linux kernel. Using buildroot specific and minimum required modules have been hand selected to use in the kernel. This layer is required to make use of hardware functionality.
+3. Third layer is user space. This is were all the libraries and applications preside. The SeedSigner applications lives in this space. This is also where libraries typically live to do networking, display drivers, external port communications, etc. However on SeedSignerOS none of these drivers or libraries are loaded (that are typically found in a linux OS).
+
+## How is the .iso structure?
+
+![SeedSignerOS microSD File Structure](docs/img/ssos_sd_files.png?raw=true "SeedSignerOS microSD File Structure")
+
+The zImage a compressed version of the Linux kernel that is self-extracting. In that compressed image, we added RootFS. The entire system in a single file!
+
+## Boot Sequence
+
+1. When Raspberry Pi is powered on, the bootloader starts on GPU and read the MicroSD (SDRAM disabled at this point)
+2. GPU reads bootcode.bin and starts the bootloader to enable SDRAM
+3. Then start_x.elf reads config.txt, cmdline.txt and kernel
+4. CPU starts working and then boot the kernel
+
+![Boot Sequence](docs/img/ssos_boot_seq.png?raw=true "Boot Sequence")
+
+Source: https://raspberrypi.stackexchange.com/questions/10442/what-is-the-boot-sequence
