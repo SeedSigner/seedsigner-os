@@ -4,7 +4,7 @@
 cur_dir_name=${PWD##*/}
 cur_dir=$(pwd)
 seedsigner_app_repo="https://github.com/SeedSigner/seedsigner.git"
-seedsigner_app_repo_branch="0.5.1-ram"
+seedsigner_app_repo_branch="0.5.2"
 
 help()
 {
@@ -12,19 +12,26 @@ help()
   
   Pi Board: (only one allowed)
   -a, --all         Build for all supported pi boards
-      --pi0         Build for pi0, pi0w, and pi2
+      --pi0         Build for pi0 and pi0w
+      --pi2         Build for pi2
       --pi02w       Build for pi02w and pi3
       --pi4         Build for pi4 and pi4cmio (Not Implemented Yet)
   
   Options:
-  -h, --help        Display a help screen and quit
+  -h, --help        Display a help screen and quit 
       --dev         Builds developer version of images
       --no-clean    Leave previous build, target, and output files
       --skip-repo   Skip pulling repo, assume rootfs-overlay/opt is populated with app code
       --app-repo    Build image with not official seedsigner github repo
       --app-branch  Build image with repo branch other than default
-      --keep-alive  Keeps container/script running after completeing"
+      --keep-alive  Keeps container/script running after completeing
+      --skip-build  Used generally with keep-alive to run an interactive container"
   exit 2
+}
+
+tail_endless() {
+  echo "Running 'tail -f /dev/null' to keep script alive"
+  tail -f /dev/null
 }
 
 download_app_repo() {
@@ -89,8 +96,6 @@ build_image() {
   
   if [ -f "${build_dir}/images/seedsigner_os.img" ] && [ -d "${image_dir}" ]; then
     mv -f "${build_dir}/images/seedsigner_os.img" "${image_dir}/seedsigner_os.${seedsigner_app_repo_branch}.${config_name}.img"
-    gzip -f "${image_dir}/seedsigner_os.${seedsigner_app_repo_branch}.${config_name}.img"
-    mv -f "${build_dir}/images" "${image_dir}/seedsigner_os.${seedsigner_app_repo_branch}.${config_name}"
   fi
   
   cd - # return to previous working directory
@@ -119,6 +124,9 @@ while (( "$#" )); do
   --pi0)
     PI0_FLAG=0; ((ARCH_CNT=ARCH_CNT+1)); shift
     ;;
+   --pi2)
+    PI2_FLAG=0; ((ARCH_CNT=ARCH_CNT+1)); shift
+    ;;
   --pi02w)
     PI02W_FLAG=0; ((ARCH_CNT=ARCH_CNT+1)); shift
     ;;
@@ -133,6 +141,9 @@ while (( "$#" )); do
     ;;
   --keep-alive)
     KEEPALIVE=0; shift
+    ;;
+  --skip-build)
+    SKIPBUILD=0; shift
     ;;
   --dev)
     DEVBUILD=0; shift
@@ -165,6 +176,14 @@ fi
 if [ $ARCH_CNT -gt 1 ]; then
   echo "Invalid number of architecture arguments" >&2
   exit 3
+fi
+
+# if skip build and check for endless
+if ! [ -z $SKIPBUILD ]; then
+  if ! [ -z $KEEPALIVE ]; then
+    tail_endless
+  fi
+  exit 0
 fi
 
 # Check for --no-clean argument to pass clean/no-clean to build_image function
@@ -215,6 +234,12 @@ if ! [ -z ${PI0_FLAG} ]; then
   build_image "pi0${DEVARG}" "${CLEAN_ARG}" "${SKIPREPO_ARG}"
 fi
 
+# Build only for pi2
+if ! [ -z ${PI2_FLAG} ]; then
+  build_image "pi2${DEVARG}" "${CLEAN_ARG}" "${SKIPREPO_ARG}"
+fi
+
+
 # build for pi02w
 if ! [ -z ${PI02W_FLAG} ]; then
   build_image "pi02w${DEVARG}" "${CLEAN_ARG}" "${SKIPREPO_ARG}"
@@ -228,7 +253,7 @@ fi
 
 # if build.sh makes it this far without errors, and --keep-alive flag is set, then keep container/script running
 if ! [ -z $KEEPALIVE ]; then
-  tail -f /dev/null
+  tail_endless
 fi
 
 exit 0

@@ -4,7 +4,7 @@ DEVNAME="/dev/$MDEV"
 
 if [ $ACTION == "add" ] && [ -n "$DEVNAME" ]; then
     mkdir -p /mnt/microsd
-    mount $DEVNAME /mnt/microsd
+    mount -o sync $DEVNAME /mnt/microsd
     echo -n "add" > /tmp/mdev_fifo
 elif [ $ACTION == "remove" ] && [ -n "$DEVNAME" ]; then
     umount /mnt/microsd
