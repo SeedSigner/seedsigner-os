@@ -226,6 +226,7 @@ fi
 if ! [ -z ${ALL_FLAG} ]; then
   build_image "pi0${DEVARG}" "clean" "${SKIPREPO_ARG}"
   build_image "pi02w${DEVARG}" "clean" "${SKIPREPO_ARG}"
+  build_image "pi2${DEVARG}" "clean" "${SKIPREPO_ARG}"
   build_image "pi4${DEVARG}" "clean" "${SKIPREPO_ARG}"
 fi
 
