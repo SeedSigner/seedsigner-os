@@ -21,3 +21,8 @@ boot_delay=0
 
 # Overclock de Rpi
 force_turbo=1
+
+# raspberry firmware config to disable wifi and bluetooth 
+# https://github.com/raspberrypi/firmware/blob/master/boot/overlays/README
+dtoverlay=pi3-disable-wifi
+dtoverlay=disable-bt
