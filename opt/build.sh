@@ -40,7 +40,7 @@ download_app_repo() {
   
   # Download SeedSigner from GitHub and put into rootfs
   echo "cloning repo ${seedsigner_app_repo} with branch ${seedsigner_app_repo_branch}"
-  git clone --depth 1 -b "${seedsigner_app_repo_branch}" "${seedsigner_app_repo}" "${rootfs_overlay}/opt/"
+  git clone --depth 1 -b "${seedsigner_app_repo_branch}" "${seedsigner_app_repo}" "${rootfs_overlay}/opt/" || exit
         
   # Delete unnecessary files to save space
   rm -rf ${rootfs_overlay}/opt/.git
