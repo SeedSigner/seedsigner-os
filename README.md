@@ -67,7 +67,7 @@ Easiest way to build SeedSigner OS is using docker. This keeps the build process
    ```
 3. Build images using docker-compose (expect this to take more than 1 hour). You can change the `--pi0` option to the board type you wish to build or use `--all` to build all images types.
    ```bash
-   SS_ARGS="--pi0" docker-compose up -d
+   SS_ARGS="--pi0" docker-compose up
    ```
 
 This command will build a docker image from the Dockerfile and in the background (as a daemon) run a container used to compile SeedSigner OS. You can monitor the seedsigner-os-build-images container in Docker Dashboard (if using Docker Desktop) or by running the docker contain list command waiting for the container to complete with an Exit (0) status. The container will create the image(s) in the images directory.
@@ -101,11 +101,11 @@ Here is a table Raspberry Pi boards to image filenames/configs
 
 ### Development cycle using docker
 
-Each time the `docker-compose up` command runs a full build from scratch is performed. To have faster development cycles you'll likely want to avoid building the OS from scratch each time. You can avoid recreating the docker image/container a few different ways. One way is to pass the options `--skip-build` and `--keep-alive` to the `SS_ARGS` env variable when running `docker-compse up -d`. This will cause the container to skip build steps but keep the container running in the background until you explicitly stop it. You can then launch a shell session into the container and work interactively running any specific build commands you desire.
+Each time the `docker-compose up` command runs a full build from scratch is performed. You can optionally run `docker-compose up -d` in detached mode by adding the `-d` flag. This will run the container in the background. To have faster development cycles you'll likely want to avoid building the OS from scratch each time. You can avoid recreating the docker image/container a few different ways. One way is to pass the options `--skip-build` and `--keep-alive` to the `SS_ARGS` env variable when running `docker-compse up`. This will cause the container to skip build steps but keep the container running in the background until you explicitly stop it. You can then launch a shell session into the container and work interactively running any specific build commands you desire.
 
 Using docker-compose will build the image and launch the container
 ```bash
-SS_ARGS="--skip-build --keep-alive" docker-compose up -d
+SS_ARGS="--skip-build --keep-alive" docker-compose up
 ```
 
 Start a shell session inside the container by running
