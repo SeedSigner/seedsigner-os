@@ -15,7 +15,7 @@ help()
       --pi0         Build for pi0 and pi0w
       --pi2         Build for pi2
       --pi02w       Build for pi02w and pi3
-      --pi4         Build for pi4 and pi4cmio (Not Implemented Yet)
+      --pi4         Build for pi4 and pi4cmio
   
   Options:
   -h, --help        Display a help screen and quit 
