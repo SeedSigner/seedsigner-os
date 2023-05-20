@@ -1,0 +1,28 @@
+start_file=start_x.elf
+fixup_file=fixup_x.dat
+
+# Kernel location
+kernel=zImage
+
+# How much memory in MB to assign to the GPU on Pi models having
+gpu_mem=32
+
+# Enable Camera module
+start_x=1
+
+# Enable SPI
+dtparam=spi=on
+
+# Set the bootloader delay to 0 seconds. The default is 1s if not specified
+boot_delay=0
+disable_splash=1
+
+# mild overclock of pi zero
+force_turbo=1
+arm_freq=1050
+gpu_freq=500
+#over_voltage=2
+core_freq=450
+core_freq_min=450
+#sdram_freq=500
+#over_voltage_sdram=1

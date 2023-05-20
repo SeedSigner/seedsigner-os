@@ -65,7 +65,12 @@ Easiest way to build SeedSigner OS is using docker. This keeps the build process
    ```bash
    cd seedsigner-os
    ```
-3. Build images using docker-compose (expect this to take more than 1 hour). You can change the `--pi0` option to the board type you wish to build or use `--all` to build all images types.
+3. Apply patching to buildroot to force python version 3.10.10
+   ```bash
+    cd opt/buildroot
+    git apply ../buildroot-python3.10.10.patch
+    ```
+4. Build images using docker-compose (expect this to take more than 1 hour). You can change the `--pi0` option to the board type you wish to build or use `--all` to build all images types.
    ```bash
    SS_ARGS="--pi0" docker-compose up
    ```
@@ -101,24 +106,31 @@ Here is a table Raspberry Pi boards to image filenames/configs
 
 ### Development cycle using docker
 
-Each time the `docker-compose up` command runs a full build from scratch is performed. You can optionally run `docker-compose up -d` in detached mode by adding the `-d` flag. This will run the container in the background. To have faster development cycles you'll likely want to avoid building the OS from scratch each time. You can avoid recreating the docker image/container a few different ways. One way is to pass the options `--skip-build` and `--keep-alive` to the `SS_ARGS` env variable when running `docker-compse up`. This will cause the container to skip build steps but keep the container running in the background until you explicitly stop it. You can then launch a shell session into the container and work interactively running any specific build commands you desire.
+Each time the `docker-compose up` command runs a full build from scratch is performed. You can optionally run `docker-compose up -d` in detached mode by adding the `-d` flag. This will run the container in the background. To have faster development cycles you'll likely want to avoid building the OS from scratch each time. You can avoid recreating the docker image/container a few different ways. One way is to pass the options `--no-op` (which is the default) to the `SS_ARGS` env variable when running `docker-compse up`. This will cause the container to skip build steps but keep the container running in the background until you explicitly stop it. You can then launch a shell session into the container and work interactively running any specific build commands you desire.
 
-Using docker-compose will build the image and launch the container
+Using docker-compose will start the container (create new container if on does not already exist) without building an image
 ```bash
-SS_ARGS="--skip-build --keep-alive" docker-compose up
+SS_ARGS="--no-op" docker-compose up -d --no-recreate
+```
+
+If you want to start a new container environment, use `--force-recreate` instead of `--no-create`
+```bash
+SS_ARGS="--no-op" docker-compose up -d --force-recreate
 ```
 
 Start a shell session inside the container by running
 ```bash
-docker exec -it seedsigner-os-build-images-1 /bin/bash
+docker exec -it seedsigner-os-build-images-1 bash
 ```
 
-Once you are in the container you can use the build script directly
+Once you are in the container you can use the build script directly from the `/opt` directory
 ```bash
 ./build.sh --pi0 --app-repo=https://github.com/seedsigner/seedsigner.git --app-branch=dev --no-clean
 ```
 
-Or you can use any of the Buildroot customization commands like `make menuconfig` or `linux-menuconfig` 
+Or you can use any of the Buildroot customization commands like `make menuconfig` or `linux-menuconfig`  from the `/output` directory
+
+Move images manually built with `make` with the command `mv images/seedsigner_os.img /images/`
 
 ## Developement Configs
 

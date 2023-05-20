@@ -1,44 +1,8 @@
 #!/bin/sh
-# Provides: SeedSigner 
-# Description: Start SeedSigner main.py
+# Provides: SeedSigner
 
 start() {
-    # Enable kernel modules
-    modprobe aes_arm
-    modprobe aes_generic
-    modprobe cmac
-    modprobe hci_uart
-    modprobe ecdh_generic
-    modprobe ecc
-    modprobe libaes
-    modprobe spidev
-    modprobe garp
-    modprobe stp
-    modprobe llc
-    modprobe sha256_generic
-    modprobe libsha256
-    modprobe raspberrypi_hwmon
-    modprobe rfkill
-    modprobe bcm2835_codec
-    modprobe v4l2_mem2mem
-    modprobe bcm2835_isp
-    modprobe bcm2835_v4l2
-    modprobe bcm2835_mmal_vchiq
-    modprobe videobuf2_dma_contig
-    modprobe videobuf2_vmalloc
-    modprobe videobuf2_memops
-    modprobe videobuf2_v4l2
-    modprobe spi_bcm2835
-    modprobe videobuf2_common
-    modprobe videodev
-    modprobe mc
-    modprobe vc_sm_cma
-    modprobe fixed
-    modprobe uio_pdrv_genirq
-    modprobe uio
-
-    # Go to the SeedSigner directory and run SeedSigner 
-    python3 /opt/src/main.py &
+    /opt/start.sh &
     echo "Service starting up"   
 }
 

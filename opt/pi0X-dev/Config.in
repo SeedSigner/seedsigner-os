@@ -1,0 +1,5 @@
+source "../external-packages/python-urtypes/Config.in"
+source "../external-packages/python-pyzbar/Config.in"
+source "../external-packages/python-mock/Config.in"
+source "../external-packages/python-embit/Config.in"
+source "../external-packages/python-picamera/Config.in"

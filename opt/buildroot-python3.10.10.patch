@@ -1,0 +1,1607 @@
+diff --git a/package/python3/0001-Make-the-build-of-pyc-files-conditional.patch b/package/python3/0001-Make-the-build-of-pyc-files-conditional.patch
+index 92aa7274ba..d3b5368903 100644
+--- a/package/python3/0001-Make-the-build-of-pyc-files-conditional.patch
++++ b/package/python3/0001-Make-the-build-of-pyc-files-conditional.patch
+@@ -1,4 +1,4 @@
+-From 51ed7f93cc0333efa8fccd9b88db713c48993df9 Mon Sep 17 00:00:00 2001
++From 322724e166d7ec0393aec577c12fdf6ef2b61e1d Mon Sep 17 00:00:00 2001
+ From: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+ Date: Wed, 22 Feb 2017 16:21:31 -0800
+ Subject: [PATCH] Make the build of pyc files conditional
+@@ -15,10 +15,10 @@ Signed-off-by: Andrey Smirnov <andrew.smirnov@gmail.com>
+  2 files changed, 8 insertions(+)
+ 
+ diff --git a/Makefile.pre.in b/Makefile.pre.in
+-index 8fbcd7ac17..2957c8e5a1 100644
++index 77f91e72b1..0c809f3d8a 100644
+ --- a/Makefile.pre.in
+ +++ b/Makefile.pre.in
+-@@ -2078,6 +2078,7 @@ libinstall:	all $(srcdir)/Modules/xxmodule.c
++@@ -1600,6 +1600,7 @@ libinstall:	build_all $(srcdir)/Modules/xxmodule.c
+  		$(INSTALL_DATA) $(srcdir)/Modules/xxmodule.c \
+  			$(DESTDIR)$(LIBDEST)/distutils/tests ; \
+  	fi
+@@ -26,7 +26,7 @@ index 8fbcd7ac17..2957c8e5a1 100644
+  	-PYTHONPATH=$(DESTDIR)$(LIBDEST)  $(RUNSHARED) \
+  		$(PYTHON_FOR_BUILD) -Wi $(DESTDIR)$(LIBDEST)/compileall.py \
+  		-j0 -d $(LIBDEST) -f \
+-@@ -2105,6 +2106,7 @@ libinstall:	all $(srcdir)/Modules/xxmodule.c
++@@ -1627,6 +1628,7 @@ libinstall:	build_all $(srcdir)/Modules/xxmodule.c
+  		$(PYTHON_FOR_BUILD) -Wi -OO $(DESTDIR)$(LIBDEST)/compileall.py \
+  		-j0 -d $(LIBDEST)/site-packages -f \
+  		-x badsyntax $(DESTDIR)$(LIBDEST)/site-packages
+@@ -35,10 +35,10 @@ index 8fbcd7ac17..2957c8e5a1 100644
+  		$(PYTHON_FOR_BUILD) -m lib2to3.pgen2.driver $(DESTDIR)$(LIBDEST)/lib2to3/Grammar.txt
+  	-PYTHONPATH=$(DESTDIR)$(LIBDEST) $(RUNSHARED) \
+ diff --git a/configure.ac b/configure.ac
+-index ab5e1de6fa..0cf89ed641 100644
++index d60f05251a..1ee5a09588 100644
+ --- a/configure.ac
+ +++ b/configure.ac
+-@@ -1441,6 +1441,12 @@ fi
++@@ -1110,6 +1110,12 @@ fi
+  
+  AC_MSG_CHECKING(LDLIBRARY)
+  
+@@ -52,5 +52,5 @@ index ab5e1de6fa..0cf89ed641 100644
+  # library that we build, but we do not want to link against it (we
+  # will find it with a -framework option). For this reason there is an
+ -- 
+-2.34.1
++2.25.1
+ 
+diff --git a/package/python3/0002-Disable-buggy_getaddrinfo-configure-test-when-cross-.patch b/package/python3/0002-Disable-buggy_getaddrinfo-configure-test-when-cross-.patch
+index 5389cb5d15..411b8dae4e 100644
+--- a/package/python3/0002-Disable-buggy_getaddrinfo-configure-test-when-cross-.patch
++++ b/package/python3/0002-Disable-buggy_getaddrinfo-configure-test-when-cross-.patch
+@@ -1,4 +1,4 @@
+-From b180ab302e2a82be239af334382436628b81381e Mon Sep 17 00:00:00 2001
++From 72e20220f3a592b3ab9f440fbe74efa9f9e82d49 Mon Sep 17 00:00:00 2001
+ From: Vanya Sergeev <vsergeev@gmail.com>
+ Date: Wed, 23 Dec 2015 11:30:33 +0100
+ Subject: [PATCH] Disable buggy_getaddrinfo configure test when cross-compiling
+@@ -10,18 +10,18 @@ Signed-off-by: Vanya Sergeev <vsergeev@gmail.com>
+  1 file changed, 1 insertion(+), 1 deletion(-)
+ 
+ diff --git a/configure.ac b/configure.ac
+-index 0cf89ed641..830885fcb3 100644
++index 1ee5a09588..c2445edc88 100644
+ --- a/configure.ac
+ +++ b/configure.ac
+-@@ -5086,7 +5086,7 @@ fi]))
+- dnl if ac_cv_func_getaddrinfo
+- ])
++@@ -4230,7 +4230,7 @@ fi
+  
+--if test "$ac_cv_func_getaddrinfo" = no -o "$ac_cv_buggy_getaddrinfo" = yes
+-+if test "$ac_cv_func_getaddrinfo" = no || test "$cross_compiling" != "yes" -a "$ac_cv_buggy_getaddrinfo" = yes
++ AC_MSG_RESULT($ac_cv_buggy_getaddrinfo)
++ 
++-if test $have_getaddrinfo = no || test "$ac_cv_buggy_getaddrinfo" = yes
+++if test $have_getaddrinfo = no || test "$cross_compiling" != "yes" -a "$ac_cv_buggy_getaddrinfo" = yes
+  then
+-   AS_VAR_IF([ipv6], [yes], [
+-     AC_MSG_ERROR([m4_normalize([
++ 	if test $ipv6 = yes
++ 	then
+ -- 
+-2.34.1
++2.25.1
+ 
+diff --git a/package/python3/0003-Add-infrastructure-to-disable-the-build-of-certain-e.patch b/package/python3/0003-Add-infrastructure-to-disable-the-build-of-certain-e.patch
+index 5b3911374e..7ac0f39d06 100644
+--- a/package/python3/0003-Add-infrastructure-to-disable-the-build-of-certain-e.patch
++++ b/package/python3/0003-Add-infrastructure-to-disable-the-build-of-certain-e.patch
+@@ -1,4 +1,4 @@
+-From 8e02cebdac536dfb6748da2c50656a26f70d9da7 Mon Sep 17 00:00:00 2001
++From df7c95b4ceecf390b961d843a556c470ac9080b2 Mon Sep 17 00:00:00 2001
+ From: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+ Date: Wed, 22 Feb 2017 16:33:22 -0800
+ Subject: [PATCH] Add infrastructure to disable the build of certain extensions
+@@ -44,10 +44,10 @@ Signed-off-by: Andrey Smirnov <andrew.smirnov@gmail.com>
+  3 files changed, 11 insertions(+), 2 deletions(-)
+ 
+ diff --git a/Makefile.pre.in b/Makefile.pre.in
+-index 2957c8e5a1..c1cfb96767 100644
++index 0c809f3d8a..7c3dde8dd4 100644
+ --- a/Makefile.pre.in
+ +++ b/Makefile.pre.in
+-@@ -239,6 +239,8 @@ FILEMODE=	644
++@@ -218,6 +218,8 @@ FILEMODE=	644
+  # configure script arguments
+  CONFIG_ARGS=	@CONFIG_ARGS@
+  
+@@ -56,18 +56,18 @@ index 2957c8e5a1..c1cfb96767 100644
+  
+  # Subdirectories with code
+  SRCDIRS= 	@SRCDIRS@
+-@@ -739,6 +741,7 @@ sharedmods: $(PYTHON_FOR_BUILD_DEPS) pybuilddir.txt @LIBMPDEC_INTERNAL@ @LIBEXPA
+- 	    *) quiet="";; \
++@@ -628,6 +630,7 @@ sharedmods: $(BUILDPYTHON) pybuilddir.txt Modules/_math.o
+  	esac; \
+  	echo "$(RUNSHARED) CC='$(CC)' LDSHARED='$(BLDSHARED)' OPT='$(OPT)' \
++ 		_TCLTK_INCLUDES='$(TCLTK_INCLUDES)' _TCLTK_LIBS='$(TCLTK_LIBS)' \
+ +		DISABLED_EXTENSIONS="$(DISABLED_EXTENSIONS)" \
+  		$(PYTHON_FOR_BUILD) $(srcdir)/setup.py $$quiet build"; \
+  	$(RUNSHARED) CC='$(CC)' LDSHARED='$(BLDSHARED)' OPT='$(OPT)' \
+- 		$(PYTHON_FOR_BUILD) $(srcdir)/setup.py $$quiet build
+-@@ -2228,7 +2231,8 @@ libainstall: all python-config
++ 		_TCLTK_INCLUDES='$(TCLTK_INCLUDES)' _TCLTK_LIBS='$(TCLTK_LIBS)' \
++@@ -1748,7 +1751,8 @@ libainstall:	@DEF_MAKE_RULE@ python-config
+  # Install the dynamically loadable modules
+  # This goes into $(exec_prefix)
+- sharedinstall: all
++ sharedinstall: sharedmods
+ -	$(RUNSHARED) $(PYTHON_FOR_BUILD) $(srcdir)/setup.py install \
+ +	$(RUNSHARED) DISABLED_EXTENSIONS="$(DISABLED_EXTENSIONS)" \
+ +		$(PYTHON_FOR_BUILD) $(srcdir)/setup.py install \
+@@ -75,12 +75,12 @@ index 2957c8e5a1..c1cfb96767 100644
+  		--install-scripts=$(BINDIR) \
+  		--install-platlib=$(DESTSHARED) \
+ diff --git a/configure.ac b/configure.ac
+-index 830885fcb3..5a6a1fe608 100644
++index c2445edc88..73d66167de 100644
+ --- a/configure.ac
+ +++ b/configure.ac
+-@@ -3562,6 +3562,8 @@ LIBS="$withval $LIBS"
+- ],
+- [AC_MSG_RESULT(no)])
++@@ -3091,6 +3091,8 @@ LIBS="$withval $LIBS"
++ 
++ PKG_PROG_PKG_CONFIG
+  
+ +AC_SUBST(DISABLED_EXTENSIONS)
+ +
+@@ -88,11 +88,11 @@ index 830885fcb3..5a6a1fe608 100644
+  AC_MSG_CHECKING(for --with-system-expat)
+  AC_ARG_WITH(system_expat,
+ diff --git a/setup.py b/setup.py
+-index 15d0d4576a..e496ee34c2 100644
++index 770866bca7..b6c829b3a5 100644
+ --- a/setup.py
+ +++ b/setup.py
+-@@ -56,7 +56,10 @@
+- 
++@@ -58,7 +58,10 @@ with warnings.catch_warnings():
++ TEST_EXTENSIONS = (sysconfig.get_config_var('TEST_MODULES') == 'yes')
+  
+  # This global variable is used to hold the list of modules to be disabled.
+ -DISABLED_MODULE_LIST = []
+@@ -104,5 +104,5 @@ index 15d0d4576a..e496ee34c2 100644
+  # --list-module-names option used by Tools/scripts/generate_module_names.py
+  LIST_MODULE_NAMES = False
+ -- 
+-2.34.1
++2.25.1
+ 
+diff --git a/package/python3/0004-Adjust-library-header-paths-for-cross-compilation.patch b/package/python3/0004-Adjust-library-header-paths-for-cross-compilation.patch
+index 9a55d2582d..0311348405 100644
+--- a/package/python3/0004-Adjust-library-header-paths-for-cross-compilation.patch
++++ b/package/python3/0004-Adjust-library-header-paths-for-cross-compilation.patch
+@@ -1,4 +1,4 @@
+-From 132b9dca3bb4d4682f7e318648ce11e1abb31b62 Mon Sep 17 00:00:00 2001
++From 61af65485f1dade4aa08d0cf2b24082aeda24c51 Mon Sep 17 00:00:00 2001
+ From: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+ Date: Wed, 23 Dec 2015 11:33:14 +0100
+ Subject: [PATCH] Adjust library/header paths for cross-compilation
+@@ -23,10 +23,10 @@ Refresh for 3.10.0
+  2 files changed, 15 insertions(+), 5 deletions(-)
+ 
+ diff --git a/Lib/distutils/command/build_ext.py b/Lib/distutils/command/build_ext.py
+-index f287b34998..298234d6a1 100644
++index 1a9bd12..3cf7d67 100644
+ --- a/Lib/distutils/command/build_ext.py
+ +++ b/Lib/distutils/command/build_ext.py
+-@@ -234,7 +234,10 @@ def finalize_options(self):
++@@ -234,7 +234,10 @@ class build_ext(Command):
+          if (sysconfig.get_config_var('Py_ENABLE_SHARED')):
+              if not sysconfig.python_build:
+                  # building third party extensions
+@@ -39,10 +39,10 @@ index f287b34998..298234d6a1 100644
+                  # building python standard extensions
+                  self.library_dirs.append('.')
+ diff --git a/Lib/sysconfig.py b/Lib/sysconfig.py
+-index ebe3711827..6328ec41af 100644
++index 95b48f6..9fb1956 100644
+ --- a/Lib/sysconfig.py
+ +++ b/Lib/sysconfig.py
+-@@ -168,10 +168,17 @@ def joinuser(*args):
++@@ -123,10 +123,17 @@ _SCHEME_KEYS = ('stdlib', 'platstdlib', 'purelib', 'platlib', 'include',
+  _PY_VERSION = sys.version.split()[0]
+  _PY_VERSION_SHORT = f'{sys.version_info[0]}.{sys.version_info[1]}'
+  _PY_VERSION_SHORT_NO_DOT = f'{sys.version_info[0]}{sys.version_info[1]}'
+@@ -65,5 +65,5 @@ index ebe3711827..6328ec41af 100644
+  _USER_BASE = None
+  
+ -- 
+-2.34.1
++2.30.2
+ 
+diff --git a/package/python3/0005-Don-t-look-in-usr-lib-termcap-for-libraries.patch b/package/python3/0005-Don-t-look-in-usr-lib-termcap-for-libraries.patch
+index 78b3ae596d..3e224995a5 100644
+--- a/package/python3/0005-Don-t-look-in-usr-lib-termcap-for-libraries.patch
++++ b/package/python3/0005-Don-t-look-in-usr-lib-termcap-for-libraries.patch
+@@ -1,4 +1,4 @@
+-From 5d13e384b30a2c0b1c7b65718590b7fb0c3ba55e Mon Sep 17 00:00:00 2001
++From 60d71e37d167ea89445250be436170a6cfee84e7 Mon Sep 17 00:00:00 2001
+ From: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+ Date: Wed, 23 Dec 2015 11:36:00 +0100
+ Subject: [PATCH] Don't look in /usr/lib/termcap for libraries
+@@ -9,10 +9,10 @@ Signed-off-by: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+  1 file changed, 1 insertion(+), 4 deletions(-)
+ 
+ diff --git a/setup.py b/setup.py
+-index e496ee34c2..1904898165 100644
++index 66d372a..e632b6f 100644
+ --- a/setup.py
+ +++ b/setup.py
+-@@ -1107,12 +1107,9 @@ def detect_readline_curses(self):
++@@ -1147,12 +1147,9 @@ class PyBuildExt(build_ext):
+                  pass # Issue 7384: Already linked against curses or tinfo.
+              elif curses_library:
+                  readline_libs.append(curses_library)
+@@ -23,9 +23,9 @@ index e496ee34c2..1904898165 100644
+                  readline_libs.append('termcap')
+              self.add(Extension('readline', ['readline.c'],
+ -                               library_dirs=['/usr/lib/termcap'],
++                                extra_link_args=readline_extra_link_args,
+                                 libraries=readline_libs))
+          else:
+-             self.missing.append('readline')
+ -- 
+-2.34.1
++2.25.1
+ 
+diff --git a/package/python3/0006-Don-t-add-multiarch-paths.patch b/package/python3/0006-Don-t-add-multiarch-paths.patch
+index 749e295df1..48d8cc790e 100644
+--- a/package/python3/0006-Don-t-add-multiarch-paths.patch
++++ b/package/python3/0006-Don-t-add-multiarch-paths.patch
+@@ -1,4 +1,4 @@
+-From ad463b5d58ae79f69b011fb048861bd874d34369 Mon Sep 17 00:00:00 2001
++From f5933b8f973cd11698b52d535a10d0474e49f5a5 Mon Sep 17 00:00:00 2001
+ From: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+ Date: Wed, 23 Dec 2015 11:36:27 +0100
+ Subject: [PATCH] Don't add multiarch paths
+@@ -17,10 +17,10 @@ Signed-off-by: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+  1 file changed, 1 insertion(+), 1 deletion(-)
+ 
+ diff --git a/setup.py b/setup.py
+-index 1904898165..32294546b6 100644
++index ec3ba60607..e27620035c 100644
+ --- a/setup.py
+ +++ b/setup.py
+-@@ -852,10 +852,10 @@ def configure_compiler(self):
++@@ -830,10 +830,10 @@ class PyBuildExt(build_ext):
+          if not CROSS_COMPILING:
+              add_dir_to_list(self.compiler.library_dirs, '/usr/local/lib')
+              add_dir_to_list(self.compiler.include_dirs, '/usr/local/include')
+@@ -33,5 +33,5 @@ index 1904898165..32294546b6 100644
+  
+      def init_inc_lib_dirs(self):
+ -- 
+-2.34.1
++2.25.1
+ 
+diff --git a/package/python3/0007-Abort-on-failed-module-build.patch b/package/python3/0007-Abort-on-failed-module-build.patch
+index a473896127..32e2261a05 100644
+--- a/package/python3/0007-Abort-on-failed-module-build.patch
++++ b/package/python3/0007-Abort-on-failed-module-build.patch
+@@ -1,4 +1,4 @@
+-From 60b1664a7acebadb1a3d6df871145147f33b5afe Mon Sep 17 00:00:00 2001
++From 188c0ebfdb71f5252fa7701013b8d1209f28aef7 Mon Sep 17 00:00:00 2001
+ From: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+ Date: Wed, 23 Dec 2015 11:43:24 +0100
+ Subject: [PATCH] Abort on failed module build
+@@ -14,10 +14,10 @@ Signed-off-by: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+  1 file changed, 1 insertion(+)
+ 
+ diff --git a/setup.py b/setup.py
+-index 32294546b6..0e04944ce0 100644
++index e27620035c..d3f0e663f2 100644
+ --- a/setup.py
+ +++ b/setup.py
+-@@ -579,6 +579,7 @@ def print_three_column(lst):
++@@ -561,6 +561,7 @@ class PyBuildExt(build_ext):
+              print("Failed to build these modules:")
+              print_three_column(failed)
+              print()
+@@ -26,5 +26,5 @@ index 32294546b6..0e04944ce0 100644
+          if self.failed_on_import:
+              failed = self.failed_on_import[:]
+ -- 
+-2.34.1
++2.25.1
+ 
+diff --git a/package/python3/0008-Serial-ioctl-workaround.patch b/package/python3/0008-Serial-ioctl-workaround.patch
+index 7722a04f38..df31cd6220 100644
+--- a/package/python3/0008-Serial-ioctl-workaround.patch
++++ b/package/python3/0008-Serial-ioctl-workaround.patch
+@@ -1,4 +1,4 @@
+-From 90f3075b629d90d942da1d22ef7563f7149f4f6c Mon Sep 17 00:00:00 2001
++From 9e6211b0d6d4610e5fb7d2c7e1152eb7c64d968b Mon Sep 17 00:00:00 2001
+ From: Baruch Siach <baruch@tkos.co.il>
+ Date: Wed, 23 Dec 2015 11:44:02 +0100
+ Subject: [PATCH] Serial ioctl() workaround
+@@ -15,7 +15,7 @@ Signed-off-by: Baruch Siach <baruch@tkos.co.il>
+  1 file changed, 2 insertions(+)
+ 
+ diff --git a/Modules/termios.c b/Modules/termios.c
+-index 354e5ca18d..c08957c500 100644
++index 75e5e52320..eefbddfe69 100644
+ --- a/Modules/termios.c
+ +++ b/Modules/termios.c
+ @@ -15,7 +15,9 @@
+@@ -29,5 +29,5 @@ index 354e5ca18d..c08957c500 100644
+  /* HP-UX requires that this be included to pick up MDCD, MCTS, MDSR,
+   * MDTR, MRI, and MRTS (apparently used internally by some things
+ -- 
+-2.34.1
++2.25.1
+ 
+diff --git a/package/python3/0009-Do-not-adjust-the-shebang-of-Python-scripts-for-cros.patch b/package/python3/0009-Do-not-adjust-the-shebang-of-Python-scripts-for-cros.patch
+index eff8fc7694..8a77fe3708 100644
+--- a/package/python3/0009-Do-not-adjust-the-shebang-of-Python-scripts-for-cros.patch
++++ b/package/python3/0009-Do-not-adjust-the-shebang-of-Python-scripts-for-cros.patch
+@@ -1,4 +1,4 @@
+-From 2439bd2ed5dbdd7e5fda15adefd0f6f1b047ec1b Mon Sep 17 00:00:00 2001
++From cb595a591c71e0bf7c63a3706b0be45ac6a642e3 Mon Sep 17 00:00:00 2001
+ From: Christophe Vu-Brugier <cvubrugier@fastmail.fm>
+ Date: Wed, 23 Dec 2015 11:44:30 +0100
+ Subject: [PATCH] Do not adjust the shebang of Python scripts for
+@@ -21,7 +21,7 @@ diff --git a/Lib/distutils/command/build_scripts.py b/Lib/distutils/command/buil
+ index ccc70e6465..d6d54195c1 100644
+ --- a/Lib/distutils/command/build_scripts.py
+ +++ b/Lib/distutils/command/build_scripts.py
+-@@ -91,7 +91,7 @@ def copy_scripts(self):
++@@ -91,7 +91,7 @@ class build_scripts(Command):
+                      adjust = True
+                      post_interp = match.group(1) or b''
+  
+@@ -31,5 +31,5 @@ index ccc70e6465..d6d54195c1 100644
+                           self.build_dir)
+                  updated_files.append(outfile)
+ -- 
+-2.34.1
++2.25.1
+ 
+diff --git a/package/python3/0010-Misc-python-config.sh.in-ensure-sed-invocations-only.patch b/package/python3/0010-Misc-python-config.sh.in-ensure-sed-invocations-only.patch
+index f26ee85b61..a1f9ab6cd9 100644
+--- a/package/python3/0010-Misc-python-config.sh.in-ensure-sed-invocations-only.patch
++++ b/package/python3/0010-Misc-python-config.sh.in-ensure-sed-invocations-only.patch
+@@ -1,4 +1,4 @@
+-From 55ef5552e4ee60266e3299f253bec3b13785e585 Mon Sep 17 00:00:00 2001
++From eb51497e4b5799f8ab0277426d3e54414acb9d4b Mon Sep 17 00:00:00 2001
+ From: Peter Korsgaard <peter@korsgaard.com>
+ Date: Thu, 20 Nov 2014 13:24:59 +0100
+ Subject: [PATCH] Misc/python-config.sh.in: ensure sed invocations only match
+@@ -63,5 +63,5 @@ index 2602fe24c0..a1bc3cd5f7 100644
+  PYTHONFRAMEWORK="@PYTHONFRAMEWORK@"
+  INCDIR="-I$includedir/python${VERSION}${ABIFLAGS}"
+ -- 
+-2.34.1
++2.25.1
+ 
+diff --git a/package/python3/0011-Add-an-option-to-disable-pydoc.patch b/package/python3/0011-Add-an-option-to-disable-pydoc.patch
+index f7bfd437bb..a843c8c126 100644
+--- a/package/python3/0011-Add-an-option-to-disable-pydoc.patch
++++ b/package/python3/0011-Add-an-option-to-disable-pydoc.patch
+@@ -1,4 +1,4 @@
+-From 38b7f7949258aeadf8bc45525be91340bb732a2a Mon Sep 17 00:00:00 2001
++From a65e5d3caf8e076d531191164c23c6240461f675 Mon Sep 17 00:00:00 2001
+ From: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+ Date: Wed, 22 Feb 2017 17:07:56 -0800
+ Subject: [PATCH] Add an option to disable pydoc
+@@ -19,10 +19,10 @@ Signed-off-by: Adam Duskett <aduskett@gmail.com>
+  3 files changed, 19 insertions(+), 3 deletions(-)
+ 
+ diff --git a/Makefile.pre.in b/Makefile.pre.in
+-index c1cfb96767..403380e181 100644
++index c0d5511..32b3df7 100644
+ --- a/Makefile.pre.in
+ +++ b/Makefile.pre.in
+-@@ -1864,7 +1864,9 @@ bininstall: altbininstall
++@@ -1391,7 +1391,9 @@ bininstall: altbininstall
+  	-rm -f $(DESTDIR)$(BINDIR)/idle3
+  	(cd $(DESTDIR)$(BINDIR); $(LN) -s idle$(VERSION) idle3)
+  	-rm -f $(DESTDIR)$(BINDIR)/pydoc3
+@@ -32,15 +32,15 @@ index c1cfb96767..403380e181 100644
+  	-rm -f $(DESTDIR)$(BINDIR)/2to3
+  	(cd $(DESTDIR)$(BINDIR); $(LN) -s 2to3-$(VERSION) 2to3)
+  	if test "x$(LIPO_32BIT_FLAGS)" != "x" ; then \
+-@@ -1915,7 +1917,6 @@ LIBSUBDIRS=	asyncio \
++@@ -1442,7 +1444,6 @@ LIBSUBDIRS=	asyncio \
+  		lib2to3 lib2to3/fixes lib2to3/pgen2 \
+  		logging \
+  		multiprocessing multiprocessing/dummy \
+ -		pydoc_data \
+- 		re \
+  		site-packages \
+  		sqlite3 \
+-@@ -2008,6 +2009,10 @@ TESTSUBDIRS=	ctypes/test \
++ 		tkinter \
++@@ -1530,6 +1531,10 @@ TESTSUBDIRS=	ctypes/test \
+  		tkinter/test/test_ttk \
+  		unittest/test unittest/test/testmock
+  
+@@ -49,15 +49,15 @@ index c1cfb96767..403380e181 100644
+ +endif
+ +
+  TEST_MODULES=@TEST_MODULES@
+- libinstall:	all $(srcdir)/Modules/xxmodule.c
++ libinstall:	build_all $(srcdir)/Modules/xxmodule.c
+  	@for i in $(SCRIPTDIR) $(LIBDEST); \
+ diff --git a/configure.ac b/configure.ac
+-index 5a6a1fe608..f68ea72321 100644
++index 083a12d..9079531 100644
+ --- a/configure.ac
+ +++ b/configure.ac
+-@@ -4171,6 +4171,12 @@ AS_VAR_IF([posix_threads], [stub], [
+-   AC_DEFINE([HAVE_PTHREAD_STUBS], [1], [Define if platform requires stubbed pthreads support])
+- ])
++@@ -3373,6 +3373,12 @@ if test "$posix_threads" = "yes"; then
++       AC_CHECK_FUNCS(pthread_getcpuclockid)
++ fi
+  
+ +AC_SUBST(PYDOC)
+ +
+@@ -65,14 +65,14 @@ index 5a6a1fe608..f68ea72321 100644
+ +	AS_HELP_STRING([--disable-pydoc], [disable pydoc]),
+ +	[ PYDOC="${enableval}" ], [ PYDOC=yes ])
+ +
++ 
+  # Check for enable-ipv6
+  AH_TEMPLATE(ENABLE_IPV6, [Define if --enable-ipv6 is specified])
+- AC_MSG_CHECKING([if --enable-ipv6 is specified])
+ diff --git a/setup.py b/setup.py
+-index 0e04944ce0..3e55f5b2e0 100644
++index d00d389..d23f148 100644
+ --- a/setup.py
+ +++ b/setup.py
+-@@ -1593,6 +1593,12 @@ class DummyProcess:
++@@ -2721,6 +2721,12 @@ def main():
+      # turn off warnings when deprecated modules are imported
+      import warnings
+      warnings.filterwarnings("ignore",category=DeprecationWarning)
+@@ -85,7 +85,7 @@ index 0e04944ce0..3e55f5b2e0 100644
+      setup(# PyPI Metadata (PEP 301)
+            name = "Python",
+            version = sys.version.split()[0],
+-@@ -1617,8 +1623,7 @@ class DummyProcess:
++@@ -2746,8 +2752,7 @@ def main():
+            # If you change the scripts installed here, you also need to
+            # check the PyBuildScripts command above, and change the links
+            # created by the bininstall target in Makefile.pre.in
+@@ -96,5 +96,5 @@ index 0e04944ce0..3e55f5b2e0 100644
+  
+  # --install-platlib
+ -- 
+-2.34.1
++2.30.2
+ 
+diff --git a/package/python3/0012-Add-an-option-to-disable-lib2to3.patch b/package/python3/0012-Add-an-option-to-disable-lib2to3.patch
+index 0085d5a63f..c8f2e528bf 100644
+--- a/package/python3/0012-Add-an-option-to-disable-lib2to3.patch
++++ b/package/python3/0012-Add-an-option-to-disable-lib2to3.patch
+@@ -1,4 +1,4 @@
+-From 0e4f0a525ea0a68f6d4c5349c301da2e9b0c8ac9 Mon Sep 17 00:00:00 2001
++From f034b1b0f33a7bd4dde23f0bc1fa8e00e3518c9d Mon Sep 17 00:00:00 2001
+ From: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+ Date: Wed, 22 Feb 2017 17:15:31 -0800
+ Subject: [PATCH] Add an option to disable lib2to3
+@@ -14,15 +14,15 @@ Signed-off-by: Andrey Smirnov <andrew.smirnov@gmail.com>
+ Signed-off-by: Adam Duskett <aduskett@gmail.com>
+ ---
+  Makefile.pre.in | 17 ++++++++++++-----
+- configure.ac    |  6 ++++++
++ configure.ac    |  5 +++++
+  setup.py        |  6 +++---
+- 3 files changed, 21 insertions(+), 8 deletions(-)
++ 3 files changed, 20 insertions(+), 8 deletions(-)
+ 
+ diff --git a/Makefile.pre.in b/Makefile.pre.in
+-index 403380e181..f5d0573067 100644
++index 28cf88e..63fa9fb 100644
+ --- a/Makefile.pre.in
+ +++ b/Makefile.pre.in
+-@@ -1868,7 +1868,9 @@ ifeq (@PYDOC@,yes)
++@@ -1395,7 +1395,9 @@ ifeq (@PYDOC@,yes)
+  	(cd $(DESTDIR)$(BINDIR); $(LN) -s pydoc$(VERSION) pydoc3)
+  endif
+  	-rm -f $(DESTDIR)$(BINDIR)/2to3
+@@ -32,15 +32,15 @@ index 403380e181..f5d0573067 100644
+  	if test "x$(LIPO_32BIT_FLAGS)" != "x" ; then \
+  		rm -f $(DESTDIR)$(BINDIR)/python3-32$(EXE); \
+  		(cd $(DESTDIR)$(BINDIR); $(LN) -s python$(VERSION)-32$(EXE) python3-32$(EXE)) \
+-@@ -1914,7 +1916,6 @@ LIBSUBDIRS=	asyncio \
++@@ -1441,7 +1443,6 @@ LIBSUBDIRS=	asyncio \
+  		idlelib idlelib/Icons \
+- 		importlib importlib/resources importlib/metadata \
++ 		importlib importlib/metadata \
+  		json \
+ -		lib2to3 lib2to3/fixes lib2to3/pgen2 \
+  		logging \
+  		multiprocessing multiprocessing/dummy \
+- 		re \
+-@@ -1934,10 +1935,6 @@ LIBSUBDIRS=	asyncio \
++ 		site-packages \
++@@ -1458,10 +1459,6 @@ LIBSUBDIRS=	asyncio \
+  TESTSUBDIRS=	ctypes/test \
+  		distutils/tests \
+  		idlelib/idle_test \
+@@ -48,10 +48,10 @@ index 403380e181..f5d0573067 100644
+ -		lib2to3/tests/data \
+ -		lib2to3/tests/data/fixers \
+ -		lib2to3/tests/data/fixers/myfixes \
++ 		sqlite3/test \
+  		test test/audiodata \
+  		test/capath test/cjkencodings \
+- 		test/data test/decimaltestdata \
+-@@ -2013,6 +2010,14 @@ ifeq (@PYDOC@,yes)
++@@ -1535,6 +1532,14 @@ ifeq (@PYDOC@,yes)
+  LIBSUBDIRS += pydoc_data
+  endif
+  
+@@ -64,9 +64,9 @@ index 403380e181..f5d0573067 100644
+ +endif
+ +
+  TEST_MODULES=@TEST_MODULES@
+- libinstall:	all $(srcdir)/Modules/xxmodule.c
++ libinstall:	build_all $(srcdir)/Modules/xxmodule.c
+  	@for i in $(SCRIPTDIR) $(LIBDEST); \
+-@@ -2115,10 +2120,12 @@ ifeq (@PYC_BUILD@,yes)
++@@ -1637,10 +1642,12 @@ ifeq (@PYC_BUILD@,yes)
+  		-j0 -d $(LIBDEST)/site-packages -f \
+  		-x badsyntax $(DESTDIR)$(LIBDEST)/site-packages
+  endif
+@@ -80,27 +80,26 @@ index 403380e181..f5d0573067 100644
+  # bpo-21536: Misc/python-config.sh is generated in the build directory
+  # from $(srcdir)Misc/python-config.sh.in.
+ diff --git a/configure.ac b/configure.ac
+-index f68ea72321..d8e10cf2b2 100644
++index 9079531..34c2ba9 100644
+ --- a/configure.ac
+ +++ b/configure.ac
+-@@ -7078,6 +7078,12 @@ PY_STDLIB_MOD([xxlimited_35], [test "$with_trace_refs" = "no"], [test "$ac_cv_fu
+- # substitute multiline block, must come after last PY_STDLIB_MOD()
+- AC_SUBST([MODULE_BLOCK])
++@@ -6014,6 +6014,11 @@ else
++ fi
++ AC_SUBST(TEST_MODULES)
+  
+ +AC_SUBST(LIB2TO3)
+ +
+ +AC_ARG_ENABLE(lib2to3,
+ +	AS_HELP_STRING([--disable-lib2to3], [disable lib2to3]),
+ +	[ LIB2TO3="${enableval}" ], [ LIB2TO3=yes ])
+-+
++ 
+  # generate output files
+  AC_CONFIG_FILES(Makefile.pre Misc/python.pc Misc/python-embed.pc Misc/python-config.sh)
+- AC_CONFIG_FILES([Modules/Setup.bootstrap Modules/Setup.stdlib])
+ diff --git a/setup.py b/setup.py
+-index 3e55f5b2e0..c490b0b08f 100644
++index d23f148..663fd44 100644
+ --- a/setup.py
+ +++ b/setup.py
+-@@ -1594,11 +1594,11 @@ class DummyProcess:
++@@ -2722,11 +2722,11 @@ def main():
+      import warnings
+      warnings.filterwarnings("ignore",category=DeprecationWarning)
+  
+@@ -116,5 +115,5 @@ index 3e55f5b2e0..c490b0b08f 100644
+            name = "Python",
+            version = sys.version.split()[0],
+ -- 
+-2.34.1
++2.30.2
+ 
+diff --git a/package/python3/0013-Add-option-to-disable-the-sqlite3-module.patch b/package/python3/0013-Add-option-to-disable-the-sqlite3-module.patch
+index 795ea3b898..81fa52bb73 100644
+--- a/package/python3/0013-Add-option-to-disable-the-sqlite3-module.patch
++++ b/package/python3/0013-Add-option-to-disable-the-sqlite3-module.patch
+@@ -1,4 +1,4 @@
+-From ef8c030e01b1be8be582e90c31298a5863094858 Mon Sep 17 00:00:00 2001
++From dd2722dec08eb9c72c36313e93661eeca3ad64d8 Mon Sep 17 00:00:00 2001
+ From: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+ Date: Wed, 22 Feb 2017 17:20:45 -0800
+ Subject: [PATCH] Add option to disable the sqlite3 module
+@@ -10,40 +10,49 @@ Signed-off-by: Andrey Smirnov <andrew.smirnov@gmail.com>
+ [ Adam Duskett: ported to Python 3.10.0 ]
+ Signed-off-by: Adam Duskett <aduskett@gmail.com>
+ ---
+- Makefile.pre.in | 5 ++++-
++ Makefile.pre.in | 7 +++++--
+  configure.ac    | 9 +++++++++
+- 2 files changed, 13 insertions(+), 1 deletion(-)
++ 2 files changed, 14 insertions(+), 2 deletions(-)
+ 
+ diff --git a/Makefile.pre.in b/Makefile.pre.in
+-index f5d0573067..9f4cdf14cf 100644
++index 5847029..5628860 100644
+ --- a/Makefile.pre.in
+ +++ b/Makefile.pre.in
+-@@ -1920,7 +1920,6 @@ LIBSUBDIRS=	asyncio \
++@@ -1446,7 +1446,6 @@ LIBSUBDIRS=	asyncio \
++ 		logging \
+  		multiprocessing multiprocessing/dummy \
+- 		re \
+  		site-packages \
+ -		sqlite3 \
+  		tkinter \
+- 		tomllib \
+  		turtledemo \
+-@@ -2018,6 +2017,10 @@ TESTSUBDIRS += lib2to3/tests			\
++ 		unittest \
++@@ -1459,7 +1458,6 @@ LIBSUBDIRS=	asyncio \
++ TESTSUBDIRS=	ctypes/test \
++ 		distutils/tests \
++ 		idlelib/idle_test \
++-		sqlite3/test \
++ 		test test/audiodata \
++ 		test/capath test/cjkencodings \
++ 		test/data test/decimaltestdata \
++@@ -1540,6 +1538,11 @@ TESTSUBDIRS += lib2to3/tests			\
+  	lib2to3/tests/data/fixers/myfixes
+  endif
+  
+ +ifeq (@SQLITE3@,yes)
+ +LIBSUBDIRS += sqlite3
+++TESTSUBDIRS += sqlite3/test
+ +endif
+ +
+  TEST_MODULES=@TEST_MODULES@
+- libinstall:	all $(srcdir)/Modules/xxmodule.c
++ libinstall:	build_all $(srcdir)/Modules/xxmodule.c
+  	@for i in $(SCRIPTDIR) $(LIBDEST); \
+ diff --git a/configure.ac b/configure.ac
+-index d8e10cf2b2..4cc0951ab9 100644
++index 34c2ba9..dfee472 100644
+ --- a/configure.ac
+ +++ b/configure.ac
+-@@ -4171,6 +4171,15 @@ AS_VAR_IF([posix_threads], [stub], [
+-   AC_DEFINE([HAVE_PTHREAD_STUBS], [1], [Define if platform requires stubbed pthreads support])
+- ])
++@@ -3373,6 +3373,15 @@ if test "$posix_threads" = "yes"; then
++       AC_CHECK_FUNCS(pthread_getcpuclockid)
++ fi
+  
+ +AC_SUBST(SQLITE3)
+ +AC_ARG_ENABLE(sqlite3,
+@@ -58,5 +67,5 @@ index d8e10cf2b2..4cc0951ab9 100644
+  
+  AC_ARG_ENABLE(pydoc,
+ -- 
+-2.34.1
++2.30.2
+ 
+diff --git a/package/python3/0014-Add-an-option-to-disable-the-tk-module.patch b/package/python3/0014-Add-an-option-to-disable-the-tk-module.patch
+index 04f7e34435..db79f5691f 100644
+--- a/package/python3/0014-Add-an-option-to-disable-the-tk-module.patch
++++ b/package/python3/0014-Add-an-option-to-disable-the-tk-module.patch
+@@ -1,4 +1,4 @@
+-From bbbfe699d648a5cb191203b16e1786e8cf4ea908 Mon Sep 17 00:00:00 2001
++From ad6b66b34f71ff6b60b3be5f6fd3e781cdeecd59 Mon Sep 17 00:00:00 2001
+ From: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+ Date: Wed, 22 Feb 2017 17:23:42 -0800
+ Subject: [PATCH] Add an option to disable the tk module
+@@ -15,18 +15,18 @@ Signed-off-by: Adam Duskett <aduskett@gmail.com>
+  2 files changed, 16 insertions(+), 3 deletions(-)
+ 
+ diff --git a/Makefile.pre.in b/Makefile.pre.in
+-index 9f4cdf14cf..4f83911200 100644
++index 5628860..c968113 100644
+ --- a/Makefile.pre.in
+ +++ b/Makefile.pre.in
+-@@ -1920,7 +1920,6 @@ LIBSUBDIRS=	asyncio \
++@@ -1446,7 +1446,6 @@ LIBSUBDIRS=	asyncio \
++ 		logging \
+  		multiprocessing multiprocessing/dummy \
+- 		re \
+  		site-packages \
+ -		tkinter \
+- 		tomllib \
+  		turtledemo \
+  		unittest \
+-@@ -2001,8 +2000,6 @@ TESTSUBDIRS=	ctypes/test \
++ 		urllib \
++@@ -1522,8 +1521,6 @@ TESTSUBDIRS=	ctypes/test \
+  		test/tracedmodules \
+  		test/xmltestdata test/xmltestdata/c14n-20 \
+  		test/ziptestdata \
+@@ -35,8 +35,8 @@ index 9f4cdf14cf..4f83911200 100644
+  		unittest/test unittest/test/testmock
+  
+  ifeq (@PYDOC@,yes)
+-@@ -2021,6 +2018,13 @@ ifeq (@SQLITE3@,yes)
+- LIBSUBDIRS += sqlite3
++@@ -1543,6 +1540,13 @@ LIBSUBDIRS += sqlite3
++ TESTSUBDIRS += sqlite3/test
+  endif
+  
+ +ifeq (@TK@,yes)
+@@ -47,13 +47,13 @@ index 9f4cdf14cf..4f83911200 100644
+ +
+ +
+  TEST_MODULES=@TEST_MODULES@
+- libinstall:	all $(srcdir)/Modules/xxmodule.c
++ libinstall:	build_all $(srcdir)/Modules/xxmodule.c
+  	@for i in $(SCRIPTDIR) $(LIBDEST); \
+ diff --git a/configure.ac b/configure.ac
+-index 4cc0951ab9..f4ce506801 100644
++index dfee472..dc76dff 100644
+ --- a/configure.ac
+ +++ b/configure.ac
+-@@ -4180,6 +4180,15 @@ if test "$SQLITE3" = "no" ; then
++@@ -3382,6 +3382,15 @@ if test "$SQLITE3" = "no" ; then
+     DISABLED_EXTENSIONS="${DISABLED_EXTENSIONS} _sqlite3"
+  fi
+  
+@@ -70,5 +70,5 @@ index 4cc0951ab9..f4ce506801 100644
+  
+  AC_ARG_ENABLE(pydoc,
+ -- 
+-2.34.1
++2.30.2
+ 
+diff --git a/package/python3/0015-Add-an-option-to-disable-the-curses-module.patch b/package/python3/0015-Add-an-option-to-disable-the-curses-module.patch
+index da6f891104..35d92fb7d1 100644
+--- a/package/python3/0015-Add-an-option-to-disable-the-curses-module.patch
++++ b/package/python3/0015-Add-an-option-to-disable-the-curses-module.patch
+@@ -1,4 +1,4 @@
+-From 03e28cdd46dac1b7e4e9c8bbd2ea44b09e514205 Mon Sep 17 00:00:00 2001
++From 962deb43f5f340a8472d432ae8e6d61186f9040e Mon Sep 17 00:00:00 2001
+ From: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+ Date: Wed, 22 Feb 2017 17:31:51 -0800
+ Subject: [PATCH] Add an option to disable the curses module
+@@ -10,15 +10,15 @@ Signed-off-by: Andrey Smirnov <andrew.smirnov@gmail.com>
+ [ Adam Duskett: ported to Python 3.10.0 ]
+ Signed-off-by: Adam Duskett <aduskett@gmail.com>
+ ---
+- Makefile.pre.in | 4 +++-
++ Makefile.pre.in |  4 +++-
+  configure.ac    | 9 +++++++++
+  2 files changed, 12 insertions(+), 1 deletion(-)
+ 
+ diff --git a/Makefile.pre.in b/Makefile.pre.in
+-index 4f83911200..8e879b35c6 100644
++index c968113..f89f155 100644
+ --- a/Makefile.pre.in
+ +++ b/Makefile.pre.in
+-@@ -1905,7 +1905,6 @@ LIBSUBDIRS=	asyncio \
++@@ -1432,7 +1432,6 @@ LIBSUBDIRS=	asyncio \
+  		concurrent concurrent/futures \
+  		csv \
+  		ctypes ctypes/macholib \
+@@ -26,7 +26,7 @@ index 4f83911200..8e879b35c6 100644
+  		dbm \
+  		distutils distutils/command \
+  		email email/mime \
+-@@ -2024,6 +2023,9 @@ TESTSUBDIRS += tkinter/test tkinter/test/test_tkinter \
++@@ -1546,6 +1545,9 @@ TESTSUBDIRS += tkinter/test tkinter/test/test_tkinter \
+  	tkinter/test/test_ttk
+  endif
+  
+@@ -35,12 +35,12 @@ index 4f83911200..8e879b35c6 100644
+ +endif
+  
+  TEST_MODULES=@TEST_MODULES@
+- libinstall:	all $(srcdir)/Modules/xxmodule.c
++ libinstall:	build_all $(srcdir)/Modules/xxmodule.c
+ diff --git a/configure.ac b/configure.ac
+-index f4ce506801..0ae9863cd6 100644
++index dc76dff..4f1cda5 100644
+ --- a/configure.ac
+ +++ b/configure.ac
+-@@ -4189,6 +4189,15 @@ if test "$TK" = "no"; then
++@@ -3391,6 +3391,15 @@ if test "$TK" = "no"; then
+     DISABLED_EXTENSIONS="${DISABLED_EXTENSIONS} _tkinter"
+  fi
+  
+@@ -57,5 +57,5 @@ index f4ce506801..0ae9863cd6 100644
+  
+  AC_ARG_ENABLE(pydoc,
+ -- 
+-2.34.1
++2.30.2
+ 
+diff --git a/package/python3/0016-Add-an-option-to-disable-expat.patch b/package/python3/0016-Add-an-option-to-disable-expat.patch
+index c30740762a..83c89e1f68 100644
+--- a/package/python3/0016-Add-an-option-to-disable-expat.patch
++++ b/package/python3/0016-Add-an-option-to-disable-expat.patch
+@@ -1,4 +1,4 @@
+-From c9a2ea3edacf57746517600ccc11c254a9fd6c48 Mon Sep 17 00:00:00 2001
++From 7e0e7dc25f50acd6922493ae620ee5cbf107a79a Mon Sep 17 00:00:00 2001
+ From: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+ Date: Wed, 22 Feb 2017 17:40:45 -0800
+ Subject: [PATCH] Add an option to disable expat
+@@ -17,22 +17,23 @@ Signed-off-by: Andrey Smirnov <andrew.smirnov@gmail.com>
+ Signed-off-by: Adam Duskett <aduskett@gmail.com>
+ ---
+  Makefile.pre.in |  5 ++++-
+- configure.ac    | 20 ++++++++++++++------
+- 2 files changed, 18 insertions(+), 7 deletions(-)
++ configure.ac    | 18 +++++++++++++-----
++ setup.py        |  2 +-
++ 3 files changed, 18 insertions(+), 7 deletions(-)
+ 
+ diff --git a/Makefile.pre.in b/Makefile.pre.in
+-index 8e879b35c6..80d617cf7f 100644
++index f89f155..08c5e8a 100644
+ --- a/Makefile.pre.in
+ +++ b/Makefile.pre.in
+-@@ -1925,7 +1925,6 @@ LIBSUBDIRS=	asyncio \
++@@ -1450,7 +1450,6 @@ LIBSUBDIRS=	asyncio \
+  		urllib \
+  		venv venv/scripts venv/scripts/common venv/scripts/posix \
+  		wsgiref \
+ -		$(XMLLIBSUBDIRS) \
+  		xmlrpc \
+- 		zoneinfo \
+- 		__phello__
+-@@ -2027,6 +2026,10 @@ ifeq (@CURSES@,yes)
++ 		zoneinfo
++ TESTSUBDIRS=	ctypes/test \
++@@ -1549,6 +1548,10 @@ ifeq (@CURSES@,yes)
+  LIBSUBDIRS += curses
+  endif
+  
+@@ -41,13 +42,13 @@ index 8e879b35c6..80d617cf7f 100644
+ +endif
+ +
+  TEST_MODULES=@TEST_MODULES@
+- libinstall:	all $(srcdir)/Modules/xxmodule.c
++ libinstall:	build_all $(srcdir)/Modules/xxmodule.c
+  	@for i in $(SCRIPTDIR) $(LIBDEST); \
+ diff --git a/configure.ac b/configure.ac
+-index 0ae9863cd6..201cad0bfc 100644
++index 4f1cda5..e99a174 100644
+ --- a/configure.ac
+ +++ b/configure.ac
+-@@ -3565,15 +3565,23 @@ LIBS="$withval $LIBS"
++@@ -3094,13 +3094,21 @@ PKG_PROG_PKG_CONFIG
+  AC_SUBST(DISABLED_EXTENSIONS)
+  
+  # Check for use of the system expat library
+@@ -63,8 +64,7 @@ index 0ae9863cd6..201cad0bfc 100644
+  
+ -AC_MSG_RESULT($with_system_expat)
+ +AC_MSG_RESULT($with_expat)
+- 
+--AS_VAR_IF([with_system_expat], [yes], [
+++
+ +if test "$with_expat" != "none"; then
+ +   EXPAT=yes
+ +else
+@@ -72,11 +72,22 @@ index 0ae9863cd6..201cad0bfc 100644
+ +   EXPAT=no
+ +fi
+ +AC_SUBST(EXPAT)
+-+
+-+AS_VAR_IF([with_expat], [system], [
+-   LIBEXPAT_CFLAGS=${LIBEXPAT_CFLAGS-""}
+-   LIBEXPAT_LDFLAGS=${LIBEXPAT_LDFLAGS-"-lexpat"}
+-   LIBEXPAT_INTERNAL=
++ 
++ # Check for use of the system libffi library
++ AC_MSG_CHECKING(for --with-system-ffi)
++diff --git a/setup.py b/setup.py
++index 663fd44..e30ed52 100644
++--- a/setup.py
+++++ b/setup.py
++@@ -1764,7 +1764,7 @@ class PyBuildExt(build_ext):
++         #
++         # More information on Expat can be found at www.libexpat.org.
++         #
++-        if '--with-system-expat' in sysconfig.get_config_var("CONFIG_ARGS"):
+++        if '--with-expat=system' in sysconfig.get_config_var("CONFIG_ARGS"):
++             expat_inc = []
++             define_macros = []
++             extra_compile_args = []
+ -- 
+-2.34.1
++2.30.2
+ 
+diff --git a/package/python3/0017-Add-an-option-to-disable-CJK-codecs.patch b/package/python3/0017-Add-an-option-to-disable-CJK-codecs.patch
+index 63a07fb514..2afcf4526d 100644
+--- a/package/python3/0017-Add-an-option-to-disable-CJK-codecs.patch
++++ b/package/python3/0017-Add-an-option-to-disable-CJK-codecs.patch
+@@ -1,4 +1,4 @@
+-From d8ef6a7a9f2b954cf1c1e37fc3c35055b42af0f5 Mon Sep 17 00:00:00 2001
++From 2c0d31bb91fc7f94283c3ab632925fbbe24e94d6 Mon Sep 17 00:00:00 2001
+ From: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+ Date: Wed, 23 Dec 2015 11:49:55 +0100
+ Subject: [PATCH] Add an option to disable CJK codecs
+@@ -9,10 +9,10 @@ Signed-off-by: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+  1 file changed, 6 insertions(+)
+ 
+ diff --git a/configure.ac b/configure.ac
+-index 201cad0bfc..ecdd7dbc07 100644
++index 9ef0ecd42f..18e6fd70a0 100644
+ --- a/configure.ac
+ +++ b/configure.ac
+-@@ -4188,6 +4188,12 @@ if test "$SQLITE3" = "no" ; then
++@@ -3390,6 +3390,12 @@ if test "$SQLITE3" = "no" ; then
+     DISABLED_EXTENSIONS="${DISABLED_EXTENSIONS} _sqlite3"
+  fi
+  
+@@ -26,5 +26,5 @@ index 201cad0bfc..ecdd7dbc07 100644
+  AC_ARG_ENABLE(tk,
+  	AS_HELP_STRING([--disable-tk], [disable tk]),
+ -- 
+-2.34.1
++2.25.1
+ 
+diff --git a/package/python3/0018-Add-an-option-to-disable-NIS.patch b/package/python3/0018-Add-an-option-to-disable-NIS.patch
+index 977955d1cb..d8fe3616c0 100644
+--- a/package/python3/0018-Add-an-option-to-disable-NIS.patch
++++ b/package/python3/0018-Add-an-option-to-disable-NIS.patch
+@@ -1,4 +1,4 @@
+-From 09fc9f72ebe60bb65e80732a6bd4f12a84159f6d Mon Sep 17 00:00:00 2001
++From 2041d0c8dba87991edaf088b16e37b5189a3466d Mon Sep 17 00:00:00 2001
+ From: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+ Date: Wed, 23 Dec 2015 11:50:11 +0100
+ Subject: [PATCH] Add an option to disable NIS
+@@ -12,10 +12,10 @@ Signed-off-by: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+  1 file changed, 6 insertions(+)
+ 
+ diff --git a/configure.ac b/configure.ac
+-index ecdd7dbc07..1bdde7f69d 100644
++index 18e6fd70a0..46d2a8131e 100644
+ --- a/configure.ac
+ +++ b/configure.ac
+-@@ -4194,6 +4194,12 @@ AC_ARG_ENABLE(codecs-cjk,
++@@ -3396,6 +3396,12 @@ AC_ARG_ENABLE(codecs-cjk,
+  		DISABLED_EXTENSIONS="${DISABLED_EXTENSIONS} _codecs_kr _codecs_jp _codecs_cn _codecs_tw _codecs_hk _codecs_iso2022"
+  	fi])
+  
+@@ -29,5 +29,5 @@ index ecdd7dbc07..1bdde7f69d 100644
+  AC_ARG_ENABLE(tk,
+  	AS_HELP_STRING([--disable-tk], [disable tk]),
+ -- 
+-2.34.1
++2.25.1
+ 
+diff --git a/package/python3/0019-Add-an-option-to-disable-unicodedata.patch b/package/python3/0019-Add-an-option-to-disable-unicodedata.patch
+index 74702b67a5..3519377b5e 100644
+--- a/package/python3/0019-Add-an-option-to-disable-unicodedata.patch
++++ b/package/python3/0019-Add-an-option-to-disable-unicodedata.patch
+@@ -1,4 +1,4 @@
+-From 4fe7f375a3d171d294caebdd7b7ce49bbc9ad9f3 Mon Sep 17 00:00:00 2001
++From dd82a401ff6ba4ba116bf4d520e981a1808ed443 Mon Sep 17 00:00:00 2001
+ From: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+ Date: Wed, 23 Dec 2015 11:50:27 +0100
+ Subject: [PATCH] Add an option to disable unicodedata
+@@ -9,10 +9,10 @@ Signed-off-by: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+  1 file changed, 6 insertions(+)
+ 
+ diff --git a/configure.ac b/configure.ac
+-index 1bdde7f69d..ba4b0e0c1c 100644
++index 46d2a8131e..5844e3b73f 100644
+ --- a/configure.ac
+ +++ b/configure.ac
+-@@ -4200,6 +4200,12 @@ AC_ARG_ENABLE(nis,
++@@ -3402,6 +3402,12 @@ AC_ARG_ENABLE(nis,
+      	     DISABLED_EXTENSIONS="${DISABLED_EXTENSIONS} nis"
+    	  fi])
+  
+@@ -26,5 +26,5 @@ index 1bdde7f69d..ba4b0e0c1c 100644
+  AC_ARG_ENABLE(tk,
+  	AS_HELP_STRING([--disable-tk], [disable tk]),
+ -- 
+-2.34.1
++2.25.1
+ 
+diff --git a/package/python3/0020-Add-an-option-to-disable-IDLE.patch b/package/python3/0020-Add-an-option-to-disable-IDLE.patch
+index 09b5f13cdb..f09037f7db 100644
+--- a/package/python3/0020-Add-an-option-to-disable-IDLE.patch
++++ b/package/python3/0020-Add-an-option-to-disable-IDLE.patch
+@@ -1,4 +1,4 @@
+-From 2c9dbd6d49744aa8da8ebf8d0187d6b06f93c2b5 Mon Sep 17 00:00:00 2001
++From f1b15834045d0641c43014b970721df066fa71f7 Mon Sep 17 00:00:00 2001
+ From: Maxime Ripard <maxime.ripard@free-electrons.com>
+ Date: Wed, 22 Feb 2017 17:45:14 -0800
+ Subject: [PATCH] Add an option to disable IDLE
+@@ -18,10 +18,10 @@ Signed-off-by: Adam Duskett <aduskett@gmail.com>
+  3 files changed, 16 insertions(+), 2 deletions(-)
+ 
+ diff --git a/Makefile.pre.in b/Makefile.pre.in
+-index 80d617cf7f..8d1ba1356c 100644
++index 08c5e8a..461c5e3 100644
+ --- a/Makefile.pre.in
+ +++ b/Makefile.pre.in
+-@@ -1862,7 +1862,9 @@ bininstall: altbininstall
++@@ -1389,7 +1389,9 @@ bininstall: altbininstall
+  	-rm -f $(DESTDIR)$(LIBPC)/python3-embed.pc
+  	(cd $(DESTDIR)$(LIBPC); $(LN) -s python-$(VERSION)-embed.pc python3-embed.pc)
+  	-rm -f $(DESTDIR)$(BINDIR)/idle3
+@@ -31,15 +31,15 @@ index 80d617cf7f..8d1ba1356c 100644
+  	-rm -f $(DESTDIR)$(BINDIR)/pydoc3
+  ifeq (@PYDOC@,yes)
+  	(cd $(DESTDIR)$(BINDIR); $(LN) -s pydoc$(VERSION) pydoc3)
+-@@ -1912,7 +1914,6 @@ LIBSUBDIRS=	asyncio \
++@@ -1439,7 +1441,6 @@ LIBSUBDIRS=	asyncio \
+  		ensurepip ensurepip/_bundled \
+  		html \
+  		http \
+ -		idlelib idlelib/Icons \
+- 		importlib importlib/resources importlib/metadata \
++ 		importlib importlib/metadata \
+  		json \
+  		logging \
+-@@ -2030,6 +2031,10 @@ ifeq (@EXPAT@,yes)
++@@ -1552,6 +1553,10 @@ ifeq (@EXPAT@,yes)
+  LIBSUBDIRS += $(XMLLIBSUBDIRS)
+  endif
+  
+@@ -48,13 +48,13 @@ index 80d617cf7f..8d1ba1356c 100644
+ +endif
+ +
+  TEST_MODULES=@TEST_MODULES@
+- libinstall:	all $(srcdir)/Modules/xxmodule.c
++ libinstall:	build_all $(srcdir)/Modules/xxmodule.c
+  	@for i in $(SCRIPTDIR) $(LIBDEST); \
+ diff --git a/configure.ac b/configure.ac
+-index ba4b0e0c1c..5e6d72f7db 100644
++index e99a174..baaa743 100644
+ --- a/configure.ac
+ +++ b/configure.ac
+-@@ -7137,6 +7137,12 @@ AC_ARG_ENABLE(lib2to3,
++@@ -6073,6 +6073,12 @@ AC_ARG_ENABLE(lib2to3,
+  	AS_HELP_STRING([--disable-lib2to3], [disable lib2to3]),
+  	[ LIB2TO3="${enableval}" ], [ LIB2TO3=yes ])
+  
+@@ -66,12 +66,12 @@ index ba4b0e0c1c..5e6d72f7db 100644
+ +
+  # generate output files
+  AC_CONFIG_FILES(Makefile.pre Misc/python.pc Misc/python-embed.pc Misc/python-config.sh)
+- AC_CONFIG_FILES([Modules/Setup.bootstrap Modules/Setup.stdlib])
++ AC_CONFIG_FILES([Modules/ld_so_aix], [chmod +x Modules/ld_so_aix])
+ diff --git a/setup.py b/setup.py
+-index c490b0b08f..4d49a792f7 100644
++index e30ed52..4dff249 100644
+ --- a/setup.py
+ +++ b/setup.py
+-@@ -1594,11 +1594,14 @@ class DummyProcess:
++@@ -2722,11 +2722,14 @@ def main():
+      import warnings
+      warnings.filterwarnings("ignore",category=DeprecationWarning)
+  
+@@ -88,5 +88,5 @@ index c490b0b08f..4d49a792f7 100644
+            name = "Python",
+            version = sys.version.split()[0],
+ -- 
+-2.34.1
++2.30.2
+ 
+diff --git a/package/python3/0021-Add-an-option-to-disable-decimal.patch b/package/python3/0021-Add-an-option-to-disable-decimal.patch
+index d683565f94..fd1887d603 100644
+--- a/package/python3/0021-Add-an-option-to-disable-decimal.patch
++++ b/package/python3/0021-Add-an-option-to-disable-decimal.patch
+@@ -1,4 +1,4 @@
+-From 7091fdf77f612425c178a75148560f9c3514e8b8 Mon Sep 17 00:00:00 2001
++From d5fe81cbd51da2a84ed89d1e4c80d921d4efce26 Mon Sep 17 00:00:00 2001
+ From: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+ Date: Wed, 23 Dec 2015 11:51:31 +0100
+ Subject: [PATCH] Add an option to disable decimal
+@@ -14,14 +14,15 @@ Signed-off-by: Adam Duskett <aduskett@gmail.com>
+ [james.hilliard1@gmail.com: adapt to python 3.9]
+ Signed-off-by: James Hilliard <james.hilliard1@gmail.com>
+ ---
+- configure.ac | 19 +++++++++++++------
+- 1 file changed, 13 insertions(+), 6 deletions(-)
++ configure.ac | 17 ++++++++++++-----
++ setup.py     |  2 +-
++ 2 files changed, 13 insertions(+), 6 deletions(-)
+ 
+ diff --git a/configure.ac b/configure.ac
+-index 5e6d72f7db..e6b1f1e9de 100644
++index 7bd4623ccd..e513ef6a20 100644
+ --- a/configure.ac
+ +++ b/configure.ac
+-@@ -3630,14 +3630,21 @@ fi
++@@ -3145,13 +3145,20 @@ fi
+  AC_SUBST(LIBFFI_INCLUDEDIR)
+  
+  # Check for use of the system libmpdec library
+@@ -33,8 +34,9 @@ index 5e6d72f7db..e6b1f1e9de 100644
+ +            AS_HELP_STRING([--with-libmpdec], [select which libmpdec version to use: system, builtin, none]),
+              [],
+ -            [with_system_libmpdec="no"])
+--AC_MSG_RESULT($with_system_libmpdec)
+ +            [with_libmpdec="builtin"])
++ 
++-AC_MSG_RESULT($with_system_libmpdec)
+ +AC_MSG_RESULT($with_libmpdec)
+ +if test "$with_libmpdec" != "none"; then
+ +   MPDEC=yes
+@@ -44,11 +46,21 @@ index 5e6d72f7db..e6b1f1e9de 100644
+ +fi
+ +AC_SUBST(MPDEC)
+  
+--AS_VAR_IF([with_system_libmpdec], [yes], [
+-+AS_VAR_IF([with_libmpdec], [system], [
+-   LIBMPDEC_CFLAGS=${LIBMPDEC_CFLAGS-""}
+-   LIBMPDEC_LDFLAGS=${LIBMPDEC_LDFLAGS-"-lmpdec"}
+-   LIBMPDEC_INTERNAL=
++ # Check whether _decimal should use a coroutine-local or thread-local context
++ AC_MSG_CHECKING(for --with-decimal-contextvar)
++diff --git a/setup.py b/setup.py
++index c4ee989ba3..3d0c74bb7f 100644
++--- a/setup.py
+++++ b/setup.py
++@@ -2321,7 +2321,7 @@ class PyBuildExt(build_ext):
++         # Stefan Krah's _decimal module
++         extra_compile_args = []
++         undef_macros = []
++-        if '--with-system-libmpdec' in sysconfig.get_config_var("CONFIG_ARGS"):
+++        if '--with-libmpdec=system' in sysconfig.get_config_var("CONFIG_ARGS"):
++             include_dirs = []
++             libraries = ['mpdec']
++             sources = ['_decimal/_decimal.c']
+ -- 
+-2.34.1
++2.25.1
+ 
+diff --git a/package/python3/0022-Add-an-option-to-disable-the-ossaudiodev-module.patch b/package/python3/0022-Add-an-option-to-disable-the-ossaudiodev-module.patch
+index 56713a7f8f..0459b5a14d 100644
+--- a/package/python3/0022-Add-an-option-to-disable-the-ossaudiodev-module.patch
++++ b/package/python3/0022-Add-an-option-to-disable-the-ossaudiodev-module.patch
+@@ -1,4 +1,4 @@
+-From d48d9da534cec7891ae444b4ab94a76ac67f5daa Mon Sep 17 00:00:00 2001
++From 9bedc56d2a4b8856162650a11c1fcb6ec38f160b Mon Sep 17 00:00:00 2001
+ From: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+ Date: Wed, 23 Dec 2015 11:51:58 +0100
+ Subject: [PATCH] Add an option to disable the ossaudiodev module
+@@ -9,10 +9,10 @@ Signed-off-by: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+  1 file changed, 6 insertions(+)
+ 
+ diff --git a/configure.ac b/configure.ac
+-index e6b1f1e9de..db33d567ad 100644
++index e513ef6a20..c07505e89e 100644
+ --- a/configure.ac
+ +++ b/configure.ac
+-@@ -3678,6 +3678,12 @@ fi
++@@ -3175,6 +3175,12 @@ fi
+  
+  AC_MSG_RESULT($with_decimal_contextvar)
+  
+@@ -22,9 +22,9 @@ index e6b1f1e9de..db33d567ad 100644
+ +	  DISABLED_EXTENSIONS="${DISABLED_EXTENSIONS} ossaudiodev"
+ +	  fi])
+ +
+- # Check for libmpdec machine flavor
+- AC_MSG_CHECKING(for decimal libmpdec machine)
+- AS_CASE([$ac_sys_system],
++ # Check for support for loadable sqlite extensions
++ AC_MSG_CHECKING(for --enable-loadable-sqlite-extensions)
++ AC_ARG_ENABLE(loadable-sqlite-extensions,
+ -- 
+-2.34.1
++2.25.1
+ 
+diff --git a/package/python3/0023-Add-an-option-to-disable-openssl-support.patch b/package/python3/0023-Add-an-option-to-disable-openssl-support.patch
+index d4c9fd43be..4801a27300 100644
+--- a/package/python3/0023-Add-an-option-to-disable-openssl-support.patch
++++ b/package/python3/0023-Add-an-option-to-disable-openssl-support.patch
+@@ -1,4 +1,4 @@
+-From 25c900e81a2fc0bbe35e7c94e2e5028cfbf6582a Mon Sep 17 00:00:00 2001
++From 90ed5c692b8b5596ca0b3ae1436276c8181251d8 Mon Sep 17 00:00:00 2001
+ From: Nicolas Cavallari <nicolas.cavallari@green-communications.fr>
+ Date: Wed, 22 Feb 2017 17:55:59 -0800
+ Subject: [PATCH] Add an option to disable openssl support.
+@@ -9,10 +9,10 @@ Signed-off-by: Nicolas Cavallari <nicolas.cavallari@green-communications.fr>
+  1 file changed, 6 insertions(+)
+ 
+ diff --git a/configure.ac b/configure.ac
+-index db33d567ad..42fe6c8f5a 100644
++index 08c148c..a81a24c 100644
+ --- a/configure.ac
+ +++ b/configure.ac
+-@@ -4219,6 +4219,12 @@ AC_ARG_ENABLE(unicodedata,
++@@ -3421,6 +3421,12 @@ AC_ARG_ENABLE(unicodedata,
+      	     DISABLED_EXTENSIONS="${DISABLED_EXTENSIONS} unicodedata"
+    	  fi])
+  
+@@ -26,5 +26,5 @@ index db33d567ad..42fe6c8f5a 100644
+  AC_ARG_ENABLE(tk,
+  	AS_HELP_STRING([--disable-tk], [disable tk]),
+ -- 
+-2.34.1
++2.30.2
+ 
+diff --git a/package/python3/0024-Add-an-option-to-disable-the-readline-module.patch b/package/python3/0024-Add-an-option-to-disable-the-readline-module.patch
+index 9250007dae..adb04d69ea 100644
+--- a/package/python3/0024-Add-an-option-to-disable-the-readline-module.patch
++++ b/package/python3/0024-Add-an-option-to-disable-the-readline-module.patch
+@@ -1,4 +1,4 @@
+-From 9082468ca620db77b670ccf568a96bbabb865f80 Mon Sep 17 00:00:00 2001
++From 049e7a51e1ffd0d28d6608c707ab4b54e816d338 Mon Sep 17 00:00:00 2001
+ From: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+ Date: Tue, 7 Mar 2017 23:29:05 +0100
+ Subject: [PATCH] Add an option to disable the readline module
+@@ -9,10 +9,10 @@ Signed-off-by: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+  1 file changed, 6 insertions(+)
+ 
+ diff --git a/configure.ac b/configure.ac
+-index 42fe6c8f5a..19875d7d30 100644
++index a81a24c..41a21ff 100644
+ --- a/configure.ac
+ +++ b/configure.ac
+-@@ -4225,6 +4225,12 @@ AC_ARG_ENABLE(openssl,
++@@ -3427,6 +3427,12 @@ AC_ARG_ENABLE(openssl,
+  	     DISABLED_EXTENSIONS="${DISABLED_EXTENSIONS} ssl _ssl _hashlib"
+  	  fi])
+  
+@@ -26,5 +26,5 @@ index 42fe6c8f5a..19875d7d30 100644
+  AC_ARG_ENABLE(tk,
+  	AS_HELP_STRING([--disable-tk], [disable tk]),
+ -- 
+-2.34.1
++2.30.2
+ 
+diff --git a/package/python3/0025-Add-options-to-disable-zlib-bzip2-and-xz-modules.patch b/package/python3/0025-Add-options-to-disable-zlib-bzip2-and-xz-modules.patch
+index 70a0d6cd15..d466bc3a76 100644
+--- a/package/python3/0025-Add-options-to-disable-zlib-bzip2-and-xz-modules.patch
++++ b/package/python3/0025-Add-options-to-disable-zlib-bzip2-and-xz-modules.patch
+@@ -1,4 +1,4 @@
+-From 988a335cb34b5fc25ea345ba04ff5ddffe2e946c Mon Sep 17 00:00:00 2001
++From 146730a04dfe98e3d7971ebf5410801ceae88e11 Mon Sep 17 00:00:00 2001
+ From: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+ Date: Tue, 7 Mar 2017 23:31:11 +0100
+ Subject: [PATCH] Add options to disable zlib, bzip2 and xz modules
+@@ -9,10 +9,10 @@ Signed-off-by: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+  1 file changed, 18 insertions(+)
+ 
+ diff --git a/configure.ac b/configure.ac
+-index 19875d7d30..ca6c16491a 100644
++index 41a21ff..fa81bc7 100644
+ --- a/configure.ac
+ +++ b/configure.ac
+-@@ -4231,6 +4231,24 @@ AC_ARG_ENABLE(readline,
++@@ -3433,6 +3433,24 @@ AC_ARG_ENABLE(readline,
+  	     DISABLED_EXTENSIONS="${DISABLED_EXTENSIONS} readline"
+  	  fi])
+  
+@@ -38,5 +38,5 @@ index 19875d7d30..ca6c16491a 100644
+  AC_ARG_ENABLE(tk,
+  	AS_HELP_STRING([--disable-tk], [disable tk]),
+ -- 
+-2.34.1
++2.30.2
+ 
+diff --git a/package/python3/0026-python-config.sh-don-t-reassign-prefix.patch b/package/python3/0026-python-config.sh-don-t-reassign-prefix.patch
+index b6bfb010a0..814a9d42e5 100644
+--- a/package/python3/0026-python-config.sh-don-t-reassign-prefix.patch
++++ b/package/python3/0026-python-config.sh-don-t-reassign-prefix.patch
+@@ -1,4 +1,4 @@
+-From 755fb526a62df2a73560f42184db8aadb6899bb0 Mon Sep 17 00:00:00 2001
++From 106d9378c61e7fa9cad0a63ba068668d54cd11b8 Mon Sep 17 00:00:00 2001
+ From: Matt Weber <matthew.weber@rockwellcollins.com>
+ Date: Fri, 6 Oct 2017 09:54:15 -0500
+ Subject: [PATCH] python-config.sh: don't reassign ${prefix}
+@@ -27,7 +27,7 @@ Signed-off-by: Matthew Weber <matthew.weber@rockwellcollins.com>
+  1 file changed, 2 insertions(+), 2 deletions(-)
+ 
+ diff --git a/Misc/python-config.sh.in b/Misc/python-config.sh.in
+-index a1bc3cd5f7..164d2d3603 100644
++index a1bc3cd..164d2d3 100644
+ --- a/Misc/python-config.sh.in
+ +++ b/Misc/python-config.sh.in
+ @@ -31,7 +31,7 @@ prefix_real=$(installed_prefix "$0")
+@@ -49,5 +49,5 @@ index a1bc3cd5f7..164d2d3603 100644
+  SO="@EXT_SUFFIX@"
+  PYTHONFRAMEWORK="@PYTHONFRAMEWORK@"
+ -- 
+-2.34.1
++2.30.2
+ 
+diff --git a/package/python3/0027-Add-an-option-to-disable-uuid-module.patch b/package/python3/0027-Add-an-option-to-disable-uuid-module.patch
+deleted file mode 100644
+index a9501ec189..0000000000
+--- a/package/python3/0027-Add-an-option-to-disable-uuid-module.patch
++++ /dev/null
+@@ -1,33 +0,0 @@
+-From 58027d25c3cabcf654cb0b31a61d7cbd53dc68c0 Mon Sep 17 00:00:00 2001
+-From: Thomas Petazzoni <thomas.petazzoni@bootlin.com>
+-Date: Sat, 18 Aug 2018 10:54:56 +0200
+-Subject: [PATCH] Add an option to disable uuid module
+-
+-Signed-off-by: Thomas Petazzoni <thomas.petazzoni@bootlin.com>
+----
+- configure.ac | 9 +++++++++
+- 1 file changed, 9 insertions(+)
+-
+-diff --git a/configure.ac b/configure.ac
+-index ca6c16491a..ed03b27fb1 100644
+---- a/configure.ac
+-+++ b/configure.ac
+-@@ -4267,6 +4267,15 @@ if test "$CURSES" = "no"; then
+-    DISABLED_EXTENSIONS="${DISABLED_EXTENSIONS} _curses _curses_panel"
+- fi
+- 
+-+AC_SUBST(UUID)
+-+AC_ARG_ENABLE(uuid,
+-+	AS_HELP_STRING([--disable-uuid], [disable uuid]),
+-+	[ UUID="${enableval}" ], [ UUID=yes ])
+-+
+-+if test "$UUID" = "no"; then
+-+   DISABLED_EXTENSIONS="${DISABLED_EXTENSIONS} _uuid"
+-+fi
+-+
+- AC_SUBST(PYDOC)
+- 
+- AC_ARG_ENABLE(pydoc,
+--- 
+-2.34.1
+-
+diff --git a/package/python3/0028-fix-building-on-older-distributions.patch b/package/python3/0028-fix-building-on-older-distributions.patch
+deleted file mode 100644
+index 4541b31c5f..0000000000
+--- a/package/python3/0028-fix-building-on-older-distributions.patch
++++ /dev/null
+@@ -1,47 +0,0 @@
+-From e52e2c5e3df4bc3d2ff07ecb3b8e2a9099ea1631 Mon Sep 17 00:00:00 2001
+-From: Adam Duskett <aduskett@gmail.com>
+-Date: Thu, 16 Aug 2018 14:52:37 -0700
+-Subject: [PATCH] fix building on older distributions
+-
+-Python > 3.6.3 calls os.replace in the update_file.py script, during the
+-regen-importlib phase of the build process.
+-
+-According to Doc/whatsnew/3.3.rst line 1631, os.replace acts in the same
+-way as os.rename, however, it is now cross-platform compatible for Windows.
+-
+-Because BuildRoot is guaranteed only to be built in  POSIX environment, it is
+-safe to change os.replace back to os.rename.
+-
+-This change fixes building on older systems such as CentOS7, that only come
+-with python 2.
+-
+-Signed-off-by: Adam Duskett <aduskett@gmail.com>
+----
+- Tools/scripts/update_file.py | 4 ++--
+- 1 file changed, 2 insertions(+), 2 deletions(-)
+-
+-diff --git a/Tools/scripts/update_file.py b/Tools/scripts/update_file.py
+-index b4182c1d0c..ab443cb1a6 100644
+---- a/Tools/scripts/update_file.py
+-+++ b/Tools/scripts/update_file.py
+-@@ -53,7 +53,7 @@ def update_file_with_tmpfile(filename, tmpfile, *, create=False):
+-         if not create:
+-             raise  # re-raise
+-         outcome = 'created'
+--        os.replace(tmpfile, filename)
+-+        os.rename(tmpfile, filename)
+-     else:
+-         with targetfile:
+-             old_contents = targetfile.read()
+-@@ -62,7 +62,7 @@ def update_file_with_tmpfile(filename, tmpfile, *, create=False):
+-         # Now compare!
+-         if old_contents != new_contents:
+-             outcome = 'updated'
+--            os.replace(tmpfile, filename)
+-+            os.rename(tmpfile, filename)
+-         else:
+-             outcome = 'same'
+-             os.unlink(tmpfile)
+--- 
+-2.34.1
+-
+diff --git a/package/python3/0029-configure.ac-fixup-CC-print-multiarch-output-for-mus.patch b/package/python3/0029-configure.ac-fixup-CC-print-multiarch-output-for-mus.patch
+deleted file mode 100644
+index 5253076d90..0000000000
+--- a/package/python3/0029-configure.ac-fixup-CC-print-multiarch-output-for-mus.patch
++++ /dev/null
+@@ -1,51 +0,0 @@
+-From 07b950aadd570b9f96a1f128505a959b32f40962 Mon Sep 17 00:00:00 2001
+-From: Peter Korsgaard <peter@korsgaard.com>
+-Date: Fri, 2 Aug 2019 15:53:16 +0200
+-Subject: [PATCH] configure.ac: fixup $CC --print-multiarch output for
+- musl/uclibc GCC 8+ toolchains
+-
+-GCC commit 6834b83784dcf0364eb820e8 (multiarch support for non-glibc linux
+-systems), which is part of GCC 8+, changed the multiarch logic to use
+-$arch-linux-musl / $arch-linux-uclibc rather than $arch-linux-gnu.
+-
+-This then causes the python3 configure script to error out:
+-
+-checking for the platform triplet based on compiler characteristics... powerpc-linux-gnu
+-configure: error: internal configure error for the platform triplet, please file a bug report
+-
+-http://autobuild.buildroot.net/results/cb4/cb49c539501342e45cbe5ade82e588fcdf51f05b
+-
+-As it requires that the --print-multiarch output (if not empty) matches the
+-deduced triplet (which always uses -linux-gnu).
+-
+-It isn't quite clear why --print-multiarch returns something for a
+-non-multiarch toolchain on some architectures (E.G.  PowerPC), but as a
+-workaround, rewrite the --print-multiarch output to match older GCC versions
+-to keep the configure script happy.
+-
+-Signed-off-by: Peter Korsgaard <peter@korsgaard.com>
+-[Peter: updated for 3.10.2]
+----
+- configure.ac | 6 +++++-
+- 1 file changed, 5 insertions(+), 1 deletion(-)
+-
+-diff --git a/configure.ac b/configure.ac
+-index ed03b27fb1..841fd6732c 100644
+---- a/configure.ac
+-+++ b/configure.ac
+-@@ -1086,7 +1086,11 @@ AC_MSG_CHECKING([for multiarch])
+- AS_CASE([$ac_sys_system],
+-   [Darwin*], [MULTIARCH=""],
+-   [FreeBSD*], [MULTIARCH=""],
+--  [MULTIARCH=$($CC --print-multiarch 2>/dev/null)]
+-+  [
+-+  # GCC 8+ returns $arch-linux-{musl,uclibc} for musl/uClibc based
+-+  # toolchains confusing python. Fix that up
+-+  MULTIARCH=$($CC --print-multiarch 2>/dev/null | sed -E 's/-linux-(musl|uclibc)*$/-linux-gnu/')
+-+  ]
+- )
+- AC_SUBST([MULTIARCH])
+- AC_MSG_RESULT([$MULTIARCH])
+--- 
+-2.34.1
+-
+diff --git a/package/python3/0030-Add-an-option-to-disable-the-berkeleydb-module.patch b/package/python3/0030-Add-an-option-to-disable-the-berkeleydb-module.patch
+deleted file mode 100644
+index 5fb436db59..0000000000
+--- a/package/python3/0030-Add-an-option-to-disable-the-berkeleydb-module.patch
++++ /dev/null
+@@ -1,30 +0,0 @@
+-From 67e9793d070ac5c8e83abbe95b9208533ffeadd0 Mon Sep 17 00:00:00 2001
+-From: Bernd Kuhls <bernd.kuhls@t-online.de>
+-Date: Sat, 11 Apr 2020 22:01:40 +0200
+-Subject: [PATCH] Add an option to disable the berkeleydb module
+-
+-Signed-off-by: Bernd Kuhls <bernd.kuhls@t-online.de>
+----
+- configure.ac | 6 ++++++
+- 1 file changed, 6 insertions(+)
+-
+-diff --git a/configure.ac b/configure.ac
+-index 841fd6732c..06c9a81f95 100644
+---- a/configure.ac
+-+++ b/configure.ac
+-@@ -4280,6 +4280,12 @@ if test "$UUID" = "no"; then
+-    DISABLED_EXTENSIONS="${DISABLED_EXTENSIONS} _uuid"
+- fi
+- 
+-+AC_ARG_ENABLE(berkeleydb,
+-+	AS_HELP_STRING([--disable-berkeleydb], [disable berkeleydb]),
+-+	[ if test "$enableval" = "no"; then
+-+	     DISABLED_EXTENSIONS="${DISABLED_EXTENSIONS} _dbm"
+-+	  fi])
+-+
+- AC_SUBST(PYDOC)
+- 
+- AC_ARG_ENABLE(pydoc,
+--- 
+-2.34.1
+-
+diff --git a/package/python3/0031-lib-crypt-uClibc-ng-doesn-t-set-errno-when-encryptio.patch b/package/python3/0031-lib-crypt-uClibc-ng-doesn-t-set-errno-when-encryptio.patch
+deleted file mode 100644
+index 712fd08fb1..0000000000
+--- a/package/python3/0031-lib-crypt-uClibc-ng-doesn-t-set-errno-when-encryptio.patch
++++ /dev/null
+@@ -1,42 +0,0 @@
+-From 3edeed879871a10acbe802f4a68cff3d4869dbde Mon Sep 17 00:00:00 2001
+-From: Romain Naour <romain.naour@gmail.com>
+-Date: Thu, 12 Nov 2020 00:16:18 +0100
+-Subject: [PATCH] lib/crypt: uClibc-ng doesn't set errno when encryption method
+- is not available
+-
+-Since commit [1] in cpython, an exception is raised when an encryption method
+-is not available. This eception is handled only if errno is set to EINVAL by
+-crypt() but uClibc-ng doesn't set errno in crypt() [2].
+-
+-Fixes:
+-https://gitlab.com/buildroot.org/buildroot/-/jobs/830981961
+-https://gitlab.com/buildroot.org/buildroot/-/jobs/830981979
+-
+-[1] https://github.com/python/cpython/commit/0d3fe8ae4961bf551e7d5e42559e2ede1a08fd7c
+-[2] https://cgit.uclibc-ng.org/cgi/cgit/uclibc-ng.git/tree/libcrypt/crypt.c?h=v1.0.36#n29
+-
+-Signed-off-by: Romain Naour <romain.naour@gmail.com>
+-[Daniel: updated for 3.10.7]
+-Signed-off-by: Daniel Lang <d.lang@abatec.at>
+----
+- Lib/crypt.py | 4 +++-
+- 1 file changed, 3 insertions(+), 1 deletion(-)
+-
+-diff --git a/Lib/crypt.py b/Lib/crypt.py
+-index de4a14a388..ba482487a7 100644
+---- a/Lib/crypt.py
+-+++ b/Lib/crypt.py
+-@@ -98,7 +98,9 @@ def _add_method(name, *args, rounds=None):
+-         result = crypt('', salt)
+-     except OSError as e:
+-         # Not all libc libraries support all encryption methods.
+--        if e.errno in {errno.EINVAL, errno.EPERM, errno.ENOSYS}:
+-+        # Not all libc libraries set errno when encryption method is not
+-+        # available.
+-+        if e.errno in {errno.EINVAL, errno.EPERM, errno.ENOSYS} or e.errno == 0:
+-             return False
+-         raise
+-     if result and len(result) == method.total_size:
+--- 
+-2.34.1
+-
+diff --git a/package/python3/python3.hash b/package/python3/python3.hash
+index f235347efb..d8787763a7 100644
+--- a/package/python3/python3.hash
++++ b/package/python3/python3.hash
+@@ -1,3 +1,3 @@
+ # Locally computed
+-sha256  29e4b8f5f1658542a8c13e2dd277358c9c48f2b2f7318652ef1675e402b9d2af  Python-3.11.2.tar.xz
+-sha256  3b2f81fe21d181c499c59a256c8e1968455d6689d269aa85373bfb6af41da3bf  LICENSE
++sha256  0419e9085bf51b7a672009b3f50dbf1859acdf18ba725d0ec19aa5c8503f0ea3  Python-3.10.10.tar.xz
++sha256  d4a223f033419313218c9b8444167e91e87a5bebdb43fb8490df441df5220a8b  LICENSE
+diff --git a/package/python3/python3.mk b/package/python3/python3.mk
+index 56fe95cd07..8f5b3be731 100644
+--- a/package/python3/python3.mk
++++ b/package/python3/python3.mk
+@@ -4,8 +4,8 @@
+ #
+ ################################################################################
+ 
+-PYTHON3_VERSION_MAJOR = 3.11
+-PYTHON3_VERSION = $(PYTHON3_VERSION_MAJOR).2
++PYTHON3_VERSION_MAJOR = 3.10
++PYTHON3_VERSION = $(PYTHON3_VERSION_MAJOR).10
+ PYTHON3_SOURCE = Python-$(PYTHON3_VERSION).tar.xz
+ PYTHON3_SITE = https://python.org/ftp/python/$(PYTHON3_VERSION)
+ PYTHON3_LICENSE = Python-2.0, others
+@@ -16,6 +16,9 @@ PYTHON3_CPE_ID_PRODUCT = python
+ # 0033-3.11-gh-98433-Fix-quadratic-time-idna-decoding.-GH-9.patch
+ PYTHON3_IGNORE_CVES += CVE-2022-45061
+ 
++# 0034-3-10-gh-98517-Fix-buffer-overflows-in-_sha3-module.patch
++PYTHON3_IGNORE_CVES += CVE-2022-37454
++
+ # This host Python is installed in $(HOST_DIR), as it is needed when
+ # cross-compiling third-party Python modules.
+ 
+@@ -31,8 +34,8 @@ HOST_PYTHON3_CONF_OPTS += \
+ 	--enable-unicodedata \
+ 	--disable-test-modules \
+ 	--disable-idle3 \
+-	--disable-uuid \
+-	--disable-ossaudiodev
++	--disable-ossaudiodev \
++	--enable-optimizations
+ 
+ # Make sure that LD_LIBRARY_PATH overrides -rpath.
+ # This is needed because libpython may be installed at the same time that
+@@ -45,12 +48,7 @@ HOST_PYTHON3_CONF_ENV += \
+ 
+ PYTHON3_DEPENDENCIES = host-python3 libffi
+ 
+-HOST_PYTHON3_DEPENDENCIES = \
+-	host-autoconf-archive \
+-	host-expat \
+-	host-libffi \
+-	host-pkgconf \
+-	host-zlib
++HOST_PYTHON3_DEPENDENCIES = host-autoconf-archive host-expat host-zlib host-libffi
+ 
+ ifeq ($(BR2_PACKAGE_HOST_PYTHON3_BZIP2),y)
+ HOST_PYTHON3_DEPENDENCIES += host-bzip2
+@@ -183,14 +181,14 @@ endif
+ PYTHON3_CONF_OPTS += \
+ 	--without-ensurepip \
+ 	--without-cxx-main \
+-	--with-build-python=$(HOST_DIR)/bin/python3 \
+ 	--with-system-ffi \
+ 	--disable-pydoc \
+ 	--disable-test-modules \
+ 	--disable-tk \
+ 	--disable-nis \
+ 	--disable-idle3 \
+-	--disable-pyc-build
++	--disable-pyc-build \
++	--enable-optimizations
+ 
+ #
+ # Remove useless files. In the config/ directory, only the Makefile
