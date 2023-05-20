@@ -15,7 +15,7 @@ help()
       --pi0         Build for pi0 and pi0w
       --pi2         Build for pi2
       --pi02w       Build for pi02w and pi3
-      --pi4         Build for pi4 and pi4cmio (Not Implemented Yet)
+      --pi4         Build for pi4 and pi4cmio
       --pi0X        Experimental build for pi0
   
   Options:
@@ -41,7 +41,7 @@ download_app_repo() {
   
   # Download SeedSigner from GitHub and put into rootfs
   echo "cloning repo ${seedsigner_app_repo} with branch ${seedsigner_app_repo_branch}"
-  git clone --depth 1 -b "${seedsigner_app_repo_branch}" "${seedsigner_app_repo}" "${rootfs_overlay}/opt/"
+  git clone --depth 1 -b "${seedsigner_app_repo_branch}" "${seedsigner_app_repo}" "${rootfs_overlay}/opt/" || exit
         
   # Delete unnecessary files to save space
   rm -rf ${rootfs_overlay}/opt/.git
