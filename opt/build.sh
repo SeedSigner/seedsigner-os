@@ -17,6 +17,7 @@ help()
       --pi02w       Build for pi02w and pi3
       --pi4         Build for pi4 and pi4cmio
       --pi0X        Experimental build for pi0
+      --pi02wX      Experimental build for pi02w and pi3
   
   Options:
   -h, --help        Display a help screen and quit 
@@ -55,6 +56,7 @@ download_app_repo() {
   rm -rf ${rootfs_overlay}/opt/setup.py
   rm -rf ${rootfs_overlay}/opt/tests
   rm -rf ${rootfs_overlay}/opt/tools
+  rm -rf ${rootfs_overlay}/opt/pytest.ini
 }
 
 build_image() {
@@ -83,9 +85,9 @@ build_image() {
     
   fi
   
-  # if [ "${3}" != "skip-repo" ]; then
-  #   download_app_repo
-  # fi
+  if [ "${3}" != "skip-repo" ]; then
+    download_app_repo
+  fi
   
   # Setup external tree
   #make BR2_EXTERNAL="../${config_dir}/" O="${build_dir}" -C ./buildroot/ #2> /dev/null > /dev/null
@@ -139,6 +141,9 @@ while (( "$#" )); do
   --pi0X)
     PI0X_FLAG=0; ((ARCH_CNT=ARCH_CNT+1)); shift
     ;;
+  --pi02wX)
+    PI02WX_FLAG=0; ((ARCH_CNT=ARCH_CNT+1)); shift
+  ;;
   --no-clean)
     NOCLEAN=0; shift
     ;;
@@ -256,6 +261,12 @@ fi
 if ! [ -z ${PI0X_FLAG} ]; then
   echo "building pi0X${DEVARG} image"
   build_image "pi0X${DEVARG}" "${CLEAN_ARG}" "${SKIPREPO_ARG}"
+fi
+
+# Build experimental  for pi0, pi0w, and pi1
+if ! [ -z ${PI02WX_FLAG} ]; then
+  echo "building pi02wX${DEVARG} image"
+  build_image "pi02wX${DEVARG}" "${CLEAN_ARG}" "${SKIPREPO_ARG}"
 fi
 
 exit 0

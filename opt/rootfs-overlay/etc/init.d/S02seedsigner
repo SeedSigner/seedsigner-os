@@ -2,7 +2,7 @@
 # Provides: SeedSigner
 
 start() {
-    /opt/start.sh &
+    /start.sh &
     echo "Service starting up"   
 }
 

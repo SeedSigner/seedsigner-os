@@ -65,12 +65,7 @@ Easiest way to build SeedSigner OS is using docker. This keeps the build process
    ```bash
    cd seedsigner-os
    ```
-3. Apply patching to buildroot to force python version 3.10.10
-   ```bash
-    cd opt/buildroot
-    git apply ../buildroot-python3.10.10.patch
-    ```
-4. Build images using docker-compose (expect this to take more than 1 hour). You can change the `--pi0` option to the board type you wish to build or use `--all` to build all images types.
+3. Build images using docker-compose (expect this to take more than 1 hour). You can change the `--pi0` option to the board type you wish to build or use `--all` to build all images types.
    ```bash
    SS_ARGS="--pi0" docker-compose up
    ```
