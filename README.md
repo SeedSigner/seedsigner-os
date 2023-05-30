@@ -136,7 +136,7 @@ Then to build to image(s), run the build script passing in the desired options
 
 ```bash
 cd opt
-./build --pi0
+./build.sh --pi0
 ```
 
 You can see the different build options with `./build.sh --help`
