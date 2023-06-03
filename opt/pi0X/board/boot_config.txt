@@ -5,7 +5,7 @@ fixup_file=fixup_x.dat
 kernel=zImage
 
 # How much memory in MB to assign to the GPU on Pi models having
-gpu_mem=32
+gpu_mem=64
 
 # Enable Camera module
 start_x=1

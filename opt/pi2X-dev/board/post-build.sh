@@ -10,7 +10,7 @@ if [ -e ${TARGET_DIR}/etc/inittab ]; then
 	grep -qE '^tty1::' ${TARGET_DIR}/etc/inittab || \
 	sed -i '/GENERIC_SERIAL/c\
 console::respawn:-/bin/sh\
-#tty1::respawn:-/bin/sh' ${TARGET_DIR}/etc/inittab
+tty1::respawn:-/bin/sh' ${TARGET_DIR}/etc/inittab
 fi
 
 # Clean up files included in skeleton not needed
@@ -26,7 +26,6 @@ rm -f ${TARGET_DIR}/etc/init.d/S50pigpio
 rm -rf ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/tests
 rm -rf ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/testing
 rm -rf ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/core/tests
-rm -rf ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/linalg/tests
 
 # Clean up files included in embit we don't need
 rm -rf ${TARGET_DIR}/usr/lib/python3.10/site-packages/embit/liquid

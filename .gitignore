@@ -1,3 +1,4 @@
 *.DS_Store
 opt/rootfs-overlay/opt/src
 opt/rootfs-overlay/opt/
+images/

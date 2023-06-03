@@ -17,12 +17,7 @@ dtparam=spi=on
 boot_delay=0
 disable_splash=1
 
-# mild overclock of pi zero
-force_turbo=1
-arm_freq=1050
-gpu_freq=500
-#over_voltage=2
-core_freq=450
-core_freq_min=450
-#sdram_freq=500
-#over_voltage_sdram=1
+# raspberry firmware config to disable wifi and bluetooth 
+# https://github.com/raspberrypi/firmware/blob/master/boot/overlays/README
+dtoverlay=disable-wifi
+dtoverlay=disable-bt

@@ -17,7 +17,9 @@ help()
       --pi02w       Build for pi02w and pi3
       --pi4         Build for pi4 and pi4cmio
       --pi0X        Experimental build for pi0
+      --pi2         Experimental build for pi2
       --pi02wX      Experimental build for pi02w and pi3
+      
   
   Options:
   -h, --help        Display a help screen and quit 
@@ -141,9 +143,12 @@ while (( "$#" )); do
   --pi0X)
     PI0X_FLAG=0; ((ARCH_CNT=ARCH_CNT+1)); shift
     ;;
+  --pi2X)
+    PI2X_FLAG=0; ((ARCH_CNT=ARCH_CNT+1)); shift
+    ;;
   --pi02wX)
     PI02WX_FLAG=0; ((ARCH_CNT=ARCH_CNT+1)); shift
-  ;;
+    ;;
   --no-clean)
     NOCLEAN=0; shift
     ;;
@@ -261,6 +266,12 @@ fi
 if ! [ -z ${PI0X_FLAG} ]; then
   echo "building pi0X${DEVARG} image"
   build_image "pi0X${DEVARG}" "${CLEAN_ARG}" "${SKIPREPO_ARG}"
+fi
+
+# Build experimental  for pi0, pi0w, and pi1
+if ! [ -z ${PI2X_FLAG} ]; then
+  echo "building pi2X${DEVARG} image"
+  build_image "pi2X${DEVARG}" "${CLEAN_ARG}" "${SKIPREPO_ARG}"
 fi
 
 # Build experimental  for pi0, pi0w, and pi1
