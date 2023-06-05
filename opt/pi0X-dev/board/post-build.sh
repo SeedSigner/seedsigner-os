@@ -80,3 +80,5 @@ find ${TARGET_DIR}/usr/lib/python3.10 -name '*.py' \
 	-not -path "*/python3.10/site-packages/numpy/lib/stride_tricks.py" \
 	-print0 | \
 	xargs -0 --no-run-if-empty rm -f
+
+find "${TARGET_DIR}" -name '.DS_Store' -print0 | xargs -0 --no-run-if-empty rm -f
