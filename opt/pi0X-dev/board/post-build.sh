@@ -27,6 +27,7 @@ rm -rf ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/tests
 rm -rf ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/testing
 rm -rf ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/core/tests
 rm -rf ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/linalg/tests
+rm -rf ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/f2py/tests
 
 # Clean up files included in embit we don't need
 rm -rf ${TARGET_DIR}/usr/lib/python3.10/site-packages/embit/liquid
@@ -43,3 +44,39 @@ rm -rf ${TARGET_DIR}/usr/lib/python3.10/mailbox.pyc
 rm -rf ${TARGET_DIR}/usr/lib/python3.10/zipfile.pyc
 rm -rf ${TARGET_DIR}/usr/lib/python3.10/tarfile.pyc
 rm -rf ${TARGET_DIR}/usr/lib/python3.10/pickletools.pyc
+
+# ### Reproducibility experimentation
+# ### Remove all pyc files I can seem to make reproducible and keep the py versions
+
+rm -f ${TARGET_DIR}/usr/lib/python3.10/multiprocessing/connection.pyc
+rm -f ${TARGET_DIR}/usr/lib/python3.10/json/decoder.pyc
+rm -f ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/core/_string_helpers.pyc
+rm -f ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/distutils/ccompiler.pyc
+rm -f ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/distutils/command/build_py.pyc
+rm -f ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/distutils/misc_util.pyc
+rm -f ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/distutils/system_info.pyc
+rm -f ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/f2py/auxfuncs.pyc
+rm -f ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/f2py/crackfortran.pyc
+rm -f ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/f2py/f2py2e.pyc
+rm -f ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/lib/_iotools.pyc
+rm -f ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/lib/npyio.pyc
+rm -f ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/lib/recfunctions.pyc
+rm -f ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/lib/stride_tricks.pyc
+
+find ${TARGET_DIR}/usr/lib/python3.10 -name '*.py' \
+	-not -path "*/python3.10/multiprocessing/connection.py" \
+	-not -path "*/python3.10/json/decoder.py" \
+	-not -path "*/python3.10/site-packages/numpy/core/_string_helpers.py" \
+	-not -path "*/python3.10/site-packages/numpy/distutils/ccompiler.py" \
+	-not -path "*/python3.10/site-packages/numpy/distutils/command/build_py.py" \
+	-not -path "*/python3.10/site-packages/numpy/distutils/misc_util.py" \
+	-not -path "*/python3.10/site-packages/numpy/distutils/system_info.py" \
+	-not -path "*/python3.10/site-packages/numpy/f2py/auxfuncs.py" \
+	-not -path "*/python3.10/site-packages/numpy/f2py/crackfortran.py" \
+	-not -path "*/python3.10/site-packages/numpy/f2py/f2py2e.py" \
+	-not -path "*/python3.10/site-packages/numpy/lib/_iotools.py" \
+	-not -path "*/python3.10/site-packages/numpy/lib/npyio.py" \
+	-not -path "*/python3.10/site-packages/numpy/lib/recfunctions.py" \
+	-not -path "*/python3.10/site-packages/numpy/lib/stride_tricks.py" \
+	-print0 | \
+	xargs -0 --no-run-if-empty rm -f

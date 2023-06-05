@@ -24,7 +24,10 @@ bc \
 libssl-dev \
 vim \
 build-essential \ 
-libncurses-dev
+libncurses-dev \
+mtools \
+fdisk \
+dosfstools
 
 # Locale
 RUN locale-gen en_US.UTF-8  

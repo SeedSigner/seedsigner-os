@@ -17,6 +17,7 @@ rm -rf ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/tests
 rm -rf ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/testing
 rm -rf ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/core/tests
 rm -rf ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/linalg/tests
+rm -rf ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/f2py/tests
 
 # Clean up files included in embit we don't need
 rm -rf ${TARGET_DIR}/usr/lib/python3.10/site-packages/embit/liquid
@@ -37,28 +38,28 @@ rm -rf ${TARGET_DIR}/usr/lib/python3.10/turtledemo
 rm -rf ${TARGET_DIR}/usr/lib/python3.10/unittest
 rm -rf ${TARGET_DIR}/usr/lib/python3.10/ensurepip
 
-### Reproducibility experimentation
-### Remove all pyc files
-find ${TARGET_DIR}/usr/lib/python3.10 -name '*.pyc' -print0 | xargs -0 --no-run-if-empty rm -f
-### Create pyc files post build in a way that is reproducible
-export PYTHONHASHSEED=0
-export SOURCE_DATE_EPOCH=1
-${HOST_DIR}/usr/bin/python3.10 -m compileall -f --invalidation-mode=checked-hash -s "${TARGET_DIR}" -p / ${TARGET_DIR}/usr/lib/python3.10/
-
-### reproducible build cheat
-### not able to figure out why this pyc are different each build, so I'm deleting them
-rm -f ${TARGET_DIR}/usr/lib/python3.10/json/__pycache__/decoder.cpython-310.pyc
-rm -f ${TARGET_DIR}/usr/lib/python3.10/multiprocessing/__pycache__/connection.cpython-310.pyc
-rm -f ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/core/__pycache__/_string_helpers.cpython-310.pyc
-rm -f ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/distutils/__pycache__/ccompiler.cpython-310.pyc
-rm -f ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/distutils/__pycache__/misc_util.cpython-310.pyc
-rm -f ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/distutils/__pycache__/system_info.cpython-310.pyc
-rm -f ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/distutils/command/__pycache__/build_py.cpython-310.pyc
-rm -f ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/f2py/__pycache__/auxfuncs.cpython-310.pyc
-rm -f ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/f2py/__pycache__/crackfortran.cpython-310.pyc
-rm -f ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/f2py/__pycache__/f2py2e.cpython-310.pyc
-rm -f ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/f2py/tests/__pycache__/test_array_from_pyobj.cpython-310.pyc
-rm -f ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/lib/__pycache__/_iotools.cpython-310.pyc
-rm -f ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/lib/__pycache__/npyio.cpython-310.pyc
-rm -f ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/lib/__pycache__/recfunctions.cpython-310.pyc
-rm -f ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/lib/__pycache__/stride_tricks.cpython-310.pyc
+# ### Reproducibility experimentation
+# ### Remove all pyc files
+# find ${TARGET_DIR}/usr/lib/python3.10 -name '*.pyc' -print0 | xargs -0 --no-run-if-empty rm -f
+# ### Create pyc files post build in a way that is reproducible
+# export PYTHONHASHSEED=0
+# export SOURCE_DATE_EPOCH=1
+# ${HOST_DIR}/usr/bin/python3.10 -m compileall -f --invalidation-mode=checked-hash -s "${TARGET_DIR}" -p / ${TARGET_DIR}/usr/lib/python3.10/
+# 
+# ### reproducible build cheat
+# ### not able to figure out why this pyc are different each build, so I'm deleting them
+# rm -f ${TARGET_DIR}/usr/lib/python3.10/json/__pycache__/decoder.cpython-310.pyc
+# rm -f ${TARGET_DIR}/usr/lib/python3.10/multiprocessing/__pycache__/connection.cpython-310.pyc
+# rm -f ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/core/__pycache__/_string_helpers.cpython-310.pyc
+# rm -f ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/distutils/__pycache__/ccompiler.cpython-310.pyc
+# rm -f ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/distutils/__pycache__/misc_util.cpython-310.pyc
+# rm -f ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/distutils/__pycache__/system_info.cpython-310.pyc
+# rm -f ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/distutils/command/__pycache__/build_py.cpython-310.pyc
+# rm -f ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/f2py/__pycache__/auxfuncs.cpython-310.pyc
+# rm -f ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/f2py/__pycache__/crackfortran.cpython-310.pyc
+# rm -f ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/f2py/__pycache__/f2py2e.cpython-310.pyc
+# rm -f ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/f2py/tests/__pycache__/test_array_from_pyobj.cpython-310.pyc
+# rm -f ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/lib/__pycache__/_iotools.cpython-310.pyc
+# rm -f ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/lib/__pycache__/npyio.cpython-310.pyc
+# rm -f ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/lib/__pycache__/recfunctions.cpython-310.pyc
+# rm -f ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/lib/__pycache__/stride_tricks.cpython-310.pyc
