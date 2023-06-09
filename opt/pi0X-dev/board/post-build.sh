@@ -28,6 +28,7 @@ rm -rf ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/testing
 rm -rf ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/core/tests
 rm -rf ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/linalg/tests
 rm -rf ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/f2py/tests
+rm -rf ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/typing/tests
 
 # Clean up files included in embit we don't need
 rm -rf ${TARGET_DIR}/usr/lib/python3.10/site-packages/embit/liquid
@@ -48,6 +49,7 @@ rm -rf ${TARGET_DIR}/usr/lib/python3.10/pickletools.pyc
 # ### Reproducibility experimentation
 # ### Remove all pyc files I can seem to make reproducible and keep the py versions
 
+rm -f ${TARGET_DIR}/usr/lib/python3.10/config-3.10-arm-linux-gnueabihf/Makefile
 rm -f ${TARGET_DIR}/usr/lib/python3.10/multiprocessing/connection.pyc
 rm -f ${TARGET_DIR}/usr/lib/python3.10/json/decoder.pyc
 rm -f ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/core/_string_helpers.pyc
@@ -62,6 +64,8 @@ rm -f ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/lib/_iotools.pyc
 rm -f ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/lib/npyio.pyc
 rm -f ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/lib/recfunctions.pyc
 rm -f ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/lib/stride_tricks.pyc
+rm -f ${TARGET_DIR}/usr/lib/python3.10/traceback.pyc
+rm -f ${TARGET_DIR}/usr/lib/python3.10/_sysconfigdata__linux_arm-linux-gnueabihf.pyc
 
 find ${TARGET_DIR}/usr/lib/python3.10 -name '*.py' \
 	-not -path "*/python3.10/multiprocessing/connection.py" \
@@ -78,6 +82,8 @@ find ${TARGET_DIR}/usr/lib/python3.10 -name '*.py' \
 	-not -path "*/python3.10/site-packages/numpy/lib/npyio.py" \
 	-not -path "*/python3.10/site-packages/numpy/lib/recfunctions.py" \
 	-not -path "*/python3.10/site-packages/numpy/lib/stride_tricks.py" \
+	-not -path "*/python3.10/traceback.py" \
+	-not -path "*/python3.10/_sysconfigdata__linux_arm-linux-gnueabihf.py" \
 	-print0 | \
 	xargs -0 --no-run-if-empty rm -f
 
