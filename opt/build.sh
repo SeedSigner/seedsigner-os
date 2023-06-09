@@ -22,13 +22,14 @@ help()
       
   
   Options:
-  -h, --help        Display a help screen and quit 
-      --dev         Builds developer version of images
-      --no-clean    Leave previous build, target, and output files
-      --skip-repo   Skip pulling repo, assume rootfs-overlay/opt is populated with app code
-      --app-repo    Build image with not official seedsigner github repo
-      --app-branch  Build image with repo branch other than default
-      --no-op       All other option ignored and script just hangs to keep container alive"
+  -h, --help           Display a help screen and quit 
+      --dev            Builds developer version of images
+      --no-clean       Leave previous build, target, and output files
+      --skip-repo      Skip pulling repo, assume rootfs-overlay/opt is populated with app code
+      --app-repo       Build image with not official seedsigner github repo
+      --app-branch     Build image with repo branch other than default
+      --app-commit-id  Build image with specific repo commit id
+      --no-op          All other option ignored and script just hangs to keep container alive"
   exit 2
 }
 
@@ -43,9 +44,19 @@ download_app_repo() {
   rm -fr ${rootfs_overlay}/opt/
   
   # Download SeedSigner from GitHub and put into rootfs
-  echo "cloning repo ${seedsigner_app_repo} with branch ${seedsigner_app_repo_branch}"
-  git clone --depth 1 -b "${seedsigner_app_repo_branch}" "${seedsigner_app_repo}" "${rootfs_overlay}/opt/" || exit
-        
+  
+  # check for custom app branch or custom commit. Custom commit takes priority over branch name
+  if ! [ -z ${seedsigner_app_repo_commit_id} ]; then
+    echo "cloning repo ${seedsigner_app_repo} with commit id ${seedsigner_app_repo_commit_id}"
+    git clone "${seedsigner_app_repo}" "${rootfs_overlay}/opt/" || exit
+    cd ${rootfs_overlay}/opt/
+    git reset --hard "${seedsigner_app_repo_commit_id}"
+    cd -
+  else
+    echo "cloning repo ${seedsigner_app_repo} with branch ${seedsigner_app_repo_branch}"
+    git clone --depth 1 -b "${seedsigner_app_repo_branch}" "${seedsigner_app_repo}" "${rootfs_overlay}/opt/" || exit
+  fi
+     
   # Delete unnecessary files to save space
   rm -rf ${rootfs_overlay}/opt/.git
   rm -rf ${rootfs_overlay}/opt/.gitignore
@@ -167,6 +178,9 @@ while (( "$#" )); do
   --app-branch=*)
     APP_BRANCH=$(echo "${1}" | cut -d "=" -f2-); shift
     ;;
+  --app-commit-id=*)
+    APP_COMMITID=$(echo "${1}" | cut -d "=" -f2-); shift
+    ;;
   -*|--*=) # unsupported flags
     echo "Error: Unsupported flag $1" >&2
     help
@@ -227,6 +241,11 @@ fi
 # check for custom app branch
 if ! [ -z ${APP_BRANCH} ]; then
   seedsigner_app_repo_branch="${APP_BRANCH}"
+fi
+
+# check for custom app branch
+if ! [ -z ${APP_COMMITID} ]; then
+  seedsigner_app_repo_commit_id="${APP_COMMITID}"
 fi
 
 ###
