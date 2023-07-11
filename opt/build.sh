@@ -4,7 +4,7 @@
 cur_dir_name=${PWD##*/}
 cur_dir=$(pwd)
 seedsigner_app_repo="https://github.com/SeedSigner/seedsigner.git"
-seedsigner_app_repo_branch="0.6.0"
+seedsigner_app_repo_branch="dev"
 
 help()
 {
@@ -18,20 +18,21 @@ help()
       --pi4         Build for pi4 and pi4cmio
   
   Options:
-  -h, --help        Display a help screen and quit 
-      --dev         Builds developer version of images
-      --no-clean    Leave previous build, target, and output files
-      --skip-repo   Skip pulling repo, assume rootfs-overlay/opt is populated with app code
-      --app-repo    Build image with not official seedsigner github repo
-      --app-branch  Build image with repo branch other than default
-      --keep-alive  Keeps container/script running after completeing
-      --skip-build  Used generally with keep-alive to run an interactive container"
+  -h, --help           Display a help screen and quit 
+      --dev            Builds developer version of images
+      --no-clean       Leave previous build, target, and output files
+      --skip-repo      Skip pulling repo, assume rootfs-overlay/opt is populated with app code
+      --app-repo       Build image with not official seedsigner github repo
+      --app-branch     Build image with repo branch other than default
+      --app-commit-id  Build image with specific repo commit id
+      --no-op          All other option ignored and script just hangs to keep container alive"
   exit 2
 }
 
 tail_endless() {
   echo "Running 'tail -f /dev/null' to keep script alive"
   tail -f /dev/null
+  exit 0
 }
 
 download_app_repo() {
@@ -39,9 +40,19 @@ download_app_repo() {
   rm -fr ${rootfs_overlay}/opt/
   
   # Download SeedSigner from GitHub and put into rootfs
-  echo "cloning repo ${seedsigner_app_repo} with branch ${seedsigner_app_repo_branch}"
-  git clone --depth 1 -b "${seedsigner_app_repo_branch}" "${seedsigner_app_repo}" "${rootfs_overlay}/opt/" || exit
-        
+  
+  # check for custom app branch or custom commit. Custom commit takes priority over branch name
+  if ! [ -z ${seedsigner_app_repo_commit_id} ]; then
+    echo "cloning repo ${seedsigner_app_repo} with commit id ${seedsigner_app_repo_commit_id}"
+    git clone "${seedsigner_app_repo}" "${rootfs_overlay}/opt/" || exit
+    cd ${rootfs_overlay}/opt/
+    git reset --hard "${seedsigner_app_repo_commit_id}"
+    cd -
+  else
+    echo "cloning repo ${seedsigner_app_repo} with branch ${seedsigner_app_repo_branch}"
+    git clone --depth 1 -b "${seedsigner_app_repo_branch}" "${seedsigner_app_repo}" "${rootfs_overlay}/opt/" || exit
+  fi
+     
   # Delete unnecessary files to save space
   rm -rf ${rootfs_overlay}/opt/.git
   rm -rf ${rootfs_overlay}/opt/.gitignore
@@ -52,10 +63,13 @@ download_app_repo() {
   rm -rf ${rootfs_overlay}/opt/enclosures
   rm -rf ${rootfs_overlay}/opt/seedsigner_pubkey.gpg
   rm -rf ${rootfs_overlay}/opt/setup.py
+  rm -rf ${rootfs_overlay}/opt/tests
+  rm -rf ${rootfs_overlay}/opt/tools
+  rm -rf ${rootfs_overlay}/opt/pytest.ini
 }
 
 build_image() {
-  # arguments: $1 - config name, $2 clean/no-clean - allows for 
+  # arguments: $1 - config name, $2 clean/no-clean - allows for, $3 skip-repo
 
   # Variables
   config_name="${1:-pi0}"
@@ -85,10 +99,10 @@ build_image() {
   fi
   
   # Setup external tree
-  make BR2_EXTERNAL="../${config_dir}/" O="${build_dir}" -C ./buildroot/ 2> /dev/null > /dev/null
-  
+  #make BR2_EXTERNAL="../${config_dir}/" O="${build_dir}" -C ./buildroot/ #2> /dev/null > /dev/null
+
+  make BR2_EXTERNAL="../${config_dir}/" O="${build_dir}" -C ./buildroot/ ${config_name}_defconfig
   cd "${build_dir}"
-  make ${config_name}_defconfig
   make
   
   # if successful, mv seedsigner_os.img image to /images
@@ -124,13 +138,13 @@ while (( "$#" )); do
   --pi0)
     PI0_FLAG=0; ((ARCH_CNT=ARCH_CNT+1)); shift
     ;;
-   --pi2)
+  --pi2)
     PI2_FLAG=0; ((ARCH_CNT=ARCH_CNT+1)); shift
     ;;
   --pi02w)
     PI02W_FLAG=0; ((ARCH_CNT=ARCH_CNT+1)); shift
     ;;
-   --pi4)
+  --pi4)
     PI4_FLAG=0; ((ARCH_CNT=ARCH_CNT+1)); shift
     ;;
   --no-clean)
@@ -139,11 +153,8 @@ while (( "$#" )); do
   --skip-repo)
     SKIPREPO=0; shift
     ;;
-  --keep-alive)
-    KEEPALIVE=0; shift
-    ;;
-  --skip-build)
-    SKIPBUILD=0; shift
+  --no-op)
+    NO_OP=0; shift
     ;;
   --dev)
     DEVBUILD=0; shift
@@ -153,6 +164,9 @@ while (( "$#" )); do
     ;;
   --app-branch=*)
     APP_BRANCH=$(echo "${1}" | cut -d "=" -f2-); shift
+    ;;
+  --app-commit-id=*)
+    APP_COMMITID=$(echo "${1}" | cut -d "=" -f2-); shift
     ;;
   -*|--*=) # unsupported flags
     echo "Error: Unsupported flag $1" >&2
@@ -178,11 +192,9 @@ if [ $ARCH_CNT -gt 1 ]; then
   exit 3
 fi
 
-# if skip build and check for endless
-if ! [ -z $SKIPBUILD ]; then
-  if ! [ -z $KEEPALIVE ]; then
-    tail_endless
-  fi
+# if no-op then hang endlessly
+if ! [ -z $NO_OP ]; then
+  tail_endless
   exit 0
 fi
 
@@ -218,6 +230,11 @@ if ! [ -z ${APP_BRANCH} ]; then
   seedsigner_app_repo_branch="${APP_BRANCH}"
 fi
 
+# check for custom app branch
+if ! [ -z ${APP_COMMITID} ]; then
+  seedsigner_app_repo_commit_id="${APP_COMMITID}"
+fi
+
 ###
 ### Run build_image function based on input arguments
 ###
@@ -225,9 +242,9 @@ fi
 # Build All Architectures
 if ! [ -z ${ALL_FLAG} ]; then
   build_image "pi0${DEVARG}" "clean" "${SKIPREPO_ARG}"
-  build_image "pi02w${DEVARG}" "clean" "${SKIPREPO_ARG}"
-  build_image "pi2${DEVARG}" "clean" "${SKIPREPO_ARG}"
-  build_image "pi4${DEVARG}" "clean" "${SKIPREPO_ARG}"
+  build_image "pi02w${DEVARG}" "clean" "skip-repo"
+  build_image "pi2${DEVARG}" "clean" "skip-repo"
+  build_image "pi4${DEVARG}" "clean" "skip-repo"
 fi
 
 # Build only for pi0, pi0w, and pi1
@@ -240,7 +257,6 @@ if ! [ -z ${PI2_FLAG} ]; then
   build_image "pi2${DEVARG}" "${CLEAN_ARG}" "${SKIPREPO_ARG}"
 fi
 
-
 # build for pi02w
 if ! [ -z ${PI02W_FLAG} ]; then
   build_image "pi02w${DEVARG}" "${CLEAN_ARG}" "${SKIPREPO_ARG}"
@@ -249,12 +265,6 @@ fi
 # build for pi4
 if ! [ -z ${PI4_FLAG} ]; then
   build_image "pi4${DEVARG}" "${CLEAN_ARG}" "${SKIPREPO_ARG}"
-fi
-
-
-# if build.sh makes it this far without errors, and --keep-alive flag is set, then keep container/script running
-if ! [ -z $KEEPALIVE ]; then
-  tail_endless
 fi
 
 exit 0
