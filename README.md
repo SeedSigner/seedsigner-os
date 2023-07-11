@@ -55,7 +55,7 @@ Easiest way to build SeedSigner OS is using docker. This keeps the build process
 * [Docker Compose](https://docs.docker.com/compose/install/)
 * [Docker](https://docs.docker.com/get-docker/)
 
-### Steps to build using docker-compose
+### Steps to build using docker compose
 
 1. Clone the repository in your machine:
    ```bash
@@ -65,9 +65,10 @@ Easiest way to build SeedSigner OS is using docker. This keeps the build process
    ```bash
    cd seedsigner-os
    ```
-3. Build images using docker-compose (expect this to take more than 1 hour). You can change the `--pi0` option to the board type you wish to build or use `--all` to build all images types.
+3. Build images using docker compose (expect this to take more than 1 hour). You can change the `--pi0` option to the board type you wish to build or use `--all` to build all images types.
    ```bash
-   SS_ARGS="--pi0" docker-compose up
+   export DOCKER_DEFAULT_PLATFORM=linux/amd64
+   SS_ARGS="--pi0" docker compose up --force-recreate --build
    ```
 
 This command will build a docker image from the Dockerfile and in the background (as a daemon) run a container used to compile SeedSigner OS. You can monitor the seedsigner-os-build-images container in Docker Dashboard (if using Docker Desktop) or by running the docker contain list command waiting for the container to complete with an Exit (0) status. The container will create the image(s) in the images directory.
@@ -76,11 +77,11 @@ This command will build a docker image from the Dockerfile and in the background
   docker container list --all
   ```
 
-Run ```SS_ARGS="--help" docker-compose up``` to see the possible build options you can pass in via the SS_ARGS env variable.
+Run ```SS_ARGS="--help" docker compose up``` to see the possible build options you can pass in via the SS_ARGS env variable.
 
 ### Image Location and Naming
 
-By default, the docker-compose.yml is configured to create a container volume to the images directory in the repo. This is where all the image files are written out after the container completes building the OS from source. The images are named following this convension:
+By default, the docker compose.yml is configured to create a container volume to the images directory in the repo. This is where all the image files are written out after the container completes building the OS from source. The images are named following this convension:
 
 `seedsigner_os.<app_repo_branch>.<board_config>.img`
 
@@ -101,16 +102,16 @@ Here is a table Raspberry Pi boards to image filenames/configs
 
 ### Development cycle using docker
 
-Each time the `docker-compose up` command runs a full build from scratch is performed. You can optionally run `docker-compose up -d` in detached mode by adding the `-d` flag. This will run the container in the background. To have faster development cycles you'll likely want to avoid building the OS from scratch each time. You can avoid recreating the docker image/container a few different ways. One way is to pass the options `--no-op` (which is the default) to the `SS_ARGS` env variable when running `docker-compse up`. This will cause the container to skip build steps but keep the container running in the background until you explicitly stop it. You can then launch a shell session into the container and work interactively running any specific build commands you desire.
+Each time the `docker compose up` command runs a full build from scratch is performed. You can optionally run `docker compose up -d` in detached mode by adding the `-d` flag. This will run the container in the background. To have faster development cycles you'll likely want to avoid building the OS from scratch each time. You can avoid recreating the docker image/container a few different ways. One way is to pass the options `--no-op` (which is the default) to the `SS_ARGS` env variable when running `docker-compse up`. This will cause the container to skip build steps but keep the container running in the background until you explicitly stop it. You can then launch a shell session into the container and work interactively running any specific build commands you desire.
 
-Using docker-compose will start the container (create new container if on does not already exist) without building an image
+Using docker compose will start the container (create new container if on does not already exist) without building an image
 ```bash
-SS_ARGS="--no-op" docker-compose up -d --no-recreate
+SS_ARGS="--no-op" docker compose up -d --no-recreate
 ```
 
 If you want to start a new container environment, use `--force-recreate` instead of `--no-create`
 ```bash
-SS_ARGS="--no-op" docker-compose up -d --force-recreate
+SS_ARGS="--no-op" docker compose up -d --force-recreate --build
 ```
 
 Start a shell session inside the container by running
