@@ -5,10 +5,7 @@ fixup_file=fixup_x.dat
 kernel=zImage
 
 # How much memory in MB to assign to the GPU on Pi models having
-# 256, 512 or 1024 MB total memory
-gpu_mem_256=25
-gpu_mem_512=25
-gpu_mem_1024=25
+gpu_mem=64
 
 # Enable Camera module
 start_x=1
@@ -18,9 +15,7 @@ dtparam=spi=on
 
 # Set the bootloader delay to 0 seconds. The default is 1s if not specified
 boot_delay=0
-
-# Overclock de Rpi
-force_turbo=1
+disable_splash=1
 
 # raspberry firmware config to disable wifi and bluetooth 
 # https://github.com/raspberrypi/firmware/blob/master/boot/overlays/README
