@@ -3,7 +3,8 @@
 # global variables
 cur_dir_name=${PWD##*/}
 cur_dir=$(pwd)
-seedsigner_app_repo="https://github.com/SeedSigner/seedsigner.git"
+seedsigner_app_repo="
+"
 seedsigner_app_repo_branch="dev"
 
 help()
@@ -111,6 +112,8 @@ build_image() {
   if [ -f "${build_dir}/images/seedsigner_os.img" ] && [ -d "${image_dir}" ]; then
     mv -f "${build_dir}/images/seedsigner_os.img" "${image_dir}/seedsigner_os.${seedsigner_app_repo_branch}.${config_name}.img"
   fi
+  
+  sha256sum "${image_dir}/seedsigner_os.${seedsigner_app_repo_branch}.${config_name}.img"
   
   cd - # return to previous working directory
 }
