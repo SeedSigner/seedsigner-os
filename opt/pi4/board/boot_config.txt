@@ -1,0 +1,23 @@
+start_file=start4x.elf
+fixup_file=fixup4x.dat
+
+# Kernel location
+kernel=zImage
+
+# How much memory in MB to assign to the GPU on Pi models having
+gpu_mem=256
+
+# Enable Camera module
+start_x=1
+
+# Enable SPI
+dtparam=spi=on
+
+# Set the bootloader delay to 0 seconds. The default is 1s if not specified
+boot_delay=0
+disable_splash=1
+
+# raspberry firmware config to disable wifi and bluetooth 
+# https://github.com/raspberrypi/firmware/blob/master/boot/overlays/README
+dtoverlay=disable-wifi
+dtoverlay=disable-bt

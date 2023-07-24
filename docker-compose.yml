@@ -7,4 +7,4 @@ services:
     volumes:
       - ./opt:/opt
       - ./images:/images
-    command: "${SS_ARGS:---all}"
+    command: "${SS_ARGS:---no-op}"
