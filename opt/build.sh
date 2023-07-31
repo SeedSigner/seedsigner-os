@@ -57,6 +57,7 @@ download_app_repo() {
   rm -rf ${rootfs_overlay}/opt/.git
   rm -rf ${rootfs_overlay}/opt/.gitignore
   rm -rf ${rootfs_overlay}/opt/requirements.txt
+  rm -rf ${rootfs_overlay}/opt/requirements-raspi.txt
   rm -rf ${rootfs_overlay}/opt/docs
   rm -rf ${rootfs_overlay}/opt/README.md
   rm -rf ${rootfs_overlay}/opt/LICENSE.md
