@@ -81,3 +81,8 @@ find ${TARGET_DIR}/usr/lib/python3.10 -name '*.py' \
 	xargs -0 --no-run-if-empty rm -f
 
 find "${TARGET_DIR}" -name '.DS_Store' -print0 | xargs -0 --no-run-if-empty rm -f
+
+# Add python byte code (aka __pycache__ directories) to increase boot and import module speed
+SOURCE_DATE_EPOCH=1 PYTHONHASHSEED=0 ${HOST_DIR}/bin/python3.10 \
+  "${BUILD_DIR}/python3-3.10.10/Lib/compileall.py" \
+  -f --invalidation-mode=checked-hash "${TARGET_DIR}/opt/src"
