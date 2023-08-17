@@ -134,7 +134,7 @@ Or you can use any of the Buildroot customization commands like `make menuconfig
 
 Move images manually built with `make` with the command `mv images/seedsigner_os.img /images/`
 
-## Developement Configs
+## Development Configs
 
 Each board also has a developer configuration (dev config). Inside the `/opt` folder are all the build configs for each board matching the name of the build script option. The dev configs are built to work on each board but enable many of the kernel and OS features needed for development. This also makes this the image built less secure, so please do not use with real funds. Dev configs are only used when the `--dev` option is passed in to the build.sh script.
 
