@@ -66,7 +66,7 @@ Do this with a recursive clone to pull the buildroot submodule at the same time.
    ```bash
    cd seedsigner-os
    ```
-4. Build the images using docker compose (expect this to take more than 1 hour). It *will* require 20-30 GB Of disk space. You can change the `--pi0` option to the board type you wish to build or use `--all` to build all images types. The `export DOCKER_DEFAULT_PLATFORM=linux/amd64` is required to make the build reproducible. If you leave out this option on a ARM64 mac it will build faster. The `--force-recreate` and `--build` options are specified to make sure the latest image and container are used (not a local one cached).
+4. Build the images using docker compose (expect this to take more than 1 hour). It *will* require 20-30 GB of disk space. You can change the `--pi0` option to the board type you wish to build or use `--all` to build all images types. The `export DOCKER_DEFAULT_PLATFORM=linux/amd64` is required to make the build reproducible. If you leave out this option on a ARM64 mac it will build faster. The `--force-recreate` and `--build` options are specified to make sure the latest image and container are used (not a local one cached).
    ```bash
    export DOCKER_DEFAULT_PLATFORM=linux/amd64
    SS_ARGS="--pi0" docker compose up --force-recreate --build
