@@ -58,14 +58,15 @@ Easiest way to build SeedSigner OS is using docker. This keeps the build process
 ### Steps to build using docker compose
 
 1. Clone the repository in your machine:
+Do this with a recursive clone to pull the buildroot submodule at the same time. By default, this will create a directory in the current working directory named seedsigner-os.
    ```bash
    git clone --recursive https://github.com/SeedSigner/seedsigner-os.git
    ```
-2. Go into the repo directory:
+3. Go into the repo directory:
    ```bash
    cd seedsigner-os
    ```
-3. Build images using docker compose (expect this to take more than 1 hour). You can change the `--pi0` option to the board type you wish to build or use `--all` to build all images types. The `export DOCKER_DEFAULT_PLATFORM=linux/amd64` is required to make the build reproducible. If you leave out this option on a ARM64 mac it will build faster. The `--force-recreate` and `--build` are there to make sure the latest image and container are used (not a local one cached).
+4. Build the images using docker compose (expect this to take more than 1 hour). It *will* require 20-30 GB Of disk space. You can change the `--pi0` option to the board type you wish to build or use `--all` to build all images types. The `export DOCKER_DEFAULT_PLATFORM=linux/amd64` is required to make the build reproducible. If you leave out this option on a ARM64 mac it will build faster. The `--force-recreate` and `--build` options are specified to make sure the latest image and container are used (not a local one cached).
    ```bash
    export DOCKER_DEFAULT_PLATFORM=linux/amd64
    SS_ARGS="--pi0" docker compose up --force-recreate --build
@@ -81,7 +82,7 @@ Run ```SS_ARGS="--help" docker compose up``` to see the possible build options y
 
 ### Image Location and Naming
 
-By default, the docker-compose.yml is configured to create a container volume to the images directory in the repo. This is where all the image files are written out after the container completes building the OS from source. The images are named following this convension:
+By default, the docker-compose.yml is configured to create a container volume to the images directory in the repo. This is where all the image files are written out after the container completes building the OS from source. The images are named using this convention:
 
 `seedsigner_os.<app_repo_branch>.<board_config>.img`
 
@@ -102,7 +103,7 @@ Here is a table Raspberry Pi boards to image filenames/configs
 
 ### Development cycle using docker
 
-Each time the `docker compose up` command runs a full build from scratch is performed. You can optionally run `docker compose up -d` in detached mode by adding the `-d` flag. This will run the container in the background. To have faster development cycles you'll likely want to avoid building the OS from scratch each time. You can avoid recreating the docker image/container a few different ways. One way is to pass the options `--no-op` (which is the default) to the `SS_ARGS` env variable when running `docker-compose up`. This will cause the container to skip build steps but keep the container running in the background until you explicitly stop it. You can then launch a shell session into the container and work interactively running any specific build commands you desire.
+Each time the `docker compose up` command runs, a full build from scratch is performed. You can optionally run `docker compose up -d` in detached mode by adding the `-d` flag. This will run the container in the background. To have faster development cycles you'll likely want to avoid building the OS from scratch each time. To avoid recreating the docker image/container each time you have a few different routes. One way is to pass the options `--no-op` (which is the default) to the `SS_ARGS` env variable when running `docker-compose up`. This will cause the container to skip build steps but keep the container running in the background until you explicitly stop it. You can then launch a shell session into the container and work interactively running any specific build commands you desire.
 
 Using docker compose will start the container (create new container if one does not already exist) without building an image
 ```bash
@@ -136,7 +137,7 @@ Move images manually built with `make` with the command `mv images/seedsigner_os
 
 ## Development Configs
 
-Each board also has a developer configuration (dev config). Inside the `/opt` folder are all the build configs for each board matching the name of the build script option. The dev configs are built to work on each board but enable many of the kernel and OS features needed for development. This also makes this the image built less secure, so please do not use with real funds. Dev configs are only used when the `--dev` option is passed in to the build.sh script.
+Each board also has a developer configuration (dev config). Inside the `/opt` folder are all the build configs for each board matching the name of the build script option. The dev configs are built to work on each board but enable many of the kernel and OS features needed for development. This also makes the built image less secure, so please do not use those with real funds. Dev configs are only used when the `--dev` option is passed in to the build.sh script.
 
 ## 📑 Using Debian/Ubuntu (without docker)
 
@@ -178,15 +179,15 @@ busybox-menuconfig
 
 ## SeedSignerOS Layers
 
-Kernel and User space all built from scratch.
+Kernel and User space are all built from scratch.
 
 ![Image Showing SeedSignerOS Layers](docs/img/ssos_layers.png?raw=true "SeedSignerOS Layers")
 
 1. First layer is the hardware. Normally this is the raspberry pi board, camera, LCD Waveshare HAT, and microSD card.
 2. Second layer is the linux kernel. Using buildroot specific and minimum required modules have been hand selected to use in the kernel. This layer is required to make use of hardware functionality.
-3. Third layer is user space. This is were all the libraries and applications preside. The SeedSigner applications lives in this space. This is also where libraries typically live to do networking, display drivers, external port communications, etc. However on SeedSignerOS none of these drivers or libraries are loaded (that are typically found in a linux OS).
+3. Third layer is user space. This is where all the libraries and applications reside. The SeedSigner application lives in this space. This is also where libraries typically live to do networking, display drivers, external port communications, etc. However on SeedSignerOS, none of these drivers or libraries are loaded (that are typically found in a linux OS).
 
-## How is the .iso structure?
+## How is the .iso structured?
 
 ![SeedSignerOS microSD File Structure](docs/img/ssos_sd_files.png?raw=true "SeedSignerOS microSD File Structure")
 
@@ -194,7 +195,7 @@ The zImage a compressed version of the Linux kernel that is self-extracting. In 
 
 ## Boot Sequence
 
-1. When Raspberry Pi is powered on, the bootloader starts on GPU and read the MicroSD (SDRAM disabled at this point)
+1. When Raspberry Pi is powered on, the bootloader starts on GPU and reads the MicroSD (SDRAM disabled at this point)
 2. GPU reads bootcode.bin and starts the bootloader to enable SDRAM
 3. Then start_x.elf reads config.txt, cmdline.txt and kernel
 4. CPU starts working and then boot the kernel
