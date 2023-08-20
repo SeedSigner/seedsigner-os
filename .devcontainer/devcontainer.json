@@ -1,6 +1,11 @@
 
 {
     "workspaceFolder": "/",
+
+    "remoteEnv": {
+      "CODESPACE_VSCODE_FOLDER" : "/"
+    },
+    
     
     "build": { "dockerfile": "../Dockerfile" },
 
