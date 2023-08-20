@@ -1,10 +1,10 @@
 
 {
-    "workspaceFolder": "/"
+    "workspaceFolder": "/",
     
     "build": { "dockerfile": "../Dockerfile" },
 
-    "postCreateCommand": "git submodule update --init",
+    "postCreateCommand": "git submodule update --init"
 
     
   }
