@@ -10,7 +10,7 @@
 	},
 	"features": {
 		"ghcr.io/devcontainers/features/docker-in-docker:2": {}
-	}
+	},
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
@@ -19,7 +19,7 @@
 	// "forwardPorts": [],
 
 	// Uncomment the next line to run commands after the container is created.
-	// "postCreateCommand": "cat /etc/os-release",
+	"postCreateCommand": "git submodule update --init",
 
 	// Configure tool-specific properties.
 	// "customizations": {},
