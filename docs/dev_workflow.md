@@ -1,4 +1,4 @@
-### Development cycle using docker
+# Development cycle using docker
 
 Each time the `docker compose up` command runs, a full build from scratch is performed. You can optionally run `docker compose up -d` in detached mode by adding the `-d` flag. This will run the container in the background. To have faster development cycles you'll likely want to avoid building the OS from scratch each time. To avoid recreating the docker image/container each time, you have a few different routes. One such route is to pass the options `--no-op` (which is the default) to the `SS_ARGS` env variable when running `docker-compose up`. This will cause the container to skip the build steps but keep the container running in the background until you explicitly stop it. You can then launch a shell session into the container and work interactively, running any specific build commands you desire.
 
@@ -31,6 +31,17 @@ or
 Or you can use any of the Buildroot customization commands like `make menuconfig` or `linux-menuconfig`  from the `/output` directory
 
 Move images manually built with `make` with the command `mv images/seedsigner_os.img /images/`
+
+
+## Image Location and Naming
+
+By default, the docker-compose.yml is configured to create a container volume of the *images* directory in the repo. This is where all the image files are written out after the container completes building the OS from source. That volume is accessible from the host. The image files are named using this convention:
+
+`seedsigner_os.<app_repo_branch>.<board_config>.img`
+
+Example name for a `pi0` built off the 0.5.2 branch would be named:
+
+`seedsigner_os.0.5.2.pi0.img`
 
 
 ## Development Configs

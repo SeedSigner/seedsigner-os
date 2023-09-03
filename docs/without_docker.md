@@ -1,4 +1,4 @@
-## 📑 Using Debian/Ubuntu (without docker)
+## Building without docker
 
 If you are not using the docker image, then these build tools will be required for cross-compiling with Buildroot. This is only tested and expected to work on a debian based OS using apt package manager (not MacOS). This single command will install required dependencies for a debian based linux os.
 
