@@ -1,0 +1,37 @@
+### Development cycle using docker
+
+Each time the `docker compose up` command runs, a full build from scratch is performed. You can optionally run `docker compose up -d` in detached mode by adding the `-d` flag. This will run the container in the background. To have faster development cycles you'll likely want to avoid building the OS from scratch each time. To avoid recreating the docker image/container each time, you have a few different routes. One such route is to pass the options `--no-op` (which is the default) to the `SS_ARGS` env variable when running `docker-compose up`. This will cause the container to skip the build steps but keep the container running in the background until you explicitly stop it. You can then launch a shell session into the container and work interactively, running any specific build commands you desire.
+
+Using docker compose will start the container (create new container if one does not already exist) without building an image
+```bash
+SS_ARGS="--no-op" docker compose up -d --no-recreate
+```
+
+If you want to start a new container environment, use `--force-recreate` instead of `--no-create`
+```bash
+SS_ARGS="--no-op" docker compose up -d --force-recreate --build
+```
+
+Start a shell session inside the container by running
+```bash
+docker exec -it seedsigner-os-build-images-1 bash
+```
+
+Once you are in the container you can use the build script directly from the `/opt` directory
+```bash
+./build.sh --pi0 --app-repo=https://github.com/seedsigner/seedsigner.git --app-branch=dev --no-clean
+```
+
+or
+
+```bash
+./build.sh --pi0 --app-repo=https://github.com/seedsigner/seedsigner.git --app-commit-id=9c36f5c --no-clean
+```
+
+Or you can use any of the Buildroot customization commands like `make menuconfig` or `linux-menuconfig`  from the `/output` directory
+
+Move images manually built with `make` with the command `mv images/seedsigner_os.img /images/`
+
+
+## Development Configs
+Each board also has a developer configuration (dev config). Inside the `/opt` folder are all the build configs for each board matching the name of the build script option. The dev configs are built to work on each board but enable many of the kernel and OS features needed for development. This also makes the built image less secure, so please do not use those with real funds. Dev configs are only used when the `--dev` option is passed in to the build.sh script.
