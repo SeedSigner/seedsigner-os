@@ -5,12 +5,14 @@ Assemble the SeedSigner OS along with the SeedSigner application code into an im
 <br/>
 ## 🔥🔥🔥🛠 Quickstart: SeedSigner Reproducible Build! 🛠🔥🔥🔥
 
+### _Note to Windows users_
+Recommend running these steps in WSL2 (Windows Subsystem for Linux) so that you can just follow the Linux steps below.
+
 ### Install Dependencies
 * Docker (choose one):
     * Desktop users: [Docker Desktop](https://www.docker.com/products/docker-desktop/)
     * Or Linux command line: [Docker Engine](https://docs.docker.com/engine/install/#server)
-
-Windows users may also need to [install `git`](https://git-scm.com/download/win)
+* Windows PowerShell users may also need to [install `git`](https://git-scm.com/download/win)
 
 
 
@@ -36,10 +38,10 @@ export DOCKER_DEFAULT_PLATFORM=linux/amd64
 ```
 
 </td>
-<td width="40%">Windows:
+<td width="40%">Windows PowerShell:
 
 ```powershell
-set DOCKER_DEFAULT_PLATFORM=linux/amd64
+$env:DOCKER_DEFAULT_PLATFORM = 'linux/amd64'
 ```
 </td>
 </tr>
@@ -57,10 +59,10 @@ If you're unsure, most people should specify `pi0`.
 export BOARD_TYPE=pi0
 ```
 </td>
-        <td width="40%">Windows:(?)
+        <td width="40%">Windows PowerShell:
 
 ```powershell
-set BOARD_TYPE=pi0
+$env:BOARD_TYPE = 'pi0'
 ```
 </td>
 </tr>
@@ -77,9 +79,10 @@ SS_ARGS=--$BOARD_TYPE docker compose up --force-recreate --build
 ```
 
 </td>
-        <td width="40%">Windows:(?)
+        <td width="40%">Windows PowerShell:
 
 ```powershell
+# TODO: NEEDS FIX: INCORRECT SYNTAX FOR POWERSHELL
 SS_ARGS=--%BOARD_TYPE% docker compose up --force-recreate --build
 ```
 </td>
@@ -96,10 +99,16 @@ seedsigner-os-build-images-1  | 7a8fa1a81fb2145ea5d71d35b54bd425479ad5095fe52ce6
 seedsigner-os-build-images-1 exited with code 0
 ```
 
+The second line above lists the SHA256 hash of the image file that was built. This hash should match the hash of the release image that was posted on Github. If the hashes match, then you have successfully confirmed the reproducible build!
+
 The completed image file will be in the `images` subdirectory.
 ```bash
 cd images
 ls -l
+
+total 26628
+-rw-r--r-- 1 root root       97 Sep  3 02:09 README.md
+-rw-r--r-- 1 root root 27262976 Sep  3 18:49 seedsigner_os.dev.pi0.img
 ```
 
 That image can be burned to an SD card and run in your SeedSigner.
