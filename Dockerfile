@@ -2,7 +2,7 @@ FROM debian:11
 
 # buildroot dependencies
 RUN apt-get -qq update
-RUN apt-get -y install \
+RUN apt-get -qq -y install \
 locales=2.31-13+deb11u6 \
 lsb-release=11.1.0 \
 git=1:2.30.2-1+deb11u2 \
