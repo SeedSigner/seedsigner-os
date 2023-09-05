@@ -2,7 +2,7 @@ FROM debian:11
 
 # buildroot dependencies
 RUN apt-get -qq update
-RUN apt-get -qq -y install \
+RUN apt-get -y install \
 locales=2.31-13+deb11u6 \
 lsb-release=11.1.0 \
 git=1:2.30.2-1+deb11u2 \
@@ -19,6 +19,8 @@ tar=1.34+dfsg-1 \
 cpio=2.13+dfsg-4 \
 unzip=6.0-26+deb11u1 \
 rsync=3.2.3-4+deb11u1 \
+libmagic1=1:5.39-3 \
+libmagic-mgc=1:5.39-3 \
 file=1:5.39-3 \
 bc=1.07.1-2+b2 \
 libssl-dev=1.1.1n-0+deb11u5 \
