@@ -19,8 +19,6 @@ tar \
 cpio \
 unzip \
 rsync \
-libmagic1 \
-libmagic-mgc \
 file \
 bc \
 libssl-dev \
