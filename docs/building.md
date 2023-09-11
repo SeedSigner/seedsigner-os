@@ -5,16 +5,13 @@ Assemble the SeedSigner OS along with the SeedSigner application code into an im
 <br/>
 ## 🔥🔥🔥🛠 Quickstart: SeedSigner Reproducible Build! 🛠🔥🔥🔥
 
-### _Note to Windows users_
-Recommend running these steps in WSL2 (Windows Subsystem for Linux) so that you can just follow the Linux steps below.
+<details><summary>macOS / Linux instructions:</summary>
+<p>
 
 ### Install Dependencies
 * Docker (choose one):
     * Desktop users: [Docker Desktop](https://www.docker.com/products/docker-desktop/)
     * Or Linux command line: [Docker Engine](https://docs.docker.com/engine/install/#server)
-* Windows PowerShell users may also need to [install `git`](https://git-scm.com/download/win)
-
-
 
 ### Launch the build
 In a terminal window:
@@ -27,69 +24,83 @@ git clone --recursive https://github.com/SeedSigner/seedsigner-os.git
 cd seedsigner-os
 ```
 
-Force Docker to build on amd64 in order to get an identical result, even if your actual cpu is different (e.g. M1 Mac is arm64):
-
-<table>
-    <tr>
-        <td width="40%">macOS / Linux:
+Force Docker to build on a container meant to run on amd64 in order to get an identical result, even if your actual cpu is different:
 
 ```bash
 export DOCKER_DEFAULT_PLATFORM=linux/amd64
 ```
 
-</td>
-<td width="40%">Windows PowerShell:
+Select your board type from the [Board configs](#board-configs) list below. 
+
+If you're unsure, most people should specify `pi0`.
+
+```bash
+export BOARD_TYPE=pi0
+```
+
+Start the build!
+
+```bash
+SS_ARGS="--$BOARD_TYPE --app-branch=0.7.0" docker compose up --force-recreate --build
+```
+
+Building can take 25min to 2.5hrs+ depending on your cpu and will require 20-30 GB of disk space.
+</p>
+</details>
+
+
+<details><summary>Windows PowerShell instructions:</summary>
+<p>
+Recommend running these steps in WSL2 (Windows Subsystem for Linux) so that you can just follow the Linux steps below.
+
+### Install Dependencies
+* Docker (choose one):
+    * Desktop users: [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+    * Or Linux command line: [Docker Engine](https://docs.docker.com/engine/install/#server)
+* Windows PowerShell users may also need to [install `git`](https://git-scm.com/download/win)
+
+### Launch the build
+In a terminal window:
+
+```bash
+# Copy the SeedSigner OS repo to your local machine
+git clone --recursive https://github.com/SeedSigner/seedsigner-os.git
+
+# Move into the repo directory
+cd seedsigner-os
+```
+
+Force Docker to build on a container meant to run on amd64 in order to get an identical result, even if your actual cpu is different:
 
 ```powershell
 $env:DOCKER_DEFAULT_PLATFORM = 'linux/amd64'
 ```
-</td>
-</tr>
-</table>
 
 Select your board type from the [Board configs](#board-configs) list below. 
 
 If you're unsure, most people should specify `pi0`.
 
-<table>
-    <tr>
-        <td width="40%">macOS / Linux:
-
-```bash
-export BOARD_TYPE=pi0
-```
-</td>
-        <td width="40%">Windows PowerShell:
-
 ```powershell
 $env:BOARD_TYPE = 'pi0'
 ```
-</td>
-</tr>
-</table>
 
-
-Building can take 25min to 2.5hrs+ depending on your cpu and will require 20-30 GB of disk space.
-<table>
-    <tr>
-        <td width="40%">macOS / Linux:
-
-```bash
-SS_ARGS=--$BOARD_TYPE docker compose up --force-recreate --build
-```
-
-</td>
-        <td width="40%">Windows PowerShell:
+Start the build!
 
 ```powershell
-# TODO: NEEDS FIX: INCORRECT SYNTAX FOR POWERSHELL
-SS_ARGS=--%BOARD_TYPE% docker compose up --force-recreate --build
+# TODO: INCORRECT SYNTAX FOR POWERSHELL(?)
+SS_ARGS="--%BOARD_TYPE% --app-branch=0.7.0" docker compose up --force-recreate --build
 ```
-</td>
-</tr>
-</table>
+
+Building can take 25min to 2.5hrs+ depending on your cpu and will require 20-30 GB of disk space.
+
+</p>
+</details>
+<br>
 
 
+---
+
+## Build Results
 When the build completes you'll see:
 ```bash
 seedsigner-os-build-images-1  | /opt/buildroot
