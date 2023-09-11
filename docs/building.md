@@ -91,15 +91,13 @@ SS_ARGS=--%BOARD_TYPE% docker compose up --force-recreate --build
 
 
 When the build completes you'll see:
-
-_TODO: Update with v0.7.0 release hash_
 ```bash
 seedsigner-os-build-images-1  | /opt/buildroot
-seedsigner-os-build-images-1  | 7a8fa1a81fb2145ea5d71d35b54bd425479ad5095fe52ce6bd14fefae1e4f47e  /opt/../images/seedsigner_os.dev.pi0.img
+seedsigner-os-build-images-1  | a380cb93eb852254863718a9c000be9ec30cee14a78fc0ec90708308c17c1b8a  /opt/../images/seedsigner_os.0.7.0.pi0.img
 seedsigner-os-build-images-1 exited with code 0
 ```
 
-The second line above lists the SHA256 hash of the image file that was built. This hash should match the hash of the release image that was posted on Github. If the hashes match, then you have successfully confirmed the reproducible build!
+The second line above lists the SHA256 hash of the image file that was built. This hash should match the hash of the release image [published on the main github repo](https://github.com/SeedSigner/seedsigner/releases/tag/0.7.0). If the hashes match, then you have successfully confirmed the reproducible build!
 
 The completed image file will be in the `images` subdirectory.
 ```bash
@@ -107,8 +105,8 @@ cd images
 ls -l
 
 total 26628
--rw-r--r-- 1 root root       97 Sep  3 02:09 README.md
--rw-r--r-- 1 root root 27262976 Sep  3 18:49 seedsigner_os.dev.pi0.img
+-rw-r--r-- 1 root root       97 Sep 11 02:09 README.md
+-rw-r--r-- 1 root root 27262976 Sep 11 18:49 seedsigner_os.dev.pi0.img
 ```
 
 That image can be burned to an SD card and run in your SeedSigner.
@@ -132,3 +130,14 @@ That image can be burned to an SD card and run in your SeedSigner.
 |Raspberry Pi 3 Model B |`seedsigner_os.<tag>.pi02w.img`    | --pi02w             |
 |Raspberry Pi 4 Model B |`seedsigner_os.<tag>.pi4.img`      | --pi4               |
 
+
+---
+
+
+## Hashes for each build target
+| Build | SHA256 Hash | Image Name |
+| ----- | ----------- | ---------- |
+| pi0   |`a380cb93eb852254863718a9c000be9ec30cee14a78fc0ec90708308c17c1b8a`|  seedsigner_os.0.7.0.pi0.img|
+| pi02w |`fe0601e6da97c7711093b67a7102f8108f2bfb8a2478fd94fa9d3edea5adfb64`|  seedsigner_os.0.7.0.pi02w.img|
+| pi2   |`65be9209527ba03efe8093099dae8ec65725c90a758bc98678b9da31639637d7`|  seedsigner_os.0.7.0.pi2.img|
+| pi4   |`d574c1326d07e18b550e2f65e36a4678b05db882adb5cb8f8732ff8d75d59809`|  seedsigner_os.0.7.0.pi4.img|
