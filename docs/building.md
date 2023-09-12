@@ -117,7 +117,7 @@ ls -l
 
 total 26628
 -rw-r--r-- 1 root root       97 Sep 11 02:09 README.md
--rw-r--r-- 1 root root 27262976 Sep 11 18:49 seedsigner_os.dev.pi0.img
+-rw-r--r-- 1 root root 27262976 Sep 11 18:49 seedsigner_os.0.7.0.pi0.img
 ```
 
 That image can be burned to an SD card and run in your SeedSigner.
