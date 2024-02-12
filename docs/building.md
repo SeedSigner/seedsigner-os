@@ -22,6 +22,9 @@ git clone --recursive https://github.com/SeedSigner/seedsigner-os.git
 
 # Move into the repo directory
 cd seedsigner-os
+
+# initialize and update submodules (buildroot)
+git submodule init && git submodule update
 ```
 
 Force Docker to build on a container meant to run on amd64 in order to get an identical result, even if your actual cpu is different:
@@ -68,6 +71,9 @@ git clone --recursive https://github.com/SeedSigner/seedsigner-os.git
 
 # Move into the repo directory
 cd seedsigner-os
+
+# initialize and update submodules (buildroot)
+git submodule init && git submodule update
 ```
 
 Force Docker to build on a container meant to run on amd64 in order to get an identical result, even if your actual cpu is different:
