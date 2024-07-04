@@ -22,6 +22,11 @@ rm -rf ${TARGET_DIR}/usr/lib/python3.10/site-packages/numpy/typing/tests
 
 # Clean up files included in embit we don't need
 rm -rf ${TARGET_DIR}/usr/lib/python3.10/site-packages/embit/liquid
+rm -rf ${TARGET_DIR}/usr/lib/python3.10/site-packages/embit/util/prebuilt/libsecp256k1_darwin_arm64.dylib
+rm -rf ${TARGET_DIR}/usr/lib/python3.10/site-packages/embit/util/prebuilt/libsecp256k1_darwin_x86_64.dylib
+rm -rf ${TARGET_DIR}/usr/lib/python3.10/site-packages/embit/util/prebuilt/libsecp256k1_linux_aarch64.so
+rm -rf ${TARGET_DIR}/usr/lib/python3.10/site-packages/embit/util/prebuilt/libsecp256k1_linux_x86_64.so
+rm -rf ${TARGET_DIR}/usr/lib/python3.10/site-packages/embit/util/prebuilt/libsecp256k1_windows_amd64.dll
 
 # Clean up tests/docs in other python included libs
 rm -rf ${TARGET_DIR}/usr/lib/python3.10/site-packages/pyzbar/tests
