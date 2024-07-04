@@ -54,19 +54,28 @@ download_app_repo() {
   fi
      
   # Delete unnecessary files to save space
-  rm -rf ${rootfs_overlay}/opt/.git
-  rm -rf ${rootfs_overlay}/opt/.gitignore
-  rm -rf ${rootfs_overlay}/opt/requirements.txt
-  rm -rf ${rootfs_overlay}/opt/requirements-raspi.txt
+  # folders
+  rm -rf ${rootfs_overlay}/opt/.github
+  rm -rf ${rootfs_overlay}/opt/docker
   rm -rf ${rootfs_overlay}/opt/docs
-  rm -rf ${rootfs_overlay}/opt/README.md
-  rm -rf ${rootfs_overlay}/opt/LICENSE.md
   rm -rf ${rootfs_overlay}/opt/enclosures
-  rm -rf ${rootfs_overlay}/opt/seedsigner_pubkey.gpg
-  rm -rf ${rootfs_overlay}/opt/setup.py
   rm -rf ${rootfs_overlay}/opt/tests
   rm -rf ${rootfs_overlay}/opt/tools
+  # files
+  rm -rf ${rootfs_overlay}/opt/.coveragerc
+  rm -rf ${rootfs_overlay}/opt/.git
+  rm -rf ${rootfs_overlay}/opt/.gitignore
+  rm -rf ${rootfs_overlay}/opt/docker-compose.yml
+  rm -rf ${rootfs_overlay}/opt/LICENSE.md
+  rm -rf ${rootfs_overlay}/opt/MANIFEST.in
   rm -rf ${rootfs_overlay}/opt/pytest.ini
+  rm -rf ${rootfs_overlay}/opt/README.md
+  rm -rf ${rootfs_overlay}/opt/requirements-raspi.txt
+  rm -rf ${rootfs_overlay}/opt/requirements.txt
+  rm -rf ${rootfs_overlay}/opt/seedsigner_pubkey.gpg
+  rm -rf ${rootfs_overlay}/opt/setup.py
+
+
 }
 
 build_image() {
