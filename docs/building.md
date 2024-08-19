@@ -5,15 +5,13 @@ Assemble the SeedSigner OS along with the SeedSigner application code into an im
 <br/>
 ## 🔥🔥🔥🛠 Quickstart: SeedSigner Reproducible Build! 🛠🔥🔥🔥
 
-<details><summary>macOS / Linux instructions:</summary>
-<p>
-
 ### Install Dependencies
 * Docker (choose one):
     * Desktop users: [Docker Desktop](https://www.docker.com/products/docker-desktop/)
     * Or Linux command line: [Docker Engine](https://docs.docker.com/engine/install/#server)
+* Windows PowerShell users may also need to [install `git`](https://git-scm.com/download/win)
 
-### Launch the build
+### Clone the SeedSigner OS repo
 In a terminal window:
 
 ```bash
@@ -24,9 +22,18 @@ git clone --recursive https://github.com/SeedSigner/seedsigner-os.git
 cd seedsigner-os
 
 # initialize and update submodules (buildroot)
-git submodule init && git submodule update
+git submodule init
+git submodule update
 ```
 
+---
+
+### Configure and begin the build
+<details><summary>macOS / Linux instructions:</summary>
+<p>
+
+
+#### Configure environment variables
 Force Docker to build on a container meant to run on amd64 in order to get an identical result, even if your actual cpu is different:
 
 ```bash
@@ -41,41 +48,27 @@ If you're unsure, most people should specify `pi0`.
 export BOARD_TYPE=pi0
 ```
 
-Start the build!
+Set your target release version of the SeedSigner code (see: https://github.com/SeedSigner/seedsigner/releases):
 
 ```bash
-SS_ARGS="--$BOARD_TYPE --app-branch=0.7.0" docker compose up --force-recreate --build
+# e.g. 0.8.0, 0.7.0, etc
+export RELEASE_TAG=x.y.z
 ```
 
-Building can take 25min to 2.5hrs+ depending on your cpu and will require 20-30 GB of disk space.
+
+#### Start the build!
+```bash
+SS_ARGS="--$BOARD_TYPE --app-branch=$RELEASE_TAG" docker compose up --force-recreate --build
+```
 </p>
 </details>
 
 
 <details><summary>Windows PowerShell instructions:</summary>
 <p>
-Recommend running these steps in WSL2 (Windows Subsystem for Linux) so that you can just follow the Linux steps below.
+*Note: We recommend running these steps in WSL2 (Windows Subsystem for Linux) instead of PowerShell so that you can just follow the macOS / Linux steps above.*
 
-### Install Dependencies
-* Docker (choose one):
-    * Desktop users: [Docker Desktop](https://www.docker.com/products/docker-desktop/)
-    * Or Linux command line: [Docker Engine](https://docs.docker.com/engine/install/#server)
-* Windows PowerShell users may also need to [install `git`](https://git-scm.com/download/win)
-
-### Launch the build
-In a terminal window:
-
-```powershell
-# Copy the SeedSigner OS repo to your local machine
-git clone --recursive https://github.com/SeedSigner/seedsigner-os.git
-
-# Move into the repo directory
-cd seedsigner-os
-
-# initialize and update submodules (buildroot)
-git submodule init; git submodule update
-```
-
+#### Configure environment variables
 Force Docker to build on a container meant to run on amd64 in order to get an identical result, even if your actual cpu is different:
 
 ```powershell
@@ -90,30 +83,35 @@ If you're unsure, most people should specify `pi0`.
 $env:BOARD_TYPE = 'pi0'
 ```
 
-Start the build!
+Set your target release version of the SeedSigner code (see: https://github.com/SeedSigner/seedsigner/releases):
 
 ```powershell
-$env:SS_ARGS="--$env:BOARD_TYPE --app-branch=0.7.0"; docker compose up --force-recreate --build
+# e.g. "0.8.0", "0.7.0", etc
+$env:RELEASE_TAG = "x.y.z"  
 ```
 
-Building can take 25min to 2.5hrs+ depending on your cpu and will require 20-30 GB of disk space.
+#### Start the build!
+```powershell
+$env:SS_ARGS = "--$env:BOARD_TYPE --app-branch=$env:RELEASE_TAG"
+docker compose up --force-recreate --build
+```
 
 </p>
 </details>
 <br>
 
+Building can take 25min to 2.5hrs+ depending on your cpu and will require 20-30 GB of disk space.
 
----
 
 ## Build Results
 When the build completes you'll see:
 ```bash
 seedsigner-os-build-images-1  | /opt/buildroot
-seedsigner-os-build-images-1  | a380cb93eb852254863718a9c000be9ec30cee14a78fc0ec90708308c17c1b8a  /opt/../images/seedsigner_os.0.7.0.pi0.img
+seedsigner-os-build-images-1  | {image hash}  /opt/../images/seedsigner_os.{RELEASE_TAG}.{BOARD_TYPE}.img
 seedsigner-os-build-images-1 exited with code 0
 ```
 
-The second line above lists the SHA256 hash of the image file that was built. This hash should match the hash of the release image [published on the main github repo](https://github.com/SeedSigner/seedsigner/releases/tag/0.7.0). If the hashes match, then you have successfully confirmed the reproducible build!
+The second line above will show the SHA256 hash of the image file that was built. This hash should match the hash of the release image [published on the main github repo](https://github.com/SeedSigner/seedsigner/releases) for the chosen `RELEASE_TAG` + `BOARD_TYPE` combo. If the hashes match, then you have successfully confirmed the reproducible build!
 
 The completed image file will be in the `images` subdirectory.
 ```bash
@@ -122,7 +120,7 @@ ls -l
 
 total 26628
 -rw-r--r-- 1 root root       97 Sep 11 02:09 README.md
--rw-r--r-- 1 root root 27262976 Sep 11 18:49 seedsigner_os.0.7.0.pi0.img
+-rw-r--r-- 1 root root 27262976 Sep 11 18:49 seedsigner_os.{RELEASE_TAG}.{BOARD_TYPE}.img
 ```
 
 That image can be burned to an SD card and run in your SeedSigner.
@@ -146,15 +144,3 @@ That image can be burned to an SD card and run in your SeedSigner.
 |Raspberry Pi 3 Model B |`seedsigner_os.<tag>.pi02w.img`    | --pi02w             |
 |Raspberry Pi 4 Model B |`seedsigner_os.<tag>.pi4.img`      | --pi4               |
 |Build all targets      |(all of the above)                 | --all               |
-
-
----
-
-
-## Hashes for each build target
-| Build | SHA256 Hash | Image Name |
-| ----- | ----------- | ---------- |
-| pi0   |`a380cb93eb852254863718a9c000be9ec30cee14a78fc0ec90708308c17c1b8a`|  seedsigner_os.0.7.0.pi0.img|
-| pi02w |`fe0601e6da97c7711093b67a7102f8108f2bfb8a2478fd94fa9d3edea5adfb64`|  seedsigner_os.0.7.0.pi02w.img|
-| pi2   |`65be9209527ba03efe8093099dae8ec65725c90a758bc98678b9da31639637d7`|  seedsigner_os.0.7.0.pi2.img|
-| pi4   |`d574c1326d07e18b550e2f65e36a4678b05db882adb5cb8f8732ff8d75d59809`|  seedsigner_os.0.7.0.pi4.img|
