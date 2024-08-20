@@ -44,7 +44,7 @@ export BOARD_TYPE=pi0
 Start the build!
 
 ```bash
-SS_ARGS="--$BOARD_TYPE --app-branch=0.7.0" docker compose up --force-recreate --build
+SS_ARGS="--$BOARD_TYPE --app-branch=0.8.0" docker compose up --force-recreate --build
 ```
 
 Building can take 25min to 2.5hrs+ depending on your cpu and will require 20-30 GB of disk space.
@@ -94,7 +94,7 @@ Start the build!
 
 ```powershell
 # TODO: INCORRECT SYNTAX FOR POWERSHELL(?)
-SS_ARGS="--%BOARD_TYPE% --app-branch=0.7.0" docker compose up --force-recreate --build
+SS_ARGS="--%BOARD_TYPE% --app-branch=0.8.0" docker compose up --force-recreate --build
 ```
 
 Building can take 25min to 2.5hrs+ depending on your cpu and will require 20-30 GB of disk space.
@@ -110,11 +110,11 @@ Building can take 25min to 2.5hrs+ depending on your cpu and will require 20-30 
 When the build completes you'll see:
 ```bash
 seedsigner-os-build-images-1  | /opt/buildroot
-seedsigner-os-build-images-1  | a380cb93eb852254863718a9c000be9ec30cee14a78fc0ec90708308c17c1b8a  /opt/../images/seedsigner_os.0.7.0.pi0.img
+seedsigner-os-build-images-1  | 1d0f1c412f64b40e6aba21b5bacdb41d9323653c170ce06d0a3f1dd71fddb28e  /opt/../images/seedsigner_os.0.8.0.pi0.img
 seedsigner-os-build-images-1 exited with code 0
 ```
 
-The second line above lists the SHA256 hash of the image file that was built. This hash should match the hash of the release image [published on the main github repo](https://github.com/SeedSigner/seedsigner/releases/tag/0.7.0). If the hashes match, then you have successfully confirmed the reproducible build!
+The second line above lists the SHA256 hash of the image file that was built. This hash should match the hash of the release image [published on the main github repo](https://github.com/SeedSigner/seedsigner/releases/tag/0.8.0). If the hashes match, then you have successfully confirmed the reproducible build!
 
 The completed image file will be in the `images` subdirectory.
 ```bash
@@ -122,8 +122,8 @@ cd images
 ls -l
 
 total 26628
--rw-r--r-- 1 root root       97 Sep 11 02:09 README.md
--rw-r--r-- 1 root root 27262976 Sep 11 18:49 seedsigner_os.0.7.0.pi0.img
+-rw-r--r-- 1 root root       97 Aug 20 14:59 README.md
+-rw-r--r-- 1 root root 27262976 Aug 20 14:59 seedsigner_os.0.8.0.pi0.img
 ```
 
 That image can be burned to an SD card and run in your SeedSigner.
@@ -151,7 +151,15 @@ That image can be burned to an SD card and run in your SeedSigner.
 ---
 
 
-## Hashes for each build target
+## Hashes for each 0.8.0 build target
+| Build | SHA256 Hash | Image Name |
+| ----- | ----------- | ---------- |
+| pi0   |`1d0f1c412f64b40e6aba21b5bacdb41d9323653c170ce06d0a3f1dd71fddb28e`|  seedsigner_os.0.8.0.pi0.img|
+| pi02w |`c8d5352ed4a86c19eb9ef54f2920934f8ce460742b464ea94dc9114f9f4e039a`|  seedsigner_os.0.8.0.pi02w.img|
+| pi2   |`11c5553d75b3ebca4988ae3c4573b60b33a12bc4779282454ae34404ba797670`|  seedsigner_os.0.8.0.pi2.img|
+| pi4   |`917201e335bfc7ee4189f17827f954f89588dc0fdefdad80d26f2a65c5c8e6d0`|  seedsigner_os.0.8.0.pi4.img|
+
+## Hashes for each 0.7.0 build target
 | Build | SHA256 Hash | Image Name |
 | ----- | ----------- | ---------- |
 | pi0   |`a380cb93eb852254863718a9c000be9ec30cee14a78fc0ec90708308c17c1b8a`|  seedsigner_os.0.7.0.pi0.img|
