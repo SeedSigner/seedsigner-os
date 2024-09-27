@@ -20,6 +20,7 @@ docker exec -it seedsigner-os-build-images-1 bash
 Once you are in the container you can use the build script directly from the `/opt` directory
 ```bash
 ./build.sh --pi0 --app-repo=https://github.com/seedsigner/seedsigner.git --app-branch=dev --no-clean
+./build.sh --pi0 --app-repo=https://github.com/kdmukai/seedsigner.git --app-branch=pr_7_with_merges --no-clean
 ```
 
 or
@@ -31,6 +32,27 @@ or
 Or you can use any of the Buildroot customization commands like `make menuconfig` or `linux-menuconfig`  from the `/output` directory
 
 Move images manually built with `make` with the command `mv images/seedsigner_os.img /images/`
+
+
+## "Disk full" troubleshooting
+If your build fails with the following:
+```
+The partition table has been altered.
+Syncing disks.
+mkfs.fat 4.2 (2021-01-31)
+Disk full
+make[1]: *** [Makefile:815: target-post-image] Error 1
+make: *** [Makefile:23: _all] Error 2
+```
+
+You just need to edit the `post-image-seedsigner.sh` script in your target board's `board/` subdir (e.g. opt/pi0/board/). Edit this section:
+
+```
+# Create disk image.
+dd if=/dev/zero of=disk.img bs=1M count=26 #26 MB
+```
+
+Increase the `count` to create a larger disk image and then re-run your build.
 
 
 ## Image Location and Naming
