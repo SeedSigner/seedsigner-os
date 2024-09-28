@@ -55,7 +55,7 @@ download_app_repo() {
 
   # TODO
   git clone --depth 1 -b dev "https://github.com/SeedSigner/seedsigner-translations.git" "${rootfs_overlay}/seedsigner-translations" || exit
-  cp -r "${rootfs_overlay}/seedsigner-translations/build/*" "${rootfs_overlay}/opt/src/seedsigner/resources/babel"
+  cp -r ${rootfs_overlay}/seedsigner-translations/build/* ${rootfs_overlay}/opt/src/seedsigner/resources/babel
 
   # Delete unnecessary files to save space
   # folders
