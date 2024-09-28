@@ -52,7 +52,11 @@ download_app_repo() {
     echo "cloning repo ${seedsigner_app_repo} with branch ${seedsigner_app_repo_branch}"
     git clone --depth 1 -b "${seedsigner_app_repo_branch}" "${seedsigner_app_repo}" "${rootfs_overlay}/opt/" || exit
   fi
-     
+
+  # TODO
+  git clone --depth 1 -b dev "https://github.com/SeedSigner/seedsigner-translations.git" "${rootfs_overlay}/opt/" || exit
+  cp -r "${rootfs_overlay}/opt/seedsigner-translations/build/*" "${rootfs_overlay}/opt/src/seedsigner/resources/babel"
+
   # Delete unnecessary files to save space
   # folders
   rm -rf ${rootfs_overlay}/opt/.github
@@ -74,6 +78,8 @@ download_app_repo() {
   rm -rf ${rootfs_overlay}/opt/requirements.txt
   rm -rf ${rootfs_overlay}/opt/seedsigner_pubkey.gpg
   rm -rf ${rootfs_overlay}/opt/setup.py
+
+  rm -rf ${rootfs_overlay}/opt/seedsigner-translations
 
 
 }
