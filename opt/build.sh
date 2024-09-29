@@ -53,7 +53,7 @@ download_app_repo() {
     git clone --depth 1 -b "${seedsigner_app_repo_branch}" "${seedsigner_app_repo}" "${rootfs_overlay}/opt/" || exit
   fi
 
-  # TODO
+  # TODO: Add `translations-repo`, `translations-branch` and `translations-commit-id` options
   git clone --depth 1 -b dev "https://github.com/SeedSigner/seedsigner-translations.git" "${rootfs_overlay}/seedsigner-translations" || exit
   cp -r ${rootfs_overlay}/seedsigner-translations/build/* ${rootfs_overlay}/opt/src/seedsigner/resources/babel
 
