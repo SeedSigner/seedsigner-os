@@ -61,25 +61,24 @@ download_app_repo() {
   rm -rf ${rootfs_overlay}/opt/enclosures
   rm -rf ${rootfs_overlay}/opt/l10n
   rm -rf ${rootfs_overlay}/opt/seedsigner-screenshots
+  rm -rf ${rootfs_overlay}/opt/src/seedsigner/resources/seedsigner-translations/.git*
   rm -rf ${rootfs_overlay}/opt/tests
   rm -rf ${rootfs_overlay}/opt/tools
   # files
-  rm -rf ${rootfs_overlay}/opt/.coveragerc
-  rm -rf ${rootfs_overlay}/opt/.git
-  rm -rf ${rootfs_overlay}/opt/.gitignore
+  rm -rf ${rootfs_overlay}/opt/.git*
   rm -rf ${rootfs_overlay}/opt/docker-compose.yml
   rm -rf ${rootfs_overlay}/opt/LICENSE.md
   rm -rf ${rootfs_overlay}/opt/MANIFEST.in
-  rm -rf ${rootfs_overlay}/opt/pytest.ini
+  rm -rf ${rootfs_overlay}/opt/pyproject.toml
   rm -rf ${rootfs_overlay}/opt/README.md
   rm -rf ${rootfs_overlay}/opt/requirements-raspi.txt
   rm -rf ${rootfs_overlay}/opt/requirements.txt
   rm -rf ${rootfs_overlay}/opt/seedsigner_pubkey.gpg
-  rm -rf ${rootfs_overlay}/opt/setup.py
+  rm -rf ${rootfs_overlay}/opt/setup.*
 
+  rm -rf ${rootfs_overlay}/opt/src/seedsigner/resources/seedsigner-translations/LICENSE
+  rm -rf ${rootfs_overlay}/opt/src/seedsigner/resources/seedsigner-translations/README.md
   rm -rf ${rootfs_overlay}/opt/src/seedsigner/resources/seedsigner-translations/l10n/**/*.po
-
-
 }
 
 build_image() {
