@@ -44,18 +44,14 @@ download_app_repo() {
   # check for custom app branch or custom commit. Custom commit takes priority over branch name
   if ! [ -z ${seedsigner_app_repo_commit_id} ]; then
     echo "cloning repo ${seedsigner_app_repo} with commit id ${seedsigner_app_repo_commit_id}"
-    git clone "${seedsigner_app_repo}" "${rootfs_overlay}/opt/" || exit
+    git clone --recurse-submodules "${seedsigner_app_repo}" "${rootfs_overlay}/opt/" || exit
     cd ${rootfs_overlay}/opt/
     git reset --hard "${seedsigner_app_repo_commit_id}"
     cd -
   else
     echo "cloning repo ${seedsigner_app_repo} with branch ${seedsigner_app_repo_branch}"
-    git clone --depth 1 -b "${seedsigner_app_repo_branch}" "${seedsigner_app_repo}" "${rootfs_overlay}/opt/" || exit
+    git clone --recurse-submodules --depth 1 -b "${seedsigner_app_repo_branch}" "${seedsigner_app_repo}" "${rootfs_overlay}/opt/" || exit
   fi
-
-  # TODO: Add `translations-repo`, `translations-branch` and `translations-commit-id` options
-  git clone --depth 1 -b dev "https://github.com/SeedSigner/seedsigner-translations.git" "${rootfs_overlay}/seedsigner-translations" || exit
-  cp -r ${rootfs_overlay}/seedsigner-translations/build/* ${rootfs_overlay}/opt/src/seedsigner/resources/babel
 
   # Delete unnecessary files to save space
   # folders
@@ -63,6 +59,8 @@ download_app_repo() {
   rm -rf ${rootfs_overlay}/opt/docker
   rm -rf ${rootfs_overlay}/opt/docs
   rm -rf ${rootfs_overlay}/opt/enclosures
+  rm -rf ${rootfs_overlay}/opt/l10n
+  rm -rf ${rootfs_overlay}/opt/seedsigner-screenshots
   rm -rf ${rootfs_overlay}/opt/tests
   rm -rf ${rootfs_overlay}/opt/tools
   # files
@@ -79,7 +77,7 @@ download_app_repo() {
   rm -rf ${rootfs_overlay}/opt/seedsigner_pubkey.gpg
   rm -rf ${rootfs_overlay}/opt/setup.py
 
-  rm -rf ${rootfs_overlay}/seedsigner-translations
+  rm -rf ${rootfs_overlay}/opt/src/seedsigner/resources/seedsigner-translations/l10n/**/*.po
 
 
 }
