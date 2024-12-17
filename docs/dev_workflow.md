@@ -20,7 +20,6 @@ docker exec -it seedsigner-os-build-images-1 bash
 Once you are in the container you can use the build script directly from the `/opt` directory
 ```bash
 ./build.sh --pi0 --app-repo=https://github.com/seedsigner/seedsigner.git --app-branch=dev --no-clean
-./build.sh --pi0 --app-repo=https://github.com/kdmukai/seedsigner.git --app-branch=pr_7_with_merges --no-clean
 ```
 
 or
