@@ -33,6 +33,27 @@ Or you can use any of the Buildroot customization commands like `make menuconfig
 Move images manually built with `make` with the command `mv images/seedsigner_os.img /images/`
 
 
+## "Disk full" troubleshooting
+If your build fails with the following:
+```
+The partition table has been altered.
+Syncing disks.
+mkfs.fat 4.2 (2021-01-31)
+Disk full
+make[1]: *** [Makefile:815: target-post-image] Error 1
+make: *** [Makefile:23: _all] Error 2
+```
+
+You just need to edit the `post-image-seedsigner.sh` script in your target board's `board/` subdir (e.g. opt/pi0/board/). Edit this section:
+
+```
+# Create disk image.
+dd if=/dev/zero of=disk.img bs=1M count=26 #26 MB
+```
+
+Increase the `count` to create a larger disk image and then re-run your build.
+
+
 ## Image Location and Naming
 
 By default, the docker-compose.yml is configured to create a container volume of the *images* directory in the repo. This is where all the image files are written out after the container completes building the OS from source. That volume is accessible from the host. The image files are named using this convention:
