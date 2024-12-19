@@ -17,7 +17,7 @@ mkdir -p ${BUILD_DIR}/custom_image
 cd ${BUILD_DIR}/custom_image
 
 # Create disk image.
-dd if=/dev/zero of=disk.img bs=1M count=26 #26 MB
+dd if=/dev/zero of=disk.img bs=1M count=25  # block size (1MB) * count = size allocated for image
 
 ### needed: apt install fdisk
 /sbin/sfdisk disk.img <<EOF

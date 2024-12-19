@@ -44,38 +44,41 @@ download_app_repo() {
   # check for custom app branch or custom commit. Custom commit takes priority over branch name
   if ! [ -z ${seedsigner_app_repo_commit_id} ]; then
     echo "cloning repo ${seedsigner_app_repo} with commit id ${seedsigner_app_repo_commit_id}"
-    git clone "${seedsigner_app_repo}" "${rootfs_overlay}/opt/" || exit
+    git clone --recurse-submodules "${seedsigner_app_repo}" "${rootfs_overlay}/opt/" || exit
     cd ${rootfs_overlay}/opt/
     git reset --hard "${seedsigner_app_repo_commit_id}"
     cd -
   else
     echo "cloning repo ${seedsigner_app_repo} with branch ${seedsigner_app_repo_branch}"
-    git clone --depth 1 -b "${seedsigner_app_repo_branch}" "${seedsigner_app_repo}" "${rootfs_overlay}/opt/" || exit
+    git clone --recurse-submodules --depth 1 -b "${seedsigner_app_repo_branch}" "${seedsigner_app_repo}" "${rootfs_overlay}/opt/" || exit
   fi
-     
+
   # Delete unnecessary files to save space
   # folders
   rm -rf ${rootfs_overlay}/opt/.github
   rm -rf ${rootfs_overlay}/opt/docker
   rm -rf ${rootfs_overlay}/opt/docs
   rm -rf ${rootfs_overlay}/opt/enclosures
+  rm -rf ${rootfs_overlay}/opt/l10n
+  rm -rf ${rootfs_overlay}/opt/seedsigner-screenshots
+  rm -rf ${rootfs_overlay}/opt/src/seedsigner/resources/seedsigner-translations/.git*
   rm -rf ${rootfs_overlay}/opt/tests
   rm -rf ${rootfs_overlay}/opt/tools
   # files
-  rm -rf ${rootfs_overlay}/opt/.coveragerc
-  rm -rf ${rootfs_overlay}/opt/.git
-  rm -rf ${rootfs_overlay}/opt/.gitignore
+  rm -rf ${rootfs_overlay}/opt/.git*
   rm -rf ${rootfs_overlay}/opt/docker-compose.yml
   rm -rf ${rootfs_overlay}/opt/LICENSE.md
   rm -rf ${rootfs_overlay}/opt/MANIFEST.in
-  rm -rf ${rootfs_overlay}/opt/pytest.ini
+  rm -rf ${rootfs_overlay}/opt/pyproject.toml
   rm -rf ${rootfs_overlay}/opt/README.md
   rm -rf ${rootfs_overlay}/opt/requirements-raspi.txt
   rm -rf ${rootfs_overlay}/opt/requirements.txt
   rm -rf ${rootfs_overlay}/opt/seedsigner_pubkey.gpg
-  rm -rf ${rootfs_overlay}/opt/setup.py
+  rm -rf ${rootfs_overlay}/opt/setup.*
 
-
+  rm -rf ${rootfs_overlay}/opt/src/seedsigner/resources/seedsigner-translations/LICENSE
+  rm -rf ${rootfs_overlay}/opt/src/seedsigner/resources/seedsigner-translations/README.md
+  rm -rf ${rootfs_overlay}/opt/src/seedsigner/resources/seedsigner-translations/l10n/**/*.po
 }
 
 build_image() {
