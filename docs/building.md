@@ -21,6 +21,9 @@ git clone --recursive https://github.com/SeedSigner/seedsigner-os.git
 # Move into the repo directory
 cd seedsigner-os
 
+# checkout the branch associated to the target release version of the SeedSigner code (e.g. 0.8.5, 0.8.0, etc)
+git checkout -b 0.#.#
+
 # initialize and update submodules (buildroot)
 git submodule init
 git submodule update
