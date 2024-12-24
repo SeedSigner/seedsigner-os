@@ -20,13 +20,6 @@ git clone --recursive https://github.com/SeedSigner/seedsigner-os.git
 
 # Move into the repo directory
 cd seedsigner-os
-
-# checkout the branch associated to the target release version of the SeedSigner code (e.g. 0.8.5, 0.8.0, etc)
-git checkout 0.#.#
-
-# initialize and update submodules (buildroot)
-git submodule init
-git submodule update
 ```
 
 ---
@@ -58,6 +51,16 @@ Set your target release version of the SeedSigner code (see: https://github.com/
 export RELEASE_TAG=x.y.z
 ```
 
+checkout the branch associated to the target release version of the SeedSigner code (e.g. 0.8.5, 0.8.0, etc)
+```bash
+git checkout $RELEASE_TAG
+```
+
+initialize and update submodules (buildroot) from the seedsigner-os repo
+```bash
+git submodule init
+git submodule update
+```
 
 #### Start the build!
 ```bash
@@ -91,6 +94,17 @@ Set your target release version of the SeedSigner code (see: https://github.com/
 ```powershell
 # e.g. "0.8.0", "0.7.0", etc
 $env:RELEASE_TAG = "x.y.z"  
+```
+
+checkout the branch associated to the target release version of the SeedSigner code (e.g. 0.8.5, 0.8.0, etc)
+```powershell
+git checkout $env:RELEASE_TAG
+```
+
+initialize and update submodules (buildroot) from the seedsigner-os repo
+```powershell
+git submodule init
+git submodule update
 ```
 
 #### Start the build!
