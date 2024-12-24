@@ -51,12 +51,12 @@ Set your target release version of the SeedSigner code (see: https://github.com/
 export RELEASE_TAG=x.y.z
 ```
 
-checkout the branch associated to the target release version of the SeedSigner code (e.g. 0.8.5, 0.8.0, etc)
+Checkout the branch associated to the target release version of the SeedSigner code (e.g. 0.8.5, 0.8.0, etc)
 ```bash
 git checkout $RELEASE_TAG
 ```
 
-initialize and update submodules (buildroot) from the seedsigner-os repo
+Initialize and update submodules (buildroot) from the seedsigner-os repo
 ```bash
 git submodule init
 git submodule update
@@ -96,12 +96,12 @@ Set your target release version of the SeedSigner code (see: https://github.com/
 $env:RELEASE_TAG = "x.y.z"  
 ```
 
-checkout the branch associated to the target release version of the SeedSigner code (e.g. 0.8.5, 0.8.0, etc)
+Checkout the branch associated to the target release version of the SeedSigner code (e.g. 0.8.5, 0.8.0, etc)
 ```powershell
 git checkout $env:RELEASE_TAG
 ```
 
-initialize and update submodules (buildroot) from the seedsigner-os repo
+Initialize and update submodules (buildroot) from the seedsigner-os repo
 ```powershell
 git submodule init
 git submodule update
