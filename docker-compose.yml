@@ -7,4 +7,5 @@ services:
     volumes:
       - ./opt:/opt
       - ./images:/images
+      - ./.ccache:/root/.cache/ccache
     command: "${SS_ARGS:---no-op}"
