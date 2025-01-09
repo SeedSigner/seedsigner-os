@@ -27,7 +27,8 @@ build-essential \
 libncurses-dev \
 mtools \
 fdisk \
-dosfstools
+dosfstools \
+ccache
 
 # Locale
 RUN locale-gen en_US.UTF-8  
