@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -o errexit -o pipefail
+
 # global variables
 cur_dir_name=${PWD##*/}
 cur_dir=$(pwd)
