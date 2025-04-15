@@ -114,9 +114,9 @@ build_image() {
   # Setup external tree
   #make BR2_EXTERNAL="../${config_dir}/" O="${build_dir}" -C ./buildroot/ #2> /dev/null > /dev/null
 
-  make BR2_EXTERNAL="../${config_dir}/" O="${build_dir}" -C ./buildroot/ ${config_name}_defconfig
+  PATH="/usr/lib/ccache:${PATH}" make BR2_EXTERNAL="../${config_dir}/" O="${build_dir}" -C ./buildroot/ ${config_name}_defconfig
   cd "${build_dir}"
-  make
+  PATH="/usr/lib/ccache:${PATH}" make
   
   # if successful, mv seedsigner_os.img image to /images
   # rename to image to include branch name and config name, then compress
