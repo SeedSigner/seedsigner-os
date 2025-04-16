@@ -6,4 +6,6 @@ services:
     volumes:
       - ./opt:/opt
       - ./images:/images
+      - ./.ccache:/root/.cache/ccache
+      - ./.buildroot-ccache:/root/.buildroot-ccache
     command: "${SS_ARGS:---no-op}"
