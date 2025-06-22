@@ -124,8 +124,6 @@ build_image() {
   if [ "${3}" != "skip-repo" ]; then
     download_app_repo
   fi
-  
-  exit
 
   # Setup external tree
   #make BR2_EXTERNAL="../${config_dir}/" O="${build_dir}" -C ./buildroot/ #2> /dev/null > /dev/null
