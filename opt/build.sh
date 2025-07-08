@@ -55,6 +55,18 @@ download_app_repo() {
     git clone --recurse-submodules --depth 1 -b "${seedsigner_app_repo_branch}" "${seedsigner_app_repo}" "${rootfs_overlay}/opt/" || exit
   fi
 
+  # create virtual env to compile translation files
+  virtualenv .translation-venv
+  source .translation-venv/bin/activate
+  cd ${rootfs_overlay}/opt
+  pip install babel || exit
+  pip install -e . || exit
+  # remove any existing binary mo files if they exist
+  rm -rf ${rootfs_overlay}/opt/src/seedsigner/resources/seedsigner-translations/l10n/**/**/*.mo
+  python3 setup.py compile_catalog || exit
+  cd -
+  deactivate
+
   # Delete unnecessary files to save space
   # folders
   rm -rf ${rootfs_overlay}/opt/.github
@@ -80,7 +92,7 @@ download_app_repo() {
 
   rm -rf ${rootfs_overlay}/opt/src/seedsigner/resources/seedsigner-translations/LICENSE
   rm -rf ${rootfs_overlay}/opt/src/seedsigner/resources/seedsigner-translations/README.md
-  rm -rf ${rootfs_overlay}/opt/src/seedsigner/resources/seedsigner-translations/l10n/**/*.po
+  rm -rf ${rootfs_overlay}/opt/src/seedsigner/resources/seedsigner-translations/l10n/**/**/*.po
 }
 
 build_image() {
@@ -112,7 +124,7 @@ build_image() {
   if [ "${3}" != "skip-repo" ]; then
     download_app_repo
   fi
-  
+
   # Setup external tree
   #make BR2_EXTERNAL="../${config_dir}/" O="${build_dir}" -C ./buildroot/ #2> /dev/null > /dev/null
 
