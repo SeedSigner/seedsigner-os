@@ -1,0 +1,7 @@
+config BR2_PACKAGE_SECP256K1
+    bool "secp256k1"
+    help
+      This package provides the secp256k1 cryptographic library
+      from the Bitcoin Core project.
+
+      https://github.com/bitcoin-core/secp256k1

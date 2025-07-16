@@ -1,44 +1,44 @@
-From cee28bd83882b4033c814583eda555ab5ad01b6e Mon Sep 17 00:00:00 2001
-From: Nick Klockenga <nick@klockenga.net>
-Date: Fri, 5 Jul 2024 09:03:05 -0400
-Subject: [PATCH] SeedSignerOS RPi Arch
+From 10faecd592e7b0f1cd4c855cfe8e409998dfd7cd Mon Sep 17 00:00:00 2001
+From: alvroble <alvroble@alvroble.com>
+Date: Tue, 6 May 2025 20:08:18 +0200
+Subject: [PATCH] buildroot patch
 
 ---
- pyproject.toml                 | 2 +-
- src/embit.egg-info/SOURCES.txt | 5 -----
- 2 files changed, 1 insertion(+), 6 deletions(-)
+ pyproject.toml                 | 2 --
+ src/embit.egg-info/SOURCES.txt | 7 -------
+ 2 files changed, 9 deletions(-)
 
 diff --git a/pyproject.toml b/pyproject.toml
-index fb8fcfe..aa2063c 100644
+index fb8fcfe..473f5a2 100644
 --- a/pyproject.toml
 +++ b/pyproject.toml
-@@ -33,7 +33,7 @@ dev = [
+@@ -32,8 +32,6 @@ dev = [
+ [tool.setuptools.packages.find]
  where = ["src"]
  
- [tool.setuptools.package-data]
+-[tool.setuptools.package-data]
 -embit = ["util/prebuilt/*"]
-+embit = ["util/prebuilt/libsecp256k1_linux_arm*"]
  
  
  [tool.pytest.ini_options]
 diff --git a/src/embit.egg-info/SOURCES.txt b/src/embit.egg-info/SOURCES.txt
-index 59b84e9..36d152d 100644
+index 59b84e9..ba36447 100644
 --- a/src/embit.egg-info/SOURCES.txt
 +++ b/src/embit.egg-info/SOURCES.txt
-@@ -50,13 +50,8 @@ src/embit/util/key.py
+@@ -50,13 +50,6 @@ src/embit/util/key.py
  src/embit/util/py_ripemd160.py
  src/embit/util/py_secp256k1.py
  src/embit/util/secp256k1.py
 -src/embit/util/prebuilt/libsecp256k1_darwin_arm64.dylib
 -src/embit/util/prebuilt/libsecp256k1_darwin_x86_64.dylib
 -src/embit/util/prebuilt/libsecp256k1_linux_aarch64.so
- src/embit/util/prebuilt/libsecp256k1_linux_armv6l.so
- src/embit/util/prebuilt/libsecp256k1_linux_armv7l.so
+-src/embit/util/prebuilt/libsecp256k1_linux_armv6l.so
+-src/embit/util/prebuilt/libsecp256k1_linux_armv7l.so
 -src/embit/util/prebuilt/libsecp256k1_linux_x86_64.so
 -src/embit/util/prebuilt/libsecp256k1_windows_amd64.dll
  src/embit/wordlists/__init__.py
  src/embit/wordlists/base.py
  src/embit/wordlists/bip39.py
 -- 
-2.39.3 (Apple Git-146)
+2.39.5 (Apple Git-154)
 
