@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -o errexit -o pipefail
+export FORCE_UNSAFE_CONFIGURE=1 # Allows buildroot/tar to run as root user in docker container
 
 # global variables
 cur_dir_name=${PWD##*/}
