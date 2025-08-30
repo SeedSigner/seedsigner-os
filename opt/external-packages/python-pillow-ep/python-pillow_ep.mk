@@ -16,6 +16,13 @@ PYTHON_PILLOW_EP_SETUP_TYPE = setuptools
 PYTHON_PILLOW_EP_DEPENDENCIES = host-pkgconf
 PYTHON_PILLOW_EP_BUILD_OPTS = -C--build-option=build_ext -C--build-option=--disable-platform-guessing
 
+ifeq ($(BR2_PACKAGE_LIBRAQM),y)
+PYTHON_PILLOW_DEPENDENCIES += libraqm
+PYTHON_PILLOW_BUILD_OPTS += --enable-raqm --vendor-raqm
+else
+PYTHON_PILLOW_BUILD_OPTS += --disable-raqm
+endif
+
 ifeq ($(BR2_PACKAGE_FREETYPE),y)
 PYTHON_PILLOW_EP_DEPENDENCIES += freetype
 PYTHON_PILLOW_EP_BUILD_OPTS += -C--build-option=--enable-freetype
