@@ -1,0 +1,12 @@
+config BR2_PACKAGE_LIBRAQM
+	bool "libraqm"
+	select BR2_PACKAGE_FREETYPE
+	select BR2_PACKAGE_HARFBUZZ
+	select BR2_PACKAGE_LIBFRIBIDI
+	help
+	  A library for complex text layout that provides a convenient API 
+	  for clients to perform complex text layout. Raqm can support 
+	  OpenType fonts using HarfBuzz, bidirectional text using FriBiDi, 
+	  and shaping text in different scripts.
+
+	  https://github.com/HOST-Oman/libraqm 
