@@ -103,6 +103,9 @@ download_app_repo() {
   mkdir -p ${rootfs_overlay}/opt/.git/refs
   mv ${cur_dir}/HEAD ${rootfs_overlay}/opt/.git/HEAD
   mv ${cur_dir}/tags ${rootfs_overlay}/opt/.git/refs/.
+  ls ${rootfs_overlay}/opt/.git
+  cat ${rootfs_overlay}/opt/.git/HEAD
+  ls ${rootfs_overlay}/opt/.git/refs/tags
 }
 
 build_image() {
