@@ -51,12 +51,13 @@ download_app_repo() {
     cd ${rootfs_overlay}/opt/
     git reset --hard "${seedsigner_app_repo_commit_id}"
     cd -
+    # Provide env var to the version.py script used below
+    export SEEDSIGNER_VERSION_NAME="${seedsigner_app_repo_commit_id}"
   else
     echo "cloning repo ${seedsigner_app_repo} with branch ${seedsigner_app_repo_branch}"
-    git clone --recurse-submodules "${seedsigner_app_repo}" "${rootfs_overlay}/opt/" || exit
-    cd ${rootfs_overlay}/opt/
-    git checkout "${seedsigner_app_repo_branch}" || exit
-    cd -
+    git clone --recurse-submodules --depth 1 -b "${seedsigner_app_repo_branch}" "${seedsigner_app_repo}" "${rootfs_overlay}/opt/" || exit
+    # Provide env var to the version.py script used below
+    export SEEDSIGNER_VERSION_NAME="${seedsigner_app_repo_branch}"
   fi
 
   # create virtual env to compile translation files
