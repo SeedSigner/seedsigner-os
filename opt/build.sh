@@ -65,6 +65,11 @@ download_app_repo() {
   # remove any existing binary mo files if they exist
   rm -rf ${rootfs_overlay}/opt/src/seedsigner/resources/seedsigner-translations/l10n/**/**/*.mo
   python3 setup.py compile_catalog || exit
+
+  # Set the buildroot SOURCE_DATE_EPOCH to mark all files with last commit date for reproducible builds
+  export SOURCE_DATE_EPOCH=$(git log -1 --format=%at 2> /dev/null)
+  echo "Setting SOURCE_DATE_EPOCH to ${SOURCE_DATE_EPOCH} for reproducible builds"
+
   cd -
   deactivate
 
