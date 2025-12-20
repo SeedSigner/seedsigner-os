@@ -78,12 +78,6 @@ download_app_repo() {
   python3 seedsigner/helpers/version.py || exit
   cat seedsigner/version.json
 
-  # DEBUGGING
-  cat ../.git/HEAD
-  echo | ls ../.git
-  echo | ls ../.git/refs
-  echo | ls ../.git/refs/tags
-
   # Return to previous directory
   cd -
   deactivate
