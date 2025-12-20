@@ -53,7 +53,7 @@ download_app_repo() {
     cd -
   else
     echo "cloning repo ${seedsigner_app_repo} with branch ${seedsigner_app_repo_branch}"
-    git clone --recurse-submodules --depth 1 -b "${seedsigner_app_repo_branch}" "${seedsigner_app_repo}" "${rootfs_overlay}/opt/" || exit
+    git clone --recurse-submodules -b "${seedsigner_app_repo_branch}" "${seedsigner_app_repo}" "${rootfs_overlay}/opt/" || exit
   fi
 
   # create virtual env to compile translation files
@@ -71,9 +71,6 @@ download_app_repo() {
 
   # Write the src/seedsigner/version.json file.
   cd ${rootfs_overlay}/opt/src
-  # Have to make sure we have the git tags as well, otherwise building for a specific tag
-  # will just report its detached HEAD commit hash instead of the tag name.
-  git fetch --tags
   python3 seedsigner/helpers/version.py || exit
   cat seedsigner/version.json
 
