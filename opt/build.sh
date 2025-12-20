@@ -53,7 +53,10 @@ download_app_repo() {
     cd -
   else
     echo "cloning repo ${seedsigner_app_repo} with branch ${seedsigner_app_repo_branch}"
-    git clone --recurse-submodules -b "${seedsigner_app_repo_branch}" "${seedsigner_app_repo}" "${rootfs_overlay}/opt/" || exit
+    git clone --recurse-submodules "${seedsigner_app_repo}" "${rootfs_overlay}/opt/" || exit
+    cd ${rootfs_overlay}/opt/
+    git checkout "${seedsigner_app_repo_branch}" || exit
+    cd -
   fi
 
   # create virtual env to compile translation files
