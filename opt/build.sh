@@ -66,9 +66,10 @@ download_app_repo() {
   rm -rf ${rootfs_overlay}/opt/src/seedsigner/resources/seedsigner-translations/l10n/**/**/*.mo
   python3 setup.py compile_catalog || exit
 
-  # Set the buildroot SOURCE_DATE_EPOCH to mark all files with last commit date for reproducible builds
-  export SOURCE_DATE_EPOCH=$(git log -1 --format=%at 2> /dev/null)
-  echo "Setting SOURCE_DATE_EPOCH to ${SOURCE_DATE_EPOCH} for reproducible builds"
+  # Write the src/version.json file with current git commit info
+  python3 ${rootfs_overlay}/opt/src/seedsigner/resources/version.py || exit
+  echo "Version info: "
+  cat ${rootfs_overlay}/opt/src/version.json
 
   cd -
   deactivate
