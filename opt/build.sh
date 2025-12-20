@@ -79,10 +79,6 @@ download_app_repo() {
   cd -
   deactivate
 
-  # Temporarily relocate .git files used for Version info
-  mv ${rootfs_overlay}/opt/.git/HEAD ${cur_dir}/HEAD
-  mv ${rootfs_overlay}/opt/.git/refs/tags ${cur_dir}/.
-
   # Delete unnecessary files to save space
   # folders
   rm -rf ${rootfs_overlay}/opt/.github
@@ -109,14 +105,6 @@ download_app_repo() {
   rm -rf ${rootfs_overlay}/opt/src/seedsigner/resources/seedsigner-translations/LICENSE
   rm -rf ${rootfs_overlay}/opt/src/seedsigner/resources/seedsigner-translations/README.md
   rm -rf ${rootfs_overlay}/opt/src/seedsigner/resources/seedsigner-translations/l10n/**/*.po
-
-  # Restore the .git files used for Version info
-  mkdir -p ${rootfs_overlay}/opt/.git/refs
-  mv ${cur_dir}/HEAD ${rootfs_overlay}/opt/.git/HEAD
-  mv ${cur_dir}/tags ${rootfs_overlay}/opt/.git/refs/.
-  ls ${rootfs_overlay}/opt/.git
-  cat ${rootfs_overlay}/opt/.git/HEAD
-  ls ${rootfs_overlay}/opt/.git/refs/tags
 }
 
 build_image() {
