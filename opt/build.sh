@@ -69,10 +69,11 @@ download_app_repo() {
   # return to previous directory
   cd -
 
-  # Write the src/seedsigner/version.json file. Reads the current git tag, branch, or
-  # commit hash from .git/HEAD. Pulls the last commit date from `git log`.
-  git fetch --tags
+  # Write the src/seedsigner/version.json file.
   cd ${rootfs_overlay}/opt/src
+  # Have to make sure we have the git tags as well, otherwise building for a specific tag
+  # will just report its detached HEAD commit hash instead of the tag name.
+  git fetch --tags
   python3 seedsigner/helpers/version.py || exit
   cat seedsigner/version.json
 
