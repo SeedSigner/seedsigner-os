@@ -69,8 +69,9 @@ download_app_repo() {
   # return to previous directory
   cd -
 
-  # Write the src/seedsigner/version.json file (reads the current git tag, branch, or
-  # commit hash; and the most recent last modified python file timestamp)
+  # Write the src/seedsigner/version.json file. Reads the current git tag, branch, or
+  # commit hash from .git/HEAD. Pulls the last commit date from `git log`.
+  git fetch --tags
   cd ${rootfs_overlay}/opt/src
   python3 seedsigner/helpers/version.py || exit
   cat seedsigner/version.json
