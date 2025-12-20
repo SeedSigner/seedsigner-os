@@ -66,13 +66,16 @@ download_app_repo() {
   rm -rf ${rootfs_overlay}/opt/src/seedsigner/resources/seedsigner-translations/l10n/**/**/*.mo
   python3 setup.py compile_catalog || exit
 
+  # return to previous directory
+  cd -
+
   # Write the src/seedsigner/version.json file (reads the current git tag, branch, or
   # commit hash; and the most recent last modified python file timestamp)
-  cd src
+  cd ${rootfs_overlay}/opt/src
   python3 seedsigner/helpers/version.py || exit
-  echo "Version info: "
   cat seedsigner/version.json
 
+  # Return to previous directory
   cd -
   deactivate
 
