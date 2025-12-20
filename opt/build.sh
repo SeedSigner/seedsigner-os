@@ -67,9 +67,10 @@ download_app_repo() {
   python3 setup.py compile_catalog || exit
 
   # Write the src/version.json file with current git commit info
-  python3 ${rootfs_overlay}/opt/src/seedsigner/helpers/version.py || exit
+  cd src
+  python3 seedsigner/helpers/version.py || exit
   echo "Version info: "
-  cat ${rootfs_overlay}/opt/src/version.json
+  cat ${rootfs_overlay}/opt/src/seedsigner/version.json
 
   cd -
   deactivate
