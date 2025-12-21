@@ -107,7 +107,7 @@ download_app_repo() {
 
   rm -rf ${rootfs_overlay}/opt/src/seedsigner/resources/seedsigner-translations/LICENSE
   rm -rf ${rootfs_overlay}/opt/src/seedsigner/resources/seedsigner-translations/README.md
-  rm -rf ${rootfs_overlay}/opt/src/seedsigner/resources/seedsigner-translations/l10n/**/*.po
+  rm -rf ${rootfs_overlay}/opt/src/seedsigner/resources/seedsigner-translations/l10n/**/**/*.po
 }
 
 build_image() {
