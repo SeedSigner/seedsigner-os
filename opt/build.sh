@@ -75,7 +75,6 @@ download_app_repo() {
 
   # Write the src/seedsigner/version.json file.
   cd ${rootfs_overlay}/opt/src
-  echo $SEEDSIGNER_VERSION_NAME
   python3 seedsigner/helpers/version.py || exit
   cat seedsigner/version.json
 
