@@ -25,7 +25,7 @@ help()
       --dev            Builds developer version of images
       --no-clean       Leave previous build, target, and output files
       --skip-repo      Skip pulling repo, assume rootfs-overlay/opt is populated with app code
-      --app-repo       Build image with not official seedsigner github repo
+      --app-repo       Build image with an unofficial seedsigner github repo
       --app-branch     Build image with repo branch other than default
       --app-commit-id  Build image with specific repo commit id
       --no-op          All other option ignored and script just hangs to keep container alive"
