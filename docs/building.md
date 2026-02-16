@@ -74,6 +74,23 @@ SS_ARGS="--$BOARD_TYPE --app-branch=$RELEASE_TAG" docker compose up --force-recr
 <p>
 *Note: We recommend running these steps in WSL2 (Windows Subsystem for Linux) instead of PowerShell so that you can just follow the macOS / Linux steps above.*
 
+#### Windows prerequisites (PowerShell)
+These must be set **before cloning** the repo. If you already cloned, reclone after setting these.
+
+1) Enable **Developer Mode** in Windows (Settings → System → For Developers → Developer Mode) so Git can create symlinks.
+
+2) Configure Git to preserve LF line endings and symlinks:
+```powershell
+git config --global core.autocrlf false
+git config --global core.eol lf
+git config --global core.symlinks true
+```
+
+Optional: verify the GCC hash file is a symlink after submodules are initialized:
+```powershell
+Get-Item opt/buildroot/package/gcc/gcc-initial/gcc-initial.hash | Select-Object LinkType,Target
+```
+
 #### Configure environment variables
 Force Docker to build on a container meant to run on amd64 in order to get an identical result, even if your actual cpu is different:
 
@@ -129,6 +146,8 @@ seedsigner-os-build-images-1 exited with code 0
 ```
 
 The second line above will show the SHA256 hash of the image file that was built. This hash should match the hash of the release image [published on the main github repo](https://github.com/SeedSigner/seedsigner/releases) for the chosen `RELEASE_TAG` + `BOARD_TYPE` combo. If the hashes match, then you have successfully confirmed the reproducible build!
+
+**Windows (PowerShell) note:** Even with LF line endings and symlinks enabled, some Windows builds may still produce a different image hash than the published release. WSL2 remains the recommended path for reproducible builds.
 
 The completed image file will be in the `images` subdirectory.
 ```bash
