@@ -65,6 +65,18 @@ download_app_repo() {
   # remove any existing binary mo files if they exist
   rm -rf ${rootfs_overlay}/opt/src/seedsigner/resources/seedsigner-translations/l10n/**/**/*.mo
   python3 setup.py compile_catalog || exit
+
+  # return to previous directory
+  cd -
+
+  # Write the src/seedsigner/version.json file. Relies on `git` shell commands; must be
+  # run before removing the .git directory.
+  cd ${rootfs_overlay}/opt
+  export SEEDSIGNER_OS_BUILDER=1
+  python3 tools/write_versionfile.py || exit
+  cat src/seedsigner/version.json
+
+  # Return to previous directory
   cd -
   deactivate
 
