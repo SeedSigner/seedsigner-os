@@ -8,11 +8,11 @@ Kernel and User space are all built from scratch.
 2. Second layer is the linux kernel. Using Buildroot, only specific and minimum required modules have been hand selected to use in the kernel. This layer is required to make use of hardware functionality.
 3. Third layer is user space. This is where all the libraries and applications reside. The SeedSigner application lives in this space. This is also where libraries typically live to do networking, display drivers, external port communications, etc. However on SeedSignerOS, none of these drivers or libraries are loaded (that are typically found in a linux OS).
 
-## How is the .iso structured?
+## How is the .img structured?
 
 ![SeedSignerOS microSD File Structure](img/ssos_sd_files.png?raw=true "SeedSignerOS microSD File Structure")
 
-The zImage a compressed version of the Linux kernel that is self-extracting. In that compressed image, we added RootFS. The entire system in a single file!
+The zImage is a compressed version of the Linux kernel that is self-extracting. In that compressed image, we added RootFS. The entire system in a single file!
 
 ## Boot Sequence
 
