@@ -63,7 +63,7 @@ compile_translations_and_fonts() {
   for f in ${ss_translations_repo}/l10n/*/LC_MESSAGES/messages.mo; do
     # extract just the locale name from the path (e.g. "ca" from ".../l10n/ca/LC_MESSAGES/messages.mo")
     locale=$(basename "$(dirname "$(dirname "$f")")")
-    output_chars=$(cd ${ss_translations_repo}/tools && python3 extract_characters_from_babel_mo.py "$locale")
+    output_chars=$(cd ${ss_translations_repo}/tools && python3 extract_characters_from_babel_mo.py "$locale") || echo "Warning: failed to extract chars for locale: $locale" >&2
     all_chars="${all_chars}${output_chars}"
   done
 
