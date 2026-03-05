@@ -58,11 +58,12 @@ compile_translations_and_fonts() {
   # generate messages.mo files for each translation
   python3 setup.py compile_catalog || exit
 
-
   # extract characters from all messages.mo translations into all_chars shell variable
   all_chars=""
-  for f in "${ss_translations_repo}/l10n/"**"/LC_MESSAGES/messages.mo"; do
-    output_chars=$(python3 ${ss_translations_repo}/tools/extract_characters_from_babel_mo.py $f)
+  for f in ${ss_translations_repo}/l10n/*/LC_MESSAGES/messages.mo; do
+    # extract just the locale name from the path (e.g. "ca" from ".../l10n/ca/LC_MESSAGES/messages.mo")
+    locale=$(basename "$(dirname "$(dirname "$f")")")
+    output_chars=$(cd ${ss_translations_repo}/tools && python3 extract_characters_from_babel_mo.py "$locale")
     all_chars="${all_chars}${output_chars}"
   done
 
