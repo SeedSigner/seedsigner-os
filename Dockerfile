@@ -45,4 +45,4 @@ RUN echo "LANG=en_US.UTF-8" > /etc/locale.conf
 RUN locale-gen en_US.UTF-8
 
 WORKDIR /opt
-ENTRYPOINT ["./build.sh"]
+ENTRYPOINT ["/bin/bash", "-c", "./build.sh $SS_ARGS"]
