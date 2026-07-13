@@ -1,3 +1,4 @@
 *.DS_Store
 .buildroot-ccache/
+.buildroot_dl/
 .ccache/
