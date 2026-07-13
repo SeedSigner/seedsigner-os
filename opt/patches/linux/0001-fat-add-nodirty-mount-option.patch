@@ -1,0 +1,78 @@
+fat: add "nodirty" mount option to never write the volume dirty flag
+
+SeedSigner OS mounts the SD card's FAT boot partition read-write so the
+app can persist settings. On every read-write mount the FAT driver's
+fat_set_state() sets the volume dirty flag (boot sector offset 0x25 on
+FAT12/16, 0x41 on FAT32) and clears it again on clean unmount. Since
+SeedSigner devices are powered off by cutting power, the flag is set
+once and never cleared, which breaks byte-for-byte verification of the
+card against the flashed image.
+
+With "nodirty", fat_set_state() becomes a no-op: the on-disk dirty flag
+is never set or cleared, so a mount (and unmount) writes nothing at all.
+File writes behave as usual. Without the option, behavior is unchanged.
+
+Patch applies to raspberrypi/linux 14b35093ca68 (rpi-5.15.y, v5.15.92).
+
+Signed-off-by: SeedSigner OS build patch
+
+--- a/fs/fat/fat.h	2026-07-11 15:19:52
++++ b/fs/fat/fat.h	2026-07-11 15:19:52
+@@ -51,7 +51,8 @@
+ 		 tz_set:1,	   /* Filesystem timestamps' offset set */
+ 		 rodir:1,	   /* allow ATTR_RO for directory */
+ 		 discard:1,	   /* Issue discard requests on deletions */
+-		 dos1xfloppy:1;	   /* Assume default BPB for DOS 1.x floppies */
++		 dos1xfloppy:1,	   /* Assume default BPB for DOS 1.x floppies */
++		 nodirty:1;	   /* Never write the volume dirty flag */
+ };
+ 
+ #define FAT_HASH_BITS	8
+--- a/fs/fat/inode.c	2026-07-11 15:19:52
++++ b/fs/fat/inode.c	2026-07-11 15:19:52
+@@ -669,6 +669,10 @@
+ 	struct buffer_head *bh;
+ 	struct fat_boot_sector *b;
+ 	struct msdos_sb_info *sbi = MSDOS_SB(sb);
++
++	/* never touch the on-disk dirty flag if nodirty is set */
++	if (sbi->options.nodirty)
++		return;
+ 
+ 	/* do not change any thing if mounted read only */
+ 	if (sb_rdonly(sb) && !force)
+@@ -1025,6 +1029,8 @@
+ 		seq_puts(m, ",discard");
+ 	if (opts->dos1xfloppy)
+ 		seq_puts(m, ",dos1xfloppy");
++	if (opts->nodirty)
++		seq_puts(m, ",nodirty");
+ 
+ 	return 0;
+ }
+@@ -1040,6 +1046,7 @@
+ 	Opt_obsolete, Opt_flush, Opt_tz_utc, Opt_rodir, Opt_err_cont,
+ 	Opt_err_panic, Opt_err_ro, Opt_discard, Opt_nfs, Opt_time_offset,
+ 	Opt_nfs_stale_rw, Opt_nfs_nostale_ro, Opt_err, Opt_dos1xfloppy,
++	Opt_nodirty,
+ };
+ 
+ static const match_table_t fat_tokens = {
+@@ -1073,6 +1080,7 @@
+ 	{Opt_nfs_stale_rw, "nfs=stale_rw"},
+ 	{Opt_nfs_nostale_ro, "nfs=nostale_ro"},
+ 	{Opt_dos1xfloppy, "dos1xfloppy"},
++	{Opt_nodirty, "nodirty"},
+ 	{Opt_obsolete, "conv=binary"},
+ 	{Opt_obsolete, "conv=text"},
+ 	{Opt_obsolete, "conv=auto"},
+@@ -1285,6 +1293,9 @@
+ 		case Opt_dos1xfloppy:
+ 			opts->dos1xfloppy = 1;
+ 			break;
++		case Opt_nodirty:
++			opts->nodirty = 1;
++			break;
+ 
+ 		/* msdos specific */
+ 		case Opt_dots:
