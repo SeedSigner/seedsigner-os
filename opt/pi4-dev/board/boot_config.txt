@@ -17,7 +17,12 @@ dtparam=spi=on
 boot_delay=0
 disable_splash=1
 
-# raspberry firmware config to disable wifi and bluetooth 
-# https://github.com/raspberrypi/firmware/blob/master/boot/overlays/README
-dtoverlay=disable-wifi
-dtoverlay=disable-bt
+### Dev image additions ###
+
+# USB relay: expose the USB port as an ethernet gadget when plugged into a
+# computer (see docs/dev_images.md). dwc2 is built dual-role, so a keyboard
+# on an OTG adapter still works.
+dtoverlay=dwc2
+
+# HDMI console output even when the display is plugged in after boot
+hdmi_force_hotplug=1

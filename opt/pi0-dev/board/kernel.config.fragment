@@ -1,0 +1,82 @@
+# Dev-image kernel additions, merged on top of ../pi0/board/kernel.config.
+# The release image disables all of this; keep this file to the minimal delta
+# needed for on-device development (networking, ssh, usb relay, hdmi console,
+# keyboard/mouse, persistent ext4 data partition).
+# NOTE: the release config sets CONFIG_MODULES=n, so everything here must be
+# built-in (=y), never =m.
+
+# Core networking
+CONFIG_NET=y
+CONFIG_PACKET=y
+CONFIG_UNIX=y
+CONFIG_INET=y
+
+# Onboard wifi (brcmfmac over SDIO; firmware from brcmfmac_sdio-firmware-rpi)
+CONFIG_WIRELESS=y
+CONFIG_CFG80211=y
+CONFIG_WLAN=y
+CONFIG_WLAN_VENDOR_BROADCOM=y
+CONFIG_BRCMUTIL=y
+CONFIG_BRCMFMAC=y
+CONFIG_BRCMFMAC_SDIO=y
+
+# Wired networking via USB adapters (Zero 2 W has no ethernet jack; also
+# covers the onboard USB ethernet of the Pi 3 family: smsc95xx / lan78xx)
+CONFIG_NETDEVICES=y
+CONFIG_NET_CORE=y
+CONFIG_USB_NET_DRIVERS=y
+CONFIG_USB_USBNET=y
+CONFIG_USB_NET_AX8817X=y
+CONFIG_USB_NET_AX88179_178A=y
+CONFIG_USB_NET_CDCETHER=y
+CONFIG_USB_NET_CDC_NCM=y
+CONFIG_USB_NET_RNDIS_HOST=y
+CONFIG_USB_NET_SMSC95XX=y
+CONFIG_USB_LAN78XX=y
+
+# Power domains -- REQUIRED for USB on the Zero/Zero W. The DTB's usb node has
+# power-domains = <&power RPI_POWER_DOMAIN_USB> (raspberrypi,bcm2835-power,
+# firmware-managed). The base config sets CONFIG_RASPBERRYPI_POWER=y, but that
+# symbol depends on CONFIG_PM, and nothing else in the pi0 config selects PM
+# (on pi02w/pi2/pi4, DRM_VC4 "select PM" keeps it alive -- pi0's release config
+# comments out CONFIG_SOUND, which DRM_VC4 depends on, so the whole chain
+# silently drops out at olddefconfig). Without it the dwc2 block is unpowered
+# and its probe fails ("Bad value for GSNPSID"), so no gadget ever enumerates.
+CONFIG_PM=y
+CONFIG_RASPBERRYPI_POWER=y
+
+# USB relay: ethernet-over-USB gadget (dtoverlay=dwc2 + built-in g_ether).
+# dwc2 must be dual-role so the same port still works as a host port for
+# keyboards etc. when not tethered to a computer.
+# CONFIG_USB (host-side master switch) is only a commented breadcrumb in the
+# pi0 base config (unlike pi02w/pi4 which set it =y), so set it explicitly here:
+# USB_DWC2_DUAL_ROLE and USB_HID both require CONFIG_USB=y.
+CONFIG_USB=y
+CONFIG_USB_GADGET=y
+CONFIG_USB_DWC2=y
+CONFIG_USB_DWC2_DUAL_ROLE=y
+CONFIG_USB_ETH=y
+CONFIG_USB_ETH_RNDIS=y
+
+# USB keyboard / mouse on the HDMI console
+CONFIG_VT=y
+CONFIG_VT_CONSOLE=y
+CONFIG_UNIX98_PTYS=y
+CONFIG_INPUT=y
+CONFIG_INPUT_EVDEV=y
+CONFIG_INPUT_MOUSEDEV=y
+CONFIG_HID=y
+CONFIG_HID_GENERIC=y
+CONFIG_USB_HID=y
+
+# HDMI (matches the "#HDMI" breadcrumbs left in the release kernel.config)
+CONFIG_DMADEVICES=y
+CONFIG_DMA_BCM2835=y
+CONFIG_DMA_BCM2708=y
+CONFIG_DMABUF_HEAPS=y
+CONFIG_DMABUF_HEAPS_SYSTEM=y
+CONFIG_DMABUF_HEAPS_CMA=y
+CONFIG_AUXDISPLAY=y
+
+# Persistent ext4 data partition (/dev/mmcblk0p2)
+CONFIG_EXT4_FS=y

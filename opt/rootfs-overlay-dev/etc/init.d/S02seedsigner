@@ -1,0 +1,86 @@
+#!/bin/sh
+# Provides: SeedSigner
+#
+# Dev-image control for the SeedSigner app. Unlike the release version (whose
+# stop/status are no-op stubs), this tracks the app via a pidfile so you can
+# start / stop / restart / status it without hunting for python processes.
+#
+# The app is launched through /start.sh, which `exec`s python -- so the pid in
+# the pidfile is the python process itself. Handy from an SSH session:
+#     seedsigner {start|stop|restart|status}   (see /usr/bin/seedsigner)
+
+PIDFILE=/var/run/seedsigner.pid
+LAUNCHER=/start.sh
+
+is_running() {
+	[ -f "$PIDFILE" ] || return 1
+	pid=$(cat "$PIDFILE" 2>/dev/null)
+	[ -n "$pid" ] && kill -0 "$pid" 2>/dev/null
+}
+
+start() {
+	if is_running; then
+		echo "seedsigner: already running (pid $(cat "$PIDFILE"))"
+		return 0
+	fi
+	printf "Starting seedsigner: "
+	# -b detaches it (survives SSH logout); -m writes the pidfile. start.sh
+	# execs python, so the pidfile ends up tracking the python process.
+	start-stop-daemon -S -q -b -m -p "$PIDFILE" -x "$LAUNCHER"
+	[ $? = 0 ] && echo "OK" || echo "FAIL"
+}
+
+stop() {
+	if ! is_running; then
+		echo "seedsigner: not running"
+		rm -f "$PIDFILE"
+		return 0
+	fi
+	pid=$(cat "$PIDFILE")
+	printf "Stopping seedsigner (pid %s): " "$pid"
+	kill -TERM "$pid" 2>/dev/null
+	i=0
+	while [ $i -lt 5 ] && is_running; do
+		sleep 1
+		i=$((i + 1))
+	done
+	if is_running; then
+		kill -KILL "$pid" 2>/dev/null
+		sleep 1
+	fi
+	rm -f "$PIDFILE"
+	echo "OK"
+}
+
+restart() {
+	stop
+	start
+}
+
+status() {
+	if is_running; then
+		echo "seedsigner: running (pid $(cat "$PIDFILE"))"
+		return 0
+	fi
+	echo "seedsigner: stopped"
+	return 3
+}
+
+case "$1" in
+	start)
+		start
+		;;
+	stop)
+		stop
+		;;
+	restart|reload)
+		restart
+		;;
+	status)
+		status
+		;;
+	*)
+		echo "Usage: $0 {start|stop|restart|status}"
+		exit 1
+esac
+exit $?

@@ -1,0 +1,31 @@
+#!/bin/sh
+#
+# Dev image: background daemon that re-mounts /mnt/data whenever the microSD is
+# reinserted (and detaches it on removal). The initial boot-time mount is done
+# by S30devdata; this keeps it in sync for every hot-swap afterwards.
+
+DAEMON="data-automount"
+PIDFILE="/var/run/$DAEMON.pid"
+EXEC="/usr/sbin/$DAEMON"
+
+case "$1" in
+	start)
+		printf 'Starting %s: ' "$DAEMON"
+		start-stop-daemon -S -q -b -m -p "$PIDFILE" -x "$EXEC"
+		[ $? = 0 ] && echo "OK" || echo "FAIL"
+		;;
+	stop)
+		printf 'Stopping %s: ' "$DAEMON"
+		start-stop-daemon -K -q -p "$PIDFILE"
+		[ $? = 0 ] && echo "OK" || echo "FAIL"
+		;;
+	restart)
+		"$0" stop
+		"$0" start
+		;;
+	*)
+		echo "Usage: $0 {start|stop|restart}"
+		exit 1
+esac
+
+exit 0

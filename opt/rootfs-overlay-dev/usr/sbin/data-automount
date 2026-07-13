@@ -1,0 +1,35 @@
+#!/bin/sh
+#
+# Dev image: keep /mnt/data in sync with the presence of the microSD data
+# partition (mmcblk0p2), so the card can be pulled and reinserted at runtime
+# without a reboot. Runs as a background daemon, started by S31data-automount.
+#
+# This is deliberately independent of mdev and the seedsigner app's microSD
+# FIFO: it watches sysfs (kernel-maintained, always accurate) and manages the
+# /dev node itself. That keeps it reliable even while the app is stopped for
+# development -- a stopped app leaves /tmp/mdev_fifo without a reader, which
+# blocks the (serial) mdev event loop, so an mdev-based remount could stall.
+
+DATA_SYS="/sys/class/block/mmcblk0p2"
+DATA_DEV="/dev/mmcblk0p2"
+DATA_MNT="/mnt/data"
+
+while true; do
+	if [ -e "$DATA_SYS/dev" ]; then
+		# Partition present: ensure it is mounted.
+		if ! grep -q " $DATA_MNT " /proc/mounts; then
+			[ -b "$DATA_DEV" ] || mknod "$DATA_DEV" b $(sed 's/:/ /' "$DATA_SYS/dev")
+			mkdir -p "$DATA_MNT"
+			mount -t ext4 "$DATA_DEV" "$DATA_MNT" 2>/dev/null
+		fi
+	else
+		# Card/partition gone: lazily detach the now-stale mount and clean up
+		# the dangling device node (lazy umount so a shell or the app holding
+		# a path under /mnt/data cannot wedge it).
+		if grep -q " $DATA_MNT " /proc/mounts; then
+			umount -l "$DATA_MNT" 2>/dev/null
+		fi
+		[ -b "$DATA_DEV" ] && rm -f "$DATA_DEV"
+	fi
+	sleep 2
+done

@@ -1,0 +1,40 @@
+# Dev-image busybox additions, merged on top of ../pi02w/board/busybox.config.
+# Networking applets that the release image deliberately leaves out.
+
+CONFIG_IFCONFIG=y
+CONFIG_FEATURE_IFCONFIG_STATUS=y
+CONFIG_IP=y
+CONFIG_IPADDR=y
+CONFIG_IPLINK=y
+CONFIG_IPROUTE=y
+CONFIG_IPNEIGH=y
+CONFIG_FEATURE_IP_ADDRESS=y
+CONFIG_FEATURE_IP_LINK=y
+CONFIG_FEATURE_IP_ROUTE=y
+CONFIG_FEATURE_IP_ROUTE_DIR="/etc/iproute2"
+CONFIG_FEATURE_IP_NEIGH=y
+CONFIG_PING=y
+CONFIG_ROUTE=y
+CONFIG_NETSTAT=y
+CONFIG_NSLOOKUP=y
+CONFIG_TRACEROUTE=y
+CONFIG_WGET=y
+CONFIG_FEATURE_WGET_STATUSBAR=y
+CONFIG_FEATURE_WGET_AUTHENTICATION=y
+CONFIG_FEATURE_WGET_LONG_OPTIONS=y
+CONFIG_FEATURE_WGET_TIMEOUT=y
+CONFIG_FEATURE_WGET_OPENSSL=y
+CONFIG_UDHCPC=y
+CONFIG_FEATURE_UDHCPC_ARPING=y
+CONFIG_FEATURE_UDHCPC_SANITIZEOPT=y
+CONFIG_UDHCPC_DEFAULT_SCRIPT="/usr/share/udhcpc/default.script"
+
+# DHCP server for the usb0 gadget interface (USB relay): the host end of the
+# cable has no DHCP server unless the user turns on internet sharing, so the
+# Pi runs its own on a small static subnet -- ssh root@10.55.0.1 then always
+# works, with zero configuration on the host side.
+CONFIG_UDHCPD=y
+CONFIG_DHCPD_LEASES_FILE="/var/lib/misc/udhcpd.leases"
+
+CONFIG_NTPD=y
+CONFIG_MOUNTPOINT=y

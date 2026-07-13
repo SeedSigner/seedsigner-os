@@ -1,0 +1,11 @@
+config BR2_PACKAGE_GH
+	bool "gh (GitHub CLI)"
+	help
+	  GitHub's official command line tool (gh) for working with pull
+	  requests, issues, releases, and repositories.
+
+	  Dev image only: this installs GitHub's official prebuilt,
+	  statically-linked ARM binary (the linux_armv6 build, which runs
+	  on the pi02w) rather than cross-compiling from Go source.
+
+	  https://cli.github.com/

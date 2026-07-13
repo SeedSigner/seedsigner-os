@@ -1,0 +1,16 @@
+
+  SeedSigner OS -- DEVELOPMENT IMAGE (not for real funds)
+
+  * seedsigner start|stop|restart|status   control the app (no manual killing)
+  * ssh root@seedsigner.local    reachable by name over usb/wifi/ethernet (mdns)
+  * network-info                 show interfaces / IP addresses
+  * usb relay                    ssh root@10.55.0.1 (static, no host config
+                                 needed) unless host is internet-sharing
+  * /mnt/data                    persistent 256MB ext4 scratch partition
+  * /mnt/data/seedsigner/src     app auto-runs from here if it exists,
+                                 otherwise from the baked-in /opt/src
+  * /mnt/microsd                 boot (FAT) partition; put wifi.txt or
+                                 wpa_supplicant.conf or authorized_keys here
+  * tools: git rsync scp ssh vi nano pip (installs to RAM; use /mnt/data
+                                 or a venv to persist -- see docs)
+

@@ -1,0 +1,24 @@
+#!/bin/sh
+#
+# Dev image: (re)start mdnsd whenever an interface obtains a DHCP lease.
+#
+# mdnsd is started at boot by S50mdnsd, but the USB-relay / wifi address it
+# needs to advertise usually arrives a few seconds later (the host's Internet
+# Sharing DHCP, or wifi association). mdnsd 0.12 does not reliably re-announce
+# <hostname>.local once that address appears on an interface it first saw
+# empty, so seedsigner.local stays unresolvable until mdnsd is restarted. A
+# restart with the address already present fixes it.
+#
+# This hook is run by /usr/share/udhcpc/default.script (busybox) after it
+# applies the lease; $1 is the udhcpc action. Restarting on "bound" (a freshly
+# obtained lease, at boot or after a reconnect) makes mdnsd re-probe and
+# announce on the now-addressed interface. "renew" (same address) is skipped to
+# avoid needless churn.
+
+case "$1" in
+	bound)
+		[ -x /etc/init.d/S50mdnsd ] && /etc/init.d/S50mdnsd restart >/dev/null 2>&1
+		;;
+esac
+
+exit 0

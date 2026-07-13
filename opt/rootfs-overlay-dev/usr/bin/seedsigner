@@ -1,0 +1,5 @@
+#!/bin/sh
+# Short convenience wrapper for the SeedSigner app control init script, so you
+# can type `seedsigner {start|stop|restart|status}` instead of the full
+# /etc/init.d/S02seedsigner path.
+exec /etc/init.d/S02seedsigner "$@"

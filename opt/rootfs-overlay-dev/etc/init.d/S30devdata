@@ -1,0 +1,150 @@
+#!/bin/sh
+#
+# Dev image: mount the persistent data partition (/dev/mmcblk0p2, ext4,
+# label "seedsigner-data") at /mnt/data and set up everything that relies
+# on persistent storage.
+#
+# This is the boot-time mount only. Removing/reinserting the microSD after
+# boot is handled by the data-automount daemon (S31data-automount), which
+# re-mounts /mnt/data without a reboot.
+
+DATA_DEV="/dev/mmcblk0p2"
+DATA_SYS="/sys/class/block/mmcblk0p2"
+DATA_MNT="/mnt/data"
+DISK_DEV="/dev/mmcblk0"
+DISK_SYS="/sys/class/block/mmcblk0"
+
+# On first boot, grow the data partition (mmcblk0p2, the last partition) and its
+# ext4 filesystem to fill the microSD. Idempotent: it only acts when there is
+# meaningful unallocated space after the partition, so on later boots (already
+# expanded) it does nothing. Must run BEFORE the partition is mounted.
+grow_data_partition() {
+	[ -r "$DISK_SYS/size" ] && [ -r "$DATA_SYS/start" ] && [ -r "$DATA_SYS/size" ] || return 0
+	command -v parted >/dev/null 2>&1 && command -v resize2fs >/dev/null 2>&1 || return 0
+	grep -q " $DATA_MNT " /proc/mounts && return 0   # never resize while mounted
+
+	disk_sz=$(cat "$DISK_SYS/size")
+	p_start=$(cat "$DATA_SYS/start")
+	p_sz=$(cat "$DATA_SYS/size")
+	free=$(( disk_sz - p_start - p_sz ))
+
+	# Skip unless there's more than ~64MB (131072 sectors) of free space.
+	[ "$free" -gt 131072 ] || return 0
+
+	# parted needs the whole-disk node; create it if mdev hasn't yet.
+	if [ ! -b "$DISK_DEV" ] && [ -e "$DISK_SYS/dev" ]; then
+		mknod "$DISK_DEV" b $(sed 's/:/ /' "$DISK_SYS/dev")
+	fi
+	[ -b "$DISK_DEV" ] || return 0
+
+	echo "devdata: expanding data partition to fill the card"
+	parted -s "$DISK_DEV" resizepart 2 100% || return 0
+	partprobe "$DISK_DEV" 2>/dev/null || true
+
+	# Wait for the kernel to reflect the new partition size.
+	i=0
+	while [ $i -lt 5 ] && [ "$(cat "$DATA_SYS/size" 2>/dev/null)" = "$p_sz" ]; do
+		sleep 1
+		i=$((i + 1))
+	done
+
+	e2fsck -fp "$DATA_DEV" >/dev/null 2>&1 || true
+	resize2fs "$DATA_DEV" || true
+}
+
+start() {
+	# The Pi has no RTC, so the clock starts at the epoch. Move it to a
+	# plausible recent date so TLS cert validation (git clone, pip) works
+	# before/without NTP sync (S35network runs ntpd once a link is up).
+	if [ "$(date +%s)" -lt 1750000000 ]; then
+		date -s "2026-07-01 12:00:00" > /dev/null 2>&1
+	fi
+
+	# Wait for the kernel to finish probing the mmc partitions
+	WAITED=0
+	while [ ! -e "$DATA_SYS/dev" ] && [ $WAITED -lt 10 ]; do
+		sleep 1
+		WAITED=$((WAITED + 1))
+	done
+
+	# The mdev daemon creates nodes from hotplug events; if the partition
+	# was probed before mdev started, create the node ourselves.
+	if [ ! -b "$DATA_DEV" ] && [ -e "$DATA_SYS/dev" ]; then
+		mknod "$DATA_DEV" b $(sed 's/:/ /' "$DATA_SYS/dev")
+	fi
+
+	# First-boot: grow the partition + filesystem to fill the card (before mount).
+	grow_data_partition
+
+	# Always create the mountpoint so it exists even when the data partition is
+	# missing (e.g. a kernel without the SD controller's regulators, where
+	# /dev/mmcblk0p2 never appears) -- makes the failure obvious rather than a
+	# silently absent /mnt/data.
+	mkdir -p "$DATA_MNT"
+
+	if [ -b "$DATA_DEV" ]; then
+		if mount -t ext4 "$DATA_DEV" "$DATA_MNT"; then
+			echo "devdata: mounted $DATA_DEV at $DATA_MNT"
+		else
+			echo "devdata: WARNING: failed to mount $DATA_DEV"
+		fi
+	else
+		echo "devdata: WARNING: $DATA_DEV not found; no persistent storage"
+	fi
+
+	if grep -q " $DATA_MNT " /proc/mounts; then
+		# Persist all of /root across reboots by bind-mounting it from the data
+		# partition. /root stays a real directory in the image (a symlink would
+		# break buildroot's makedevs/device-table step); the bind mount overlays
+		# the persistent copy at runtime. 0700 so ssh accepts $HOME's perms.
+		[ -d "$DATA_MNT/root" ] || mkdir -m 0700 -p "$DATA_MNT/root"
+		if ! mountpoint -q /root 2>/dev/null; then
+			mount -o bind "$DATA_MNT/root" /root
+		fi
+
+		# Persist dropbear ssh host keys across reboots: S50dropbear
+		# (dropbear -R) generates them into /etc/dropbear on first use.
+		if [ ! -L /etc/dropbear ]; then
+			mkdir -p "$DATA_MNT/etc/dropbear"
+			rm -rf /etc/dropbear
+			ln -s "$DATA_MNT/etc/dropbear" /etc/dropbear
+		fi
+	fi
+
+	# Optional pubkey ssh login: drop an "authorized_keys" file on the boot
+	# (FAT) partition or the data partition. Password login with the root
+	# password works regardless.
+	for keys in /mnt/microsd/authorized_keys "$DATA_MNT/authorized_keys"; do
+		if [ -f "$keys" ]; then
+			mkdir -p /root/.ssh
+			cp "$keys" /root/.ssh/authorized_keys
+			chmod 700 /root/.ssh
+			chmod 600 /root/.ssh/authorized_keys
+			break
+		fi
+	done
+}
+
+stop() {
+	# Unbind /root first so the data partition isn't held busy.
+	mountpoint -q /root 2>/dev/null && umount /root
+	grep -q " $DATA_MNT " /proc/mounts && umount "$DATA_MNT"
+}
+
+case "$1" in
+	start)
+		start
+		;;
+	stop)
+		stop
+		;;
+	restart)
+		stop
+		start
+		;;
+	*)
+		echo "Usage: $0 {start|stop|restart}"
+		exit 1
+esac
+
+exit 0

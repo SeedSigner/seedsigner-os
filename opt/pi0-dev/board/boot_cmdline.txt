@@ -1,1 +1,1 @@
-root=/dev/mmcblk0p2 rootwait console=tty1 console=ttyAMA0,115200 spidev.bufsiz=131072
+console=tty1 ipv6.disable=1 spidev.bufsiz=131072

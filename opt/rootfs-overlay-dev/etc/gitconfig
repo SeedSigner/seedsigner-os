@@ -1,0 +1,9 @@
+# System-wide git defaults for the dev image.
+#
+# This image only ships busybox `less`, which doesn't support the raw-ANSI
+# passthrough (LESS=FRX / less -R) that git relies on to render colored diffs
+# through a pager. The result is literal escape codes ("[[1m", "[[32m", ...)
+# on screen. Disabling the pager lets the user's terminal render git's color
+# itself, which works fine over ssh.
+[core]
+	pager = cat

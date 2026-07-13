@@ -1,0 +1,17 @@
+#!/bin/sh
+# Print a quick summary of the device's network state.
+
+echo "hostname: $(hostname)"
+echo
+
+for IFACE in $(ls /sys/class/net 2>/dev/null); do
+	[ "$IFACE" = "lo" ] && continue
+	STATE=$(cat /sys/class/net/$IFACE/operstate 2>/dev/null)
+	MAC=$(cat /sys/class/net/$IFACE/address 2>/dev/null)
+	ADDR=$(ip -4 addr show "$IFACE" 2>/dev/null | sed -n 's/.*inet \([0-9.]*\).*/\1/p')
+	echo "$IFACE: state=$STATE mac=$MAC ip=${ADDR:-none}"
+done
+
+echo
+echo "default route: $(ip route 2>/dev/null | sed -n 's/^default //p')"
+echo "dns: $(sed -n 's/^nameserver //p' /etc/resolv.conf 2>/dev/null | tr '\n' ' ')"

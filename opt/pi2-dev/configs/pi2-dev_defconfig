@@ -4,17 +4,22 @@ BR2_ARM_EABIHF=y
 BR2_ARM_FPU_NEON_VFPV4=y
 
 BR2_DL_DIR="$(TOPDIR)/../../buildroot_dl"
+BR2_GLOBAL_PATCH_DIR="$(BR2_EXTERNAL_RPI_SEEDSIGNER_PATH)/../patches"
 BR2_CCACHE=y
 BR2_REPRODUCIBLE=y
 BR2_TOOLCHAIN_BUILDROOT_VENDOR="Buildroot"
 BR2_TOOLCHAIN_BUILDROOT_GLIBC=y
 BR2_PACKAGE_HOST_LINUX_HEADERS_CUSTOM_5_15=y
-BR2_PACKAGE_GLIBC_UTILS=y
 BR2_TOOLCHAIN_BUILDROOT_CXX=y
 BR2_TARGET_GENERIC_HOSTNAME="seedsigner-os"
 BR2_ROOTFS_DEVICE_CREATION_DYNAMIC_MDEV=y
-BR2_TARGET_GENERIC_ROOT_PASSWD="passworDT"
-BR2_ROOTFS_OVERLAY="../rootfs-overlay/"
+BR2_TARGET_GENERIC_ROOT_PASSWD="seedsigner"
+# The release rootfs-overlay ships etc/shadow with root locked out (root:*),
+# and overlays are copied *after* the password hook above runs, so that file
+# clobbers this password every build. post-build.sh reapplies it, reading the
+# same value back via this arg -- keep both in sync.
+BR2_ROOTFS_POST_BUILD_SCRIPT_ARGS="seedsigner"
+BR2_ROOTFS_OVERLAY="../rootfs-overlay/ ../rootfs-overlay-dev/"
 BR2_ROOTFS_POST_BUILD_SCRIPT="../pi2-dev/board/post-build.sh"
 BR2_ROOTFS_POST_IMAGE_SCRIPT="../pi2-dev/board/post-image-seedsigner.sh"
 BR2_LINUX_KERNEL=y
@@ -22,11 +27,13 @@ BR2_LINUX_KERNEL_CUSTOM_TARBALL=y
 BR2_LINUX_KERNEL_CUSTOM_TARBALL_LOCATION="$(call github,raspberrypi,linux,14b35093ca68bf2c81bbc90aace5007142b40b40)/linux-14b35093ca68bf2c81bbc90aace5007142b40b40.tar.gz"
 BR2_LINUX_KERNEL_NEEDS_HOST_OPENSSL=y
 BR2_LINUX_KERNEL_USE_CUSTOM_CONFIG=y
-BR2_LINUX_KERNEL_CUSTOM_CONFIG_FILE="../pi2-dev/board/kernel.config"
-BR2_LINUX_KERNEL_GZIP=y
+BR2_LINUX_KERNEL_CUSTOM_CONFIG_FILE="../pi2/board/kernel.config"
+BR2_LINUX_KERNEL_CONFIG_FRAGMENT_FILES="../pi2-dev/board/kernel.config.fragment"
+BR2_LINUX_KERNEL_LZ4=y
 BR2_LINUX_KERNEL_DTS_SUPPORT=y
 BR2_LINUX_KERNEL_INTREE_DTS_NAME="bcm2709-rpi-2-b"
-BR2_PACKAGE_BUSYBOX_CONFIG="../pi2-dev/board/busybox.config"
+BR2_PACKAGE_BUSYBOX_CONFIG="../pi2/board/busybox.config"
+BR2_PACKAGE_BUSYBOX_CONFIG_FRAGMENT_FILES="../pi2-dev/board/busybox.config.fragment"
 BR2_PACKAGE_BUSYBOX_SHOW_OTHERS=y
 BR2_PACKAGE_RPI_FIRMWARE=y
 BR2_PACKAGE_RPI_FIRMWARE_BOOTCODE_BIN=y
@@ -34,21 +41,27 @@ BR2_PACKAGE_RPI_FIRMWARE_VARIANT_PI_X=y
 BR2_PACKAGE_RPI_FIRMWARE_CONFIG_FILE="../pi2-dev/board/boot_config.txt"
 BR2_PACKAGE_RPI_FIRMWARE_CMDLINE_FILE="../pi2-dev/board/boot_cmdline.txt"
 BR2_PACKAGE_RPI_USERLAND=y
-BR2_PACKAGE_SPI_TOOLS=y
 BR2_PACKAGE_PYTHON3=y
 BR2_PACKAGE_PYTHON3_SSL=y
-BR2_PACKAGE_PYTHON_PIGPIO=y
+BR2_PACKAGE_PYTHON3_BZIP2=y
+BR2_PACKAGE_PYTHON3_PYEXPAT=y
+BR2_PACKAGE_PYTHON3_READLINE=y
+BR2_PACKAGE_PYTHON3_ZLIB=y
+# Python stdlib C-extension modules (built only when enabled). sqlite3 is
+# required by coverage (pytest-cov stores data in an SQLite DB and imports it
+# unconditionally); xz/decimal/curses round out CPython so on-device dev/test
+# hits fewer "No module named ..." surprises. None are pip-installable.
+BR2_PACKAGE_PYTHON3_SQLITE=y
+BR2_PACKAGE_PYTHON3_XZ=y
+BR2_PACKAGE_PYTHON3_DECIMAL=y
+BR2_PACKAGE_PYTHON3_CURSES=y
 BR2_PACKAGE_PYTHON_PILLOW_EP=y
-BR2_PACKAGE_PYTHON_PYQRCODE=y
 BR2_PACKAGE_PYTHON_RPI_GPIO=y
 BR2_PACKAGE_PYTHON_SPIDEV=y
 BR2_PACKAGE_FREETYPE=y
 BR2_PACKAGE_LIBRAQM=y
-BR2_PACKAGE_LIBQRENCODE=y
-BR2_PACKAGE_LIBQRENCODE_TOOLS=y
 BR2_PACKAGE_PYTHON_NUMPY=y
 BR2_PACKAGE_ZBAR=y
-BR2_PACKAGE_BCM2835=y
 BR2_TARGET_ROOTFS_CPIO_GZIP=y
 BR2_TARGET_ROOTFS_INITRAMFS=y
 BR2_PACKAGE_HOST_DOSFSTOOLS=y
@@ -57,7 +70,95 @@ BR2_PACKAGE_HOST_GENIMAGE=y
 BR2_PACKAGE_HOST_MTOOLS=y
 BR2_PACKAGE_PYTHON_URTYPES=y
 BR2_PACKAGE_PYTHON_PYZBAR=y
-BR2_PACKAGE_PYTHON_MOCK=y
 BR2_PACKAGE_PYTHON_EMBIT=y
 BR2_PACKAGE_PYTHON_PICAMERA=y
 BR2_PACKAGE_PYTHON_QRCODE=y
+# BR2_PACKAGE_PYTHON3_CODECSCJK is not set
+# BR2_TARGET_ROOTFS_TAR is not set
+
+### Development additions (everything below is dev-image only) ###
+
+# Wifi firmware + userspace (Pi Zero 2 W / Pi 3 onboard wifi)
+BR2_PACKAGE_BRCMFMAC_SDIO_FIRMWARE_RPI=y
+BR2_PACKAGE_BRCMFMAC_SDIO_FIRMWARE_RPI_WIFI=y
+BR2_PACKAGE_WPA_SUPPLICANT=y
+BR2_PACKAGE_WPA_SUPPLICANT_NL80211=y
+BR2_PACKAGE_WPA_SUPPLICANT_WPA3=y
+BR2_PACKAGE_WPA_SUPPLICANT_CLI=y
+BR2_PACKAGE_WPA_SUPPLICANT_PASSPHRASE=y
+BR2_PACKAGE_IW=y
+BR2_PACKAGE_WIRELESS_REGDB=y
+
+# SSH server: dropbear (root password login works out of the box; small).
+# The client side (ssh/scp/ssh-keygen/...) comes from OpenSSH below instead --
+# so dropbear's own client is disabled to avoid ssh/scp collisions.
+BR2_PACKAGE_DROPBEAR=y
+# BR2_PACKAGE_DROPBEAR_CLIENT is not set
+
+# mDNS/Zeroconf responder so the device is reachable at seedsigner.local
+# (host-assigned DHCP addresses over the USB relay change between reboots).
+# Lightweight (no dbus, unlike avahi). Advertised name is set to "seedsigner"
+# via /etc/default/mdnsd; the SSH service file is auto-selected by dropbear.
+BR2_PACKAGE_MDNSD=y
+
+# pip for on-device package installs (setuptools pulled in automatically as a
+# runtime dep; pip builds wheels via setuptools/PEP 517). Note: python3 is
+# built --without-ensurepip, so stdlib `python3 -m venv` needs --without-pip;
+# see docs/dev_images.md.
+BR2_PACKAGE_PYTHON_PIP=y
+
+# Dev CLI tools (vi and less come from busybox)
+BR2_PACKAGE_GIT=y
+BR2_PACKAGE_LIBCURL=y
+BR2_PACKAGE_LIBCURL_CURL=y
+BR2_PACKAGE_LIBCURL_OPENSSL=y
+BR2_PACKAGE_CA_CERTIFICATES=y
+BR2_PACKAGE_NANO=y
+BR2_PACKAGE_RSYNC=y
+BR2_PACKAGE_GLIBC_UTILS=y
+
+# Shell + terminal multiplexer (image shell is busybox ash; bash for scripts,
+# tmux to keep dev sessions alive across SSH disconnects)
+BR2_PACKAGE_BASH=y
+BR2_PACKAGE_TMUX=y
+
+# Debug / inspect tools
+BR2_PACKAGE_GDB=y
+BR2_PACKAGE_GDB_DEBUGGER=y
+BR2_PACKAGE_STRACE=y
+BR2_PACKAGE_HTOP=y
+BR2_PACKAGE_FILE=y
+BR2_PACKAGE_JQ=y
+
+# gpg (signature verification) + Midnight Commander (TUI file manager)
+BR2_PACKAGE_GNUPG2=y
+BR2_PACKAGE_MC=y
+
+# GitHub CLI (prebuilt static ARM binary; external package in opt/external-packages/gh)
+BR2_PACKAGE_GH=y
+
+# OpenSSH provides the client side: ssh, scp, sftp, ssh-agent, ssh-add,
+# ssh-copy-id (full ~/.ssh/config + agent forwarding for git/gh over SSH from
+# the device) plus ssh-keygen/ssh-keyscan. SERVER stays off -- dropbear is the
+# server. (dropbear's base scp still installs and collides; post-build.sh makes
+# OpenSSH's scp win, since dropbear's scp needs the client we disabled.)
+BR2_PACKAGE_OPENSSH=y
+BR2_PACKAGE_OPENSSH_CLIENT=y
+# BR2_PACKAGE_OPENSSH_SERVER is not set
+BR2_PACKAGE_OPENSSH_KEY_UTILS=y
+
+# Modern camera stack: libcamera + RPi VC4 pipeline + Python bindings, for
+# experimenting with the libcamera Python API (`import libcamera`, `cam`).
+# picamera2 (the higher-level wrapper) is intentionally NOT included -- it needs
+# several C-extension deps that aren't in Buildroot. The legacy python-picamera
+# stays for the seedsigner app itself. (VC4 pipeline pulls in boost.)
+BR2_PACKAGE_LIBCAMERA=y
+BR2_PACKAGE_LIBCAMERA_PIPELINE_RPI_VC4=y
+BR2_PACKAGE_LIBCAMERA_PYTHON=y
+
+# First-boot data-partition auto-expand: on first boot S30devdata grows the
+# ext4 data partition (mmcblk0p2) to fill the microSD. parted resizes the
+# partition; resize2fs (from target e2fsprogs) grows the filesystem.
+BR2_PACKAGE_PARTED=y
+BR2_PACKAGE_E2FSPROGS=y
+BR2_PACKAGE_E2FSPROGS_RESIZE2FS=y

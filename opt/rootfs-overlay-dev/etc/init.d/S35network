@@ -1,0 +1,130 @@
+#!/bin/sh
+#
+# Dev image: bring up networking.
+#   - wired:  any eth* interface (USB ethernet adapter, Pi 3 onboard NIC)
+#   - usb0:   ethernet gadget when tethered to a computer (usb relay). Tries
+#             the host's DHCP server first (e.g. macOS Internet Sharing,
+#             which also gives the Pi an internet route); if nothing answers,
+#             falls back to a static 10.55.0.1 + its own DHCP server so the
+#             host auto-configures too -- ssh root@10.55.0.1 always works.
+#   - wlan0:  onboard wifi, credentials read from the boot (FAT) partition:
+#               wifi.txt             line 1: SSID, line 2: passphrase,
+#                                    line 3 (optional): country code
+#               wpa_supplicant.conf  full config, used as-is if present
+#
+# Everything runs with DHCP and retries forever in the background, so
+# interfaces that appear later (hotplugged adapter, wifi assoc) still come up.
+
+BOOT_MNT="/mnt/microsd"
+
+start_wired() {
+	(
+		for i in $(seq 1 10); do
+			IFACES=$(ls /sys/class/net 2>/dev/null | grep '^eth')
+			[ -n "$IFACES" ] && break
+			sleep 1
+		done
+		for IFACE in $IFACES; do
+			ifconfig "$IFACE" up 2>/dev/null
+			udhcpc -i "$IFACE" -b -t 0 >/dev/null 2>&1
+		done
+	) &
+}
+
+start_usb_gadget() {
+	(
+		for i in $(seq 1 10); do
+			[ -e /sys/class/net/usb0 ] && break
+			sleep 1
+		done
+		[ -e /sys/class/net/usb0 ] || exit 0
+		ifconfig usb0 up 2>/dev/null
+
+		# Quick one-shot probe: does anything on the other end of the cable
+		# hand out an address (e.g. macOS/Windows internet sharing)?
+		if udhcpc -i usb0 -n -q -t 3 -T 3 >/dev/null 2>&1; then
+			udhcpc -i usb0 -b -t 0 >/dev/null 2>&1
+		else
+			ifconfig usb0 10.55.0.1 netmask 255.255.255.248
+			mkdir -p /var/lib/misc
+			udhcpd /etc/udhcpd.conf
+		fi
+	) &
+}
+
+start_wifi() {
+	(
+		# The boot partition is auto-mounted at /mnt/microsd by mdev;
+		# wait for it before looking for credentials.
+		for i in $(seq 1 15); do
+			grep -q " $BOOT_MNT " /proc/mounts && break
+			sleep 1
+		done
+
+		if [ -f "$BOOT_MNT/wpa_supplicant.conf" ]; then
+			cp "$BOOT_MNT/wpa_supplicant.conf" /etc/wpa_supplicant.conf
+		elif [ -f "$BOOT_MNT/wifi.txt" ]; then
+			SSID=$(sed -n '1p' "$BOOT_MNT/wifi.txt" | tr -d '\r\n')
+			PSK=$(sed -n '2p' "$BOOT_MNT/wifi.txt" | tr -d '\r\n')
+			COUNTRY=$(sed -n '3p' "$BOOT_MNT/wifi.txt" | tr -d '\r\n')
+			[ -n "$COUNTRY" ] || COUNTRY="US"
+			cat > /etc/wpa_supplicant.conf <<-EOF
+			country=$COUNTRY
+			network={
+			    ssid="$SSID"
+			    psk="$PSK"
+			}
+			EOF
+		else
+			exit 0
+		fi
+
+		for i in $(seq 1 10); do
+			[ -e /sys/class/net/wlan0 ] && break
+			sleep 1
+		done
+		if [ -e /sys/class/net/wlan0 ]; then
+			ifconfig wlan0 up 2>/dev/null
+			wpa_supplicant -B -i wlan0 -c /etc/wpa_supplicant.conf
+			udhcpc -i wlan0 -b -t 0 >/dev/null 2>&1
+		else
+			echo "network: WARNING: wifi credentials found but no wlan0" > /dev/kmsg
+		fi
+	) &
+}
+
+start() {
+	ifconfig lo up 2>/dev/null
+
+	start_wired
+	start_usb_gadget
+	start_wifi
+
+	# Correct the clock once a route to the internet exists
+	ntpd -p pool.ntp.org >/dev/null 2>&1
+}
+
+stop() {
+	killall udhcpc 2>/dev/null
+	killall udhcpd 2>/dev/null
+	killall wpa_supplicant 2>/dev/null
+	killall ntpd 2>/dev/null
+}
+
+case "$1" in
+	start)
+		start
+		;;
+	stop)
+		stop
+		;;
+	restart)
+		stop
+		start
+		;;
+	*)
+		echo "Usage: $0 {start|stop|restart}"
+		exit 1
+esac
+
+exit 0

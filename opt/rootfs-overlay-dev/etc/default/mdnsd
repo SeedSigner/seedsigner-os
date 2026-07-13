@@ -1,0 +1,10 @@
+# Options for mdnsd (see /etc/init.d/S50mdnsd).
+#
+# -H seedsigner  advertise the hostname "seedsigner" -> ssh root@seedsigner.local
+#                The system hostname stays "seedsigner-os" (matching the release
+#                image, which the app requires -- it keys SeedSigner-OS behavior
+#                off the hostname), so mdnsd is told the shorter name explicitly.
+#                mdnsd announces on every multicast interface and re-checks
+#                addresses every 10s, so it follows whatever IP the USB relay /
+#                wifi / ethernet link gets from DHCP.
+MDNSD_ARGS="-H seedsigner"
