@@ -48,8 +48,10 @@ compile_translations_and_fonts() {
   ss_translations_repo="./src/seedsigner/resources/seedsigner-translations"
 
   # install depedencies for babel and fonttools(pyftsubset)
-  pip install babel || exit
-  pip install fonttools || exit
+  # versions pinned: their output lands in the checksummed image, so an unpinned
+  # upgrade would silently break byte-reproducibility
+  pip install babel==2.18.0 || exit
+  pip install fonttools==4.63.0 || exit
   pip install -e . || exit
 
   # remove any existing binary mo files if they exist
@@ -84,8 +86,15 @@ compile_translations_and_fonts() {
   pyftsubset ${ss_translations_repo}/fonts/NotoSansSC-Regular-Original.ttf --text="${all_chars}" --output-file=${ss_translations_repo}/fonts/NotoSansSC-Regular.ttf || exit
   pyftsubset ${ss_translations_repo}/fonts/NotoSansTH-Regular-Original.ttf --text="${all_chars}" --output-file=${ss_translations_repo}/fonts/NotoSansTH-Regular.ttf || exit
 
+  # NotoSansDevanagari (Hindi) lives in the app's base fonts dir rather than the
+  # translations repo; subset it in place the same way
+  app_fonts_dir="./src/seedsigner/resources/fonts"
+  mv ${app_fonts_dir}/NotoSansDevanagari-Regular.ttf ${app_fonts_dir}/NotoSansDevanagari-Regular-Original.ttf
+  pyftsubset ${app_fonts_dir}/NotoSansDevanagari-Regular-Original.ttf --text="${all_chars}" --output-file=${app_fonts_dir}/NotoSansDevanagari-Regular.ttf || exit
+
   # remove original font files
   rm -f ${ss_translations_repo}/fonts/NotoSans*Regular-Original*ttf
+  rm -f ${app_fonts_dir}/NotoSans*Regular-Original*ttf
 
   cd -
   deactivate

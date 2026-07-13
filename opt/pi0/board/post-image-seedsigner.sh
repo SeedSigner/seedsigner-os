@@ -51,6 +51,21 @@ touch -d "${disk_timestamp}" `find boot overlays`
 mcopy -bpm -i "disk.img@@$OFFSET" boot/* ::
 # mcopy doesn't copy directories deterministically, so rely on sorted shell globbing instead.
 mcopy -bpm -i "disk.img@@$OFFSET" overlays/* ::overlays
+
+# Copy the l10n assets (translations + non-Latin fonts) staged by post-build.sh.
+# The app reads them from /mnt/microsd/l10n.
+cp -r ${BASE_DIR}/images/l10n l10n
+chmod 0755 `find l10n`
+touch -d "${disk_timestamp}" `find l10n`
+# Create dirs and copy files one at a time in sorted order to keep the image
+# deterministic (mmd honors SOURCE_DATE_EPOCH for created dirs).
+for d in $(find l10n -type d | LC_ALL=C sort); do
+  mmd -i "disk.img@@$OFFSET" "::${d}"
+done
+for f in $(find l10n -type f | LC_ALL=C sort); do
+  mcopy -bpm -i "disk.img@@$OFFSET" "${f}" "::${f}"
+done
+
 mv disk.img ${BASE_DIR}/images/seedsigner_os.img
 
 cd -

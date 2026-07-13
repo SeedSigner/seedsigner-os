@@ -171,3 +171,39 @@ find "${TARGET_DIR}" -name '.DS_Store' -print0 | xargs -0 --no-run-if-empty rm -
 SOURCE_DATE_EPOCH=1 PYTHONHASHSEED=0 ${HOST_DIR}/bin/python3.12 \
   "${BUILD_DIR}/python3-3.12.10/Lib/compileall.py" \
   -f --invalidation-mode=checked-hash "${TARGET_DIR}/opt/src"
+
+# ### l10n externalization
+# ### Translations and non-Latin fonts don't need to be RAM-resident; stage them for
+# ### the FAT boot partition (copied in by post-image-seedsigner.sh, read by the app
+# ### from /mnt/microsd/l10n) and strip them from the initramfs rootfs.
+
+app_res="${TARGET_DIR}/opt/src/seedsigner/resources"
+l10n_staging="${BINARIES_DIR}/l10n"
+
+rm -rf "${l10n_staging}"
+mkdir -p "${l10n_staging}/fonts"
+
+mo_count=0
+for mo in "${app_res}"/seedsigner-translations/l10n/*/LC_MESSAGES/messages.mo; do
+  [ -f "${mo}" ] || continue
+  locale="$(basename "$(dirname "$(dirname "${mo}")")")"
+  mkdir -p "${l10n_staging}/${locale}/LC_MESSAGES"
+  cp "${mo}" "${l10n_staging}/${locale}/LC_MESSAGES/messages.mo"
+  mo_count=$((mo_count + 1))
+done
+
+# Fail loudly rather than ship an image with no languages on the FAT partition
+if [ "${mo_count}" -eq 0 ]; then
+  echo "ERROR: no compiled messages.mo files found to stage for the FAT partition" >&2
+  exit 1
+fi
+
+cp "${app_res}"/seedsigner-translations/fonts/*.ttf "${l10n_staging}/fonts/"
+cp "${app_res}/fonts/NotoSansDevanagari-Regular.ttf" "${l10n_staging}/fonts/"
+
+# Strip the now-externalized assets from the rootfs
+rm -rf "${app_res}/seedsigner-translations"
+rm -f  "${app_res}/fonts/NotoSansDevanagari-Regular.ttf"
+
+# Normalize timestamps for byte-reproducible images
+find "${l10n_staging}" -exec touch -d "2023/01/01T12:15:05" {} +
