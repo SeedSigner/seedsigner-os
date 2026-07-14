@@ -1,0 +1,68 @@
+Emit a fixed IPA module signing key for reproducible builds
+
+libcamera generates a fresh random 2048-bit RSA key at build time
+(src/meson.build custom_target ipa-priv-key), compiles the public key
+into libcamera.so (ipa_pub_key.cpp) and installs a signature next to
+each IPA module (ipa_rpi_vc4.so.sign). Two rootfs files therefore
+change on every build, breaking byte-for-byte reproducibility. There
+is no meson option to disable signing (it is gated on openssl.found())
+and unsigned IPAs pay an IPC-isolation penalty, so instead pin the key:
+RSA PKCS#1 v1.5 signing is deterministic, making both files stable.
+
+The key is deliberately public. It asserts only "this IPA belongs to
+this build of libcamera"; reproducible builds require every builder to
+sign with the same key.
+
+--- a/utils/gen-ipa-priv-key.sh
++++ b/utils/gen-ipa-priv-key.sh
+@@ -1,11 +1,46 @@
+ #!/bin/sh
+ # SPDX-License-Identifier: GPL-2.0-or-later
+ # Copyright (C) 2020, Google Inc.
+ #
+ # Author: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+ #
+ # Generate an RSA private key to sign IPA modules
+-
+-key="$1"
+-
+-openssl genpkey -algorithm RSA -out "${key}" -pkeyopt rsa_keygen_bits:2048
++#
++# SeedSigner OS: emit a fixed key instead of generating a random one, so the
++# public key compiled into libcamera.so and the ipa_*.so.sign signature are
++# byte-identical on every build (reproducible images). The signature is not a
++# trust boundary: it only tells libcamera the IPA came from the same build, so
++# it may run in-process instead of isolated over IPC.
++
++key="$1"
++
++cat > "${key}" <<'EOF'
++-----BEGIN PRIVATE KEY-----
++MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQD4nYB6OVW/qTt+
++9yGsbQBSLyeC+MoKG08aYyqAPjTtJiuAlBnLgw75qQiyy2+Txp8YjtNx7xcwMmHD
++FzEjXRC4I4aP7PLBGeLKRABnCH2FD9bVVdqL9qHvBmG2HUVNp0DfPmcna/KDoJqW
++zcaXlS1vIoVudh5f6IMo00kcd7f1ROjictXb1He2XOq3O6vlFYvpA0EX5qbSuSRz
++2LwDoZQhxAa/w1WVuYvRR6BpSVIf/VivWb3BWZcbWg1Q0Urp0MgFcvie/OhbK1mm
++CbIWvGnzqQUaNafPB05mvb09fZki5pw4dXNkA7Ep2uCsziKjA4gPurVpc1vMcjKo
++AoN7OSLNAgMBAAECggEAOuXlWA9ZNyy6gZu+iIDSQKYXMDoMc1SA6vlvSi5yj3Qp
++fi6X5dTIqXDYNLNpXZMCgejkQuunjK2C55sI8x3LJjSUXmh+Ii0lw1FU3xPt2KYl
+++Sh7vAjT2DKk12Yb0we6oKjB+17hdzmHJg7d629V8iw1fDPTglktKXDUsz/RfvM6
++x/uOnvHYJ2oSICx2pIbFaFnt1a8MmWLAXO3345V8b/l0MGPmZX7QNOlYHvRnx1qt
++dGfaFEp+v7z/6GPcH840NeYlvYqhHFVuu4tVBya6CCfJq4/K1V+yKsfT7cz05LTC
++H/siJTwOq5j2qja8SL3xyM3S9N9V9nQoqHo5bTbb6QKBgQD8mP6z3XX508yLbfVV
++Dsz1cCMjoaGXkB2kQDDFOgUnciEp9EPPUyteWz/aNWhJNYqLuK/f+pzmOOkknnwS
++lYxpSzL6CaXNsxWf2MIGCa3C2ptNeTZ8VtvKfLE2INIEfFMhJe5cQ6/jV9tA1iJF
++w4L8sF6Yj3AX2c2S6P08HZm/ZwKBgQD79sZeCU9N4f/oZnuM75YmkBomxJNPKY4/
++igzcJkla9BCsSdTSpQEsT7fz+D+AbZ+JeY96DTt4W7OPqz8mZS3H0sdnWzIgUA95
++vpqqZOlvaxH5ZUjNARTeIZ17k4EpLzSPNYdJPsMA+SXwcqESNJQwo/3FBcSxw7cB
++vj9ivu7PqwKBgDaC0dyA+1e5pFemmB4N/p8s3vhuhg/OMwdiLuQxHDGiCJQkOYoB
++WceYC5SMl//MhSSX66R7UebA+1dCuGXOTine55ZcBKL6db00KtLgvdXiFUfH08FL
++gU0WUavrs0byiYIKzICuvsNiD1fTnjvN8HOVoCRuN/N9tkZw701M2gQbAoGBALAw
++zF4NnIsVsmHM6DCRiSnGMsNRSsFcicAcxQldLIaRjOctacky4TMfO786pQ0lmx4D
++BzWN8zwiw9l/IlWzAuRsnEvGFbNKyMeVZYoprqLe+F6xWMsiKnl6gCld6D/oZpSO
++FeA+JxaTItiVD9UvN0EcK+SOOBEmjt6FLsXaRhypAoGBAJ7IyGUX8X2bb7FAuudX
++qjeVLU+U9ytDnylq4OReQzrAB82UhHB+xgBdJDZCCUuW8o2pEtxKwwrs6CVkVhBR
++JgImPWNN7Qj3ba8d/5Q0ZMLEyP9zXc72H8IxKWpbHjPM8AnPOQyaC8wMcC14YBEH
++TlNdvdURN2UOGu3JN0z/vB0q
++-----END PRIVATE KEY-----
++EOF

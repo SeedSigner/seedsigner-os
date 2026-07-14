@@ -1,0 +1,35 @@
+Prefer libcrypto over gnutls for IPA signature verification
+
+libcamera probes gnutls before OpenSSL's libcrypto, and buildroot's
+package Config.in force-selects gnutls, so gnutls + nettle + hogweed +
+gmp all land in the rootfs just to verify one RSA-SHA256 signature at
+startup. OpenSSL is already in the image (python3 ssl support; embit's
+bip39 needs hashlib.pbkdf2_hmac), so probe libcrypto first and link the
+library we already ship. gnutls still gets built (Config.in select) but
+becomes unreferenced, and post-build.sh removes it from the target.
+
+pub_key.cpp supports both backends (HAVE_CRYPTO is checked before
+HAVE_GNUTLS); this only changes which one meson picks.
+
+--- a/src/libcamera/meson.build
++++ b/src/libcamera/meson.build
+@@ -81,14 +81,14 @@
+ libudev = dependency('libudev', required : get_option('udev'))
+ libyaml = dependency('yaml-0.1', required : false)
+
+-# Use one of gnutls or libcrypto (provided by OpenSSL), trying gnutls first.
+-libcrypto = dependency('gnutls', required : false)
++# Use one of libcrypto (provided by OpenSSL) or gnutls, trying libcrypto first.
++libcrypto = dependency('libcrypto', required : false)
+ if libcrypto.found()
+-    config_h.set('HAVE_GNUTLS', 1)
++    config_h.set('HAVE_CRYPTO', 1)
+ else
+-    libcrypto = dependency('libcrypto', required : false)
++    libcrypto = dependency('gnutls', required : false)
+     if libcrypto.found()
+-        config_h.set('HAVE_CRYPTO', 1)
++        config_h.set('HAVE_GNUTLS', 1)
+     endif
+ endif
+

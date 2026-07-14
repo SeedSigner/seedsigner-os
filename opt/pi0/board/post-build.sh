@@ -18,17 +18,6 @@ ln -srf ${TARGET_DIR}/usr/lib/python3.12 ${TARGET_DIR}/usr/lib/python3
 ln -srf ${BUILD_DIR}/python3-3.12.10 ${BUILD_DIR}/python3-3.10.10
 ln -srf ${BUILD_DIR}/python3-3.12.10 ${BUILD_DIR}/python3
 
-# Clean up test files included with numpy
-rm -rf ${TARGET_DIR}/usr/lib/python3/site-packages/numpy/tests
-rm -rf ${TARGET_DIR}/usr/lib/python3/site-packages/numpy/testing
-rm -rf ${TARGET_DIR}/usr/lib/python3/site-packages/numpy/core/tests
-rm -rf ${TARGET_DIR}/usr/lib/python3/site-packages/numpy/linalg/tests
-rm -rf ${TARGET_DIR}/usr/lib/python3/site-packages/numpy/f2py/tests
-rm -rf ${TARGET_DIR}/usr/lib/python3/site-packages/numpy/typing/tests
-rm -rf ${TARGET_DIR}/usr/lib/python3/site-packages/numpy/ma/tests
-rm -rf ${TARGET_DIR}/usr/lib/python3/site-packages/numpy/lib/tests
-rm -rf ${TARGET_DIR}/usr/lib/python3/site-packages/numpy/random/tests/
-
 # Clean up files included in embit we don't need
 rm -rf ${TARGET_DIR}/usr/lib/python3/site-packages/embit/liquid
 rm -rf ${TARGET_DIR}/usr/lib/python3/site-packages/embit/util/prebuilt/libsecp256k1_darwin_arm64.dylib
@@ -54,20 +43,48 @@ rm -rf ${TARGET_DIR}/usr/lib/python3/unittest
 rm -rf ${TARGET_DIR}/usr/lib/python3/ensurepip
 
 # ### Cross-arch reproducibility normalization
-# ### Two files record the *build machine* architecture, which makes images built on
-# ### an aarch64 host differ from x86_64-host builds:
-# ###   - libstdc++: nothing in the image links against it, and its .text differs by build
-# ###     host (GCC 13.3 orders two spill slots in from_chars differently) => remove it.
+# ### Files recording the *build machine* architecture make images built on an
+# ### aarch64 host differ from x86_64-host builds:
 # ###   - python sysconfigdata: embeds the configure build triplet; only loaded via
 # ###     sysconfig.get_config_var(), which nothing on the device calls => remove it.
-# ### (numpy's __config__.py is handled at the source instead: see the python-numpy patch
-# ###  in BR2_GLOBAL_PATCH_DIR, opt/patches/python-numpy/.)
+# ###   - libstdc++: its .text differs by build host. It used to be removed here,
+# ###     but libcamera links against it, so it must ship now => normalize below.
 
-# Remove libstdc++ (unused: no binary in the image links against it)
-rm -f ${TARGET_DIR}/usr/lib/libstdc++.so.6.0.32 \
-      ${TARGET_DIR}/usr/lib/libstdc++.so.6 \
-      ${TARGET_DIR}/usr/lib/libstdc++.so \
-      ${TARGET_DIR}/usr/lib/libstdc++.so.6.0.32-gdb.py
+# Remove the libstdc++ gdb helper (build-path metadata; not a library)
+rm -f ${TARGET_DIR}/usr/lib/libstdc++.so.6.0.32-gdb.py
+
+# Normalize libstdc++ across build-host architectures. GCC 13.3's cc1plus
+# compiles std::from_chars with pairs of stack spill slots swapped (sp+28/sp+32
+# and sp+60/sp+64) depending on the architecture of the *build* machine -- 12
+# bytes across the float/double/long-double instantiations, likely an
+# unreported host-dependence bug. The x86_64-host build (the release host) is
+# canonical; a matching aarch64-host build is byte-patched to it. Self-verifying:
+# the file is only touched when it exactly matches the known aarch64-host hash,
+# and the result (or an untouched file) must match the canonical hash -- any
+# toolchain change lands in the error branch instead of shipping silently.
+# Derived 2026-07-13 from an x86_64+aarch64 build pair; every other file in the
+# two rootfs trees was byte-identical.
+LIBSTDCPP="${TARGET_DIR}/usr/lib/libstdc++.so.6.0.32"
+LIBSTDCPP_SHA_X86="65e293c8c7b41c80d418f068c533f25ac6e51a30a5d52330bd77164bfd08d647"
+LIBSTDCPP_SHA_ARM="e86282cfc72a444b73ac987fe2e9c1e0421a365bd6939ba93cc8c91da32dda29"
+libstdcpp_sha="$(sha256sum "${LIBSTDCPP}" | cut -d' ' -f1)"
+if [ "${libstdcpp_sha}" = "${LIBSTDCPP_SHA_ARM}" ]; then
+  # offset:octal-byte of the canonical (x86_64-host) value at each divergence
+  for bytepatch in 1349028:034 1349036:040 1349104:034 1349116:040 \
+                   1359604:034 1359616:040 1359700:034 1359712:040 \
+                   1375284:100 1375300:074 1375332:100 1375340:074; do
+    printf "\\${bytepatch#*:}" | \
+      dd of="${LIBSTDCPP}" bs=1 seek="${bytepatch%:*}" count=1 conv=notrunc status=none
+  done
+  libstdcpp_sha="$(sha256sum "${LIBSTDCPP}" | cut -d' ' -f1)"
+fi
+if [ "${libstdcpp_sha}" != "${LIBSTDCPP_SHA_X86}" ]; then
+  echo "ERROR: libstdc++ sha256 ${libstdcpp_sha} matches neither the canonical" >&2
+  echo "x86_64-host build nor the known aarch64-host build. The toolchain output" >&2
+  echo "changed; re-derive the byte normalization above from a fresh x86_64 +" >&2
+  echo "aarch64 build pair (diff the two rootfs trees)." >&2
+  exit 1
+fi
 
 # Remove python sysconfigdata (build-host metadata; unused at runtime)
 rm -f ${TARGET_DIR}/usr/lib/python3.12/_sysconfigdata__linux_arm-linux-gnueabihf.py
@@ -75,38 +92,40 @@ rm -f ${TARGET_DIR}/usr/lib/python3.12/_sysconfigdata__linux_arm-linux-gnueabihf
 # ### Image slimming: files verified unused by the seedsigner app
 # ### (dependency-closure scan of every ELF + import scan of every shipped pyc)
 
-# rpi-userland demo/diagnostic binaries; picamera talks to libmmal* directly
-for f in containers_check_frame_int containers_datagram_receiver containers_datagram_sender \
-         containers_dump_pktfile containers_rtp_decoder containers_stream_client \
-         containers_stream_server containers_test containers_test_bits containers_test_uri \
-         containers_uri_pipe raspistill raspivid raspividyuv raspiyuv mmal_vc_diag \
-         vchiq_test vcsmem vcmailbox tvservice vcgencmd dtoverlay dtoverlay-pre \
-         dtoverlay-post dtmerge read_zbar read_zbar.py zbarcam fribidi qr; do
+# CLI tools shipped by library packages (zbar, fribidi, qrcode) that the app,
+# which links/imports the libraries directly, never invokes
+for f in read_zbar read_zbar.py zbarcam fribidi qr; do
   rm -f ${TARGET_DIR}/usr/bin/${f}
 done
 
-# Libraries nothing in the image links against (GL stack, media-container plugins,
-# dtoverlay helpers, v4l compat shims, harfbuzz subsetter)
-rm -rf ${TARGET_DIR}/usr/lib/plugins \
-       ${TARGET_DIR}/usr/lib/libv4l
-rm -f  ${TARGET_DIR}/usr/lib/libharfbuzz-subset.so* \
-       ${TARGET_DIR}/usr/lib/libdtovl.so \
-       ${TARGET_DIR}/usr/lib/libdebug_sym.so \
-       ${TARGET_DIR}/usr/lib/libvcilcs.so \
-       ${TARGET_DIR}/usr/lib/libkhrn_client.so \
-       ${TARGET_DIR}/usr/lib/libopenmaxil.so \
-       ${TARGET_DIR}/usr/lib/libEGL.so \
-       ${TARGET_DIR}/usr/lib/libGLESv2.so \
-       ${TARGET_DIR}/usr/lib/libOpenVG.so \
-       ${TARGET_DIR}/usr/lib/libWFC.so \
-       ${TARGET_DIR}/usr/lib/libbrcmEGL.so \
-       ${TARGET_DIR}/usr/lib/libbrcmGLESv2.so \
-       ${TARGET_DIR}/usr/lib/libbrcmOpenVG.so \
-       ${TARGET_DIR}/usr/lib/libbrcmWFC.so
+# Libraries nothing in the image links against (v4l compat shims, harfbuzz subsetter)
+rm -rf ${TARGET_DIR}/usr/lib/libv4l
+rm -f  ${TARGET_DIR}/usr/lib/libharfbuzz-subset.so*
 
-# Python stdlib subsystems with no importers in the image (scan of all pyc string tables;
-# concurrent/ stays: picamera.mmal uses concurrent.futures)
-rm -rf ${TARGET_DIR}/usr/lib/python3.12/asyncio \
+# libcamera extras: the cam/qcam apps and v4l2 compat are disabled at configure
+# time, but the IPA tuning data ships one JSON per supported sensor (~20). Keep
+# the two sensors we build drivers for + the uncalibrated fallback.
+find ${TARGET_DIR}/usr/share/libcamera/ipa/rpi/vc4 -name '*.json' \
+	-not -name 'ov5647.json' -not -name 'imx219.json' \
+	-not -name 'uncalibrated.json' \
+	-print0 | xargs -0 --no-run-if-empty rm -f
+
+# gnutls and its dependency closure (libtasn1, libunistring, nettle/hogweed,
+# gmp): force-selected by buildroot's libcamera Config.in, but our libcamera
+# links OpenSSL's libcrypto instead (opt/patches/libcamera/0002), which python3
+# already ships. Nothing references these.
+rm -f  ${TARGET_DIR}/usr/lib/libgnutls*.so* \
+       ${TARGET_DIR}/usr/lib/libtasn1.so* \
+       ${TARGET_DIR}/usr/lib/libunistring.so* \
+       ${TARGET_DIR}/usr/lib/libnettle.so* \
+       ${TARGET_DIR}/usr/lib/libhogweed.so* \
+       ${TARGET_DIR}/usr/lib/libgmp*.so* \
+       ${TARGET_DIR}/usr/bin/nettle-*
+
+# Python stdlib subsystems with no importers in the image (scan of all pyc string
+# tables; concurrent/ was kept only for picamera.mmal, which is gone)
+rm -rf ${TARGET_DIR}/usr/lib/python3.12/concurrent \
+       ${TARGET_DIR}/usr/lib/python3.12/asyncio \
        ${TARGET_DIR}/usr/lib/python3.12/email \
        ${TARGET_DIR}/usr/lib/python3.12/xml \
        ${TARGET_DIR}/usr/lib/python3.12/http \
@@ -132,35 +151,11 @@ rm -f  ${TARGET_DIR}/usr/lib/python3.12/lib-dynload/_asyncio.* \
 
 rm -f ${TARGET_DIR}/usr/lib/python3/config-3.12-arm-linux-gnueabihf/Makefile
 rm -f ${TARGET_DIR}/usr/lib/python3/json/decoder.pyc
-rm -f ${TARGET_DIR}/usr/lib/python3/site-packages/numpy/core/_string_helpers.pyc
-rm -f ${TARGET_DIR}/usr/lib/python3/site-packages/numpy/distutils/ccompiler.pyc
-rm -f ${TARGET_DIR}/usr/lib/python3/site-packages/numpy/distutils/command/build_py.pyc
-rm -f ${TARGET_DIR}/usr/lib/python3/site-packages/numpy/distutils/misc_util.pyc
-rm -f ${TARGET_DIR}/usr/lib/python3/site-packages/numpy/distutils/system_info.pyc
-rm -f ${TARGET_DIR}/usr/lib/python3/site-packages/numpy/f2py/auxfuncs.pyc
-rm -f ${TARGET_DIR}/usr/lib/python3/site-packages/numpy/f2py/crackfortran.pyc
-rm -f ${TARGET_DIR}/usr/lib/python3/site-packages/numpy/f2py/f2py2e.pyc
-rm -f ${TARGET_DIR}/usr/lib/python3/site-packages/numpy/lib/_iotools.pyc
-rm -f ${TARGET_DIR}/usr/lib/python3/site-packages/numpy/lib/npyio.pyc
-rm -f ${TARGET_DIR}/usr/lib/python3/site-packages/numpy/lib/recfunctions.pyc
-rm -f ${TARGET_DIR}/usr/lib/python3/site-packages/numpy/lib/stride_tricks.pyc
 rm -f ${TARGET_DIR}/usr/lib/python3/traceback.pyc
 rm -f ${TARGET_DIR}/usr/lib/python3/_sysconfigdata__linux_arm-linux-gnueabihf.pyc
 
 find ${TARGET_DIR}/usr/lib/python3.12 -name '*.py' \
 	-not -path "*/python3.12/json/decoder.py" \
-	-not -path "*/python3.12/site-packages/numpy/core/_string_helpers.py" \
-	-not -path "*/python3.12/site-packages/numpy/distutils/ccompiler.py" \
-	-not -path "*/python3.12/site-packages/numpy/distutils/command/build_py.py" \
-	-not -path "*/python3.12/site-packages/numpy/distutils/misc_util.py" \
-	-not -path "*/python3.12/site-packages/numpy/distutils/system_info.py" \
-	-not -path "*/python3.12/site-packages/numpy/f2py/auxfuncs.py" \
-	-not -path "*/python3.12/site-packages/numpy/f2py/crackfortran.py" \
-	-not -path "*/python3.12/site-packages/numpy/f2py/f2py2e.py" \
-	-not -path "*/python3.12/site-packages/numpy/lib/_iotools.py" \
-	-not -path "*/python3.12/site-packages/numpy/lib/npyio.py" \
-	-not -path "*/python3.12/site-packages/numpy/lib/recfunctions.py" \
-	-not -path "*/python3.12/site-packages/numpy/lib/stride_tricks.py" \
 	-not -path "*/python3.12/traceback.py" \
 	-print0 | \
 	xargs -0 --no-run-if-empty rm -f

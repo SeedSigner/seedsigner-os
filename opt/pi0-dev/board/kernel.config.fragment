@@ -69,7 +69,15 @@ CONFIG_HID=y
 CONFIG_HID_GENERIC=y
 CONFIG_USB_HID=y
 
-# HDMI (matches the "#HDMI" breadcrumbs left in the release kernel.config)
+# HDMI (matches the "#HDMI" breadcrumbs left in the release kernel.config).
+# The framebuffer/console stack must be re-enabled HERE: the release config
+# now disables FB/fbcon/DRM entirely (boot-speed: no display stack on the
+# SPI-panel release image), so the dev HDMI console no longer inherits them
+# from the base.
+CONFIG_FB=y
+CONFIG_FB_BCM2708=y
+CONFIG_FB_SIMPLE=y
+CONFIG_FRAMEBUFFER_CONSOLE=y
 CONFIG_DMADEVICES=y
 CONFIG_DMA_BCM2835=y
 CONFIG_DMA_BCM2708=y
@@ -80,3 +88,45 @@ CONFIG_AUXDISPLAY=y
 
 # Persistent ext4 data partition (/dev/mmcblk0p2)
 CONFIG_EXT4_FS=y
+
+# Camera (libcamera/unicam). The release image uses the legacy GPU-firmware
+# camera stack (start_x=1 + MMAL); libcamera instead needs the ARM-side drivers:
+# unicam (CSI-2 receiver) + bcm2835-isp for the vc4 pipeline handler, the sensor
+# drivers, and I2C to talk to the sensor (which sits behind the device tree
+# i2c0mux pinctrl mux). Both sensors are built in so v1 (OV5647) and v2 (IMX219)
+# modules work; the dtoverlay in boot_config.txt selects which one probes.
+CONFIG_VIDEO_BCM2835_UNICAM=y
+CONFIG_VIDEO_ISP_BCM2835=y
+CONFIG_VIDEO_OV5647=y
+CONFIG_VIDEO_IMX219=y
+CONFIG_I2C_BCM2835=y
+CONFIG_I2C_MUX=y
+CONFIG_I2C_MUX_PINCTRL=y
+
+# The sensor's power rail (cam1_regulator, a "regulator-fixed" switched by GPIO)
+# has to be enabled before it will answer on I2C. The legacy stack powered the
+# sensor from the GPU firmware, so the ARM kernel never needed the regulator
+# framework; without these the rail stays off and the sensor probe fails with
+# -EREMOTEIO (-121).
+CONFIG_REGULATOR=y
+CONFIG_REGULATOR_FIXED_VOLTAGE=y
+
+# unicam/ISP allocate frame buffers from CMA via dma-contig. CONFIG_CMA=y is already
+# set in the base config, but without DMA_CMA nothing sets up a pool (CmaTotal: 0 kB)
+# and capture cannot allocate buffers.
+#
+# Sizing is NOT controlled by CONFIG_CMA_SIZE_MBYTES here: the Pi device tree ships a
+# "linux,cma" reserved-memory node asking for 64MB, and that node wins over the
+# compiled-in default (a cma=<n>M kernel cmdline arg would in turn override the node).
+# So the effective pool is 64MB and the value below is only a fallback if the DT node
+# ever goes away.
+#
+# 64MB of CMA is what makes gpu_mem=32 in boot_config.txt load-bearing rather than a
+# nicety. This image unpacks a ~230MB initramfs into RAM and holds a ~100MB compressed
+# copy of it until init runs, so memory is tightest at boot: with the release image's
+# gpu_mem=64 the ARM side gets 448MB, and reserving 64MB of that panics the kernel
+# ("System is deadlocked on memory") before init. gpu_mem=32 lifts the ARM side to
+# 480MB, which absorbs the reservation. Verified on pi02w-dev hardware, same 512MB
+# budget and same initramfs rootfs as this board.
+CONFIG_DMA_CMA=y
+CONFIG_CMA_SIZE_MBYTES=24
