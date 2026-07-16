@@ -35,10 +35,13 @@ BR2_PACKAGE_BUSYBOX_CONFIG_FRAGMENT_FILES="../pi0-dev/board/busybox.config.fragm
 BR2_PACKAGE_BUSYBOX_SHOW_OTHERS=y
 BR2_PACKAGE_RPI_FIRMWARE=y
 BR2_PACKAGE_RPI_FIRMWARE_BOOTCODE_BIN=y
-BR2_PACKAGE_RPI_FIRMWARE_VARIANT_PI_X=y
+# Plain firmware (no _X/camera variant): the GPU-firmware camera stack was only
+# needed by legacy picamera, which libcamera replaces. The cut-down (_cd)
+# variant does NOT work: it lacks the firmware-side ISP service (hw-tested on
+# pi0, camera never enumerates).
+BR2_PACKAGE_RPI_FIRMWARE_VARIANT_PI=y
 BR2_PACKAGE_RPI_FIRMWARE_CONFIG_FILE="../pi0-dev/board/boot_config.txt"
 BR2_PACKAGE_RPI_FIRMWARE_CMDLINE_FILE="../pi0-dev/board/boot_cmdline.txt"
-BR2_PACKAGE_RPI_USERLAND=y
 BR2_PACKAGE_PYTHON3=y
 BR2_PACKAGE_PYTHON3_SSL=y
 BR2_PACKAGE_PYTHON3_BZIP2=y
@@ -58,7 +61,6 @@ BR2_PACKAGE_PYTHON_RPI_GPIO=y
 BR2_PACKAGE_PYTHON_SPIDEV=y
 BR2_PACKAGE_FREETYPE=y
 BR2_PACKAGE_LIBRAQM=y
-BR2_PACKAGE_PYTHON_NUMPY=y
 BR2_PACKAGE_ZBAR=y
 BR2_TARGET_ROOTFS_CPIO_GZIP=y
 BR2_TARGET_ROOTFS_INITRAMFS=y
@@ -69,7 +71,6 @@ BR2_PACKAGE_HOST_MTOOLS=y
 BR2_PACKAGE_PYTHON_URTYPES=y
 BR2_PACKAGE_PYTHON_PYZBAR=y
 BR2_PACKAGE_PYTHON_EMBIT=y
-BR2_PACKAGE_PYTHON_PICAMERA=y
 BR2_PACKAGE_PYTHON_QRCODE=y
 # BR2_PACKAGE_PYTHON3_CODECSCJK is not set
 # BR2_TARGET_ROOTFS_TAR is not set
@@ -145,11 +146,11 @@ BR2_PACKAGE_OPENSSH_CLIENT=y
 # BR2_PACKAGE_OPENSSH_SERVER is not set
 BR2_PACKAGE_OPENSSH_KEY_UTILS=y
 
-# Modern camera stack: libcamera + RPi VC4 pipeline + Python bindings, for
-# experimenting with the libcamera Python API (`import libcamera`, `cam`).
-# picamera2 (the higher-level wrapper) is intentionally NOT included -- it needs
-# several C-extension deps that aren't in Buildroot. The legacy python-picamera
-# stays for the seedsigner app itself. (VC4 pipeline pulls in boost.)
+# Camera stack: libcamera + RPi VC4 pipeline + Python bindings; the seedsigner
+# app imports the native pybind11 `libcamera` module directly. picamera2 (the
+# higher-level wrapper) is intentionally NOT included -- it needs several
+# C-extension deps that aren't in Buildroot. The legacy picamera/MMAL stack
+# (python-picamera, numpy, rpi-userland) is gone. (VC4 pipeline pulls in boost.)
 BR2_PACKAGE_LIBCAMERA=y
 BR2_PACKAGE_LIBCAMERA_PIPELINE_RPI_VC4=y
 BR2_PACKAGE_LIBCAMERA_PYTHON=y

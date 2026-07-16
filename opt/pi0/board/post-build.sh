@@ -47,44 +47,16 @@ rm -rf ${TARGET_DIR}/usr/lib/python3/ensurepip
 # ### aarch64 host differ from x86_64-host builds:
 # ###   - python sysconfigdata: embeds the configure build triplet; only loaded via
 # ###     sysconfig.get_config_var(), which nothing on the device calls => remove it.
-# ###   - libstdc++: its .text differs by build host. It used to be removed here,
-# ###     but libcamera links against it, so it must ship now => normalize below.
+# ###   - libstdc++: its .text used to differ by build host (12 bytes in
+# ###     std::from_chars: cc1plus's argument evaluation order leaked into the
+# ###     pseudo-register numbering of arm.md's 64-bit shift expanders). Fixed
+# ###     at the source by opt/patches/gcc/0001-arm-deterministic-64bit-shift-
+# ###     scratch-pseudo-order.patch (verified 2026-07-15: x86_64- and aarch64-
+# ###     hosted toolchains produce byte-identical libstdc++.so.6.0.32), so no
+# ###     normalization is needed here anymore.
 
 # Remove the libstdc++ gdb helper (build-path metadata; not a library)
 rm -f ${TARGET_DIR}/usr/lib/libstdc++.so.6.0.32-gdb.py
-
-# Normalize libstdc++ across build-host architectures. GCC 13.3's cc1plus
-# compiles std::from_chars with pairs of stack spill slots swapped (sp+28/sp+32
-# and sp+60/sp+64) depending on the architecture of the *build* machine -- 12
-# bytes across the float/double/long-double instantiations, likely an
-# unreported host-dependence bug. The x86_64-host build (the release host) is
-# canonical; a matching aarch64-host build is byte-patched to it. Self-verifying:
-# the file is only touched when it exactly matches the known aarch64-host hash,
-# and the result (or an untouched file) must match the canonical hash -- any
-# toolchain change lands in the error branch instead of shipping silently.
-# Derived 2026-07-13 from an x86_64+aarch64 build pair; every other file in the
-# two rootfs trees was byte-identical.
-LIBSTDCPP="${TARGET_DIR}/usr/lib/libstdc++.so.6.0.32"
-LIBSTDCPP_SHA_X86="65e293c8c7b41c80d418f068c533f25ac6e51a30a5d52330bd77164bfd08d647"
-LIBSTDCPP_SHA_ARM="e86282cfc72a444b73ac987fe2e9c1e0421a365bd6939ba93cc8c91da32dda29"
-libstdcpp_sha="$(sha256sum "${LIBSTDCPP}" | cut -d' ' -f1)"
-if [ "${libstdcpp_sha}" = "${LIBSTDCPP_SHA_ARM}" ]; then
-  # offset:octal-byte of the canonical (x86_64-host) value at each divergence
-  for bytepatch in 1349028:034 1349036:040 1349104:034 1349116:040 \
-                   1359604:034 1359616:040 1359700:034 1359712:040 \
-                   1375284:100 1375300:074 1375332:100 1375340:074; do
-    printf "\\${bytepatch#*:}" | \
-      dd of="${LIBSTDCPP}" bs=1 seek="${bytepatch%:*}" count=1 conv=notrunc status=none
-  done
-  libstdcpp_sha="$(sha256sum "${LIBSTDCPP}" | cut -d' ' -f1)"
-fi
-if [ "${libstdcpp_sha}" != "${LIBSTDCPP_SHA_X86}" ]; then
-  echo "ERROR: libstdc++ sha256 ${libstdcpp_sha} matches neither the canonical" >&2
-  echo "x86_64-host build nor the known aarch64-host build. The toolchain output" >&2
-  echo "changed; re-derive the byte normalization above from a fresh x86_64 +" >&2
-  echo "aarch64 build pair (diff the two rootfs trees)." >&2
-  exit 1
-fi
 
 # Remove python sysconfigdata (build-host metadata; unused at runtime)
 rm -f ${TARGET_DIR}/usr/lib/python3.12/_sysconfigdata__linux_arm-linux-gnueabihf.py

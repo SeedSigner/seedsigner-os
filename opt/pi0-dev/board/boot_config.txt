@@ -1,5 +1,7 @@
-start_file=start_x.elf
-fixup_file=fixup_x.dat
+# Full firmware required: the cut-down start_cd.elf lacks the ISP service the
+# camera pipeline drives over VCHIQ (camera never enumerates -- hw-tested on pi0).
+start_file=start.elf
+fixup_file=fixup.dat
 
 # Kernel location
 kernel=zImage

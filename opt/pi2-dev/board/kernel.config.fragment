@@ -53,7 +53,15 @@ CONFIG_HID=y
 CONFIG_HID_GENERIC=y
 CONFIG_USB_HID=y
 
-# HDMI (matches the "#HDMI" breadcrumbs left in the release kernel.config)
+# HDMI (matches the "#HDMI" breadcrumbs left in the release kernel.config).
+# The framebuffer/console stack must be re-enabled HERE: the release config
+# now disables FB/fbcon/DRM entirely (boot-speed: no display stack on the
+# SPI-panel release image), so the dev HDMI console no longer inherits them
+# from the base.
+CONFIG_FB=y
+CONFIG_FB_BCM2708=y
+CONFIG_FB_SIMPLE=y
+CONFIG_FRAMEBUFFER_CONSOLE=y
 CONFIG_DMADEVICES=y
 CONFIG_DMA_BCM2835=y
 CONFIG_DMA_BCM2708=y

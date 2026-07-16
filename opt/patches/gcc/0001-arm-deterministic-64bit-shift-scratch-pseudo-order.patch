@@ -1,0 +1,88 @@
+arm: create 64-bit-shift scratch pseudos in a deterministic order
+
+The ashldi3/ashrdi3/lshrdi3 expanders pass two gen_reg_rtx (SImode)
+calls as arguments to arm_emit_coreregs_64bit_shift.  C++ argument
+evaluation order is unspecified, so which scratch receives the lower
+pseudo number depends on the compiler that built cc1: observed
+right-to-left when cc1 is built on an x86_64 host and left-to-right on
+an aarch64 host.  The swapped pseudo numbering survives into register
+allocation, where it flips equal-cost tie-breaks: the practical symptom
+is 12 differing bytes (pairs of swapped stack spill slots) in
+std::from_chars in the target libstdc++.so, breaking byte-for-byte
+reproducibility of ARM cross-builds across build-host architectures.
+
+Hoist the two gen_reg_rtx calls into sequenced statements so pseudo
+numbering -- and therefore generated code -- is host-independent.
+
+Diagnosed on gcc 13.3.0 (buildroot internal toolchain, target
+arm-buildroot-linux-gnueabihf): with this patch, x86_64- and
+aarch64-hosted builds produce byte-identical libstdc++.so.6.0.32.
+Same code is still present in gcc master as of 2026-07.
+
+Kept in the unversioned patches/gcc/ dir deliberately: if a future gcc
+bump includes an upstream fix, this patch will fail to apply and the
+build will error loudly (instead of silently regressing cross-host
+reproducibility, which no build error would ever catch).
+
+--- a/gcc/config/arm/arm.md
++++ b/gcc/config/arm/arm.md
+@@ -4600,9 +4600,17 @@
+ 	}
+     }
+ 
++  /* Create the two scratch pseudos in a fixed order.  As arguments of
++     the call below, the two gen_reg_rtx calls' evaluation order would be
++     unspecified, making the pseudo register numbering depend on the
++     argument evaluation order of the compiler that built cc1 -- observed
++     to differ between x86_64 and aarch64 build hosts, breaking
++     cross-host-reproducible builds (12 differing bytes in the target's
++     libstdc++ std::from_chars, from swapped spill slots downstream).  */
++  rtx scratch1 = gen_reg_rtx (SImode);
++  rtx scratch2 = gen_reg_rtx (SImode);
+   arm_emit_coreregs_64bit_shift (ASHIFT, operands[0], operands[1],
+-				 operands[2], gen_reg_rtx (SImode),
+-				 gen_reg_rtx (SImode));
++				 operands[2], scratch1, scratch2);
+   DONE;
+ ")
+ 
+@@ -4638,9 +4646,17 @@
+       DONE;
+     }
+ 
++  /* Create the two scratch pseudos in a fixed order.  As arguments of
++     the call below, the two gen_reg_rtx calls' evaluation order would be
++     unspecified, making the pseudo register numbering depend on the
++     argument evaluation order of the compiler that built cc1 -- observed
++     to differ between x86_64 and aarch64 build hosts, breaking
++     cross-host-reproducible builds (12 differing bytes in the target's
++     libstdc++ std::from_chars, from swapped spill slots downstream).  */
++  rtx scratch1 = gen_reg_rtx (SImode);
++  rtx scratch2 = gen_reg_rtx (SImode);
+   arm_emit_coreregs_64bit_shift (ASHIFTRT, operands[0], operands[1],
+-				 operands[2], gen_reg_rtx (SImode),
+-				 gen_reg_rtx (SImode));
++				 operands[2], scratch1, scratch2);
+   DONE;
+ ")
+ 
+@@ -4673,9 +4689,17 @@
+       DONE;
+     }
+ 
++  /* Create the two scratch pseudos in a fixed order.  As arguments of
++     the call below, the two gen_reg_rtx calls' evaluation order would be
++     unspecified, making the pseudo register numbering depend on the
++     argument evaluation order of the compiler that built cc1 -- observed
++     to differ between x86_64 and aarch64 build hosts, breaking
++     cross-host-reproducible builds (12 differing bytes in the target's
++     libstdc++ std::from_chars, from swapped spill slots downstream).  */
++  rtx scratch1 = gen_reg_rtx (SImode);
++  rtx scratch2 = gen_reg_rtx (SImode);
+   arm_emit_coreregs_64bit_shift (LSHIFTRT, operands[0], operands[1],
+-				 operands[2], gen_reg_rtx (SImode),
+-				 gen_reg_rtx (SImode));
++				 operands[2], scratch1, scratch2);
+   DONE;
+ ")
+ 

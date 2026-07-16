@@ -18,7 +18,7 @@ The zImage a compressed version of the Linux kernel that is self-extracting. In 
 
 1. When Raspberry Pi is powered on, the bootloader starts on GPU and reads the MicroSD (SDRAM disabled at this point)
 2. GPU reads bootcode.bin and starts the bootloader to enable SDRAM
-3. Then start_x.elf reads config.txt, cmdline.txt and kernel
+3. Then start.elf (start4.elf on Pi 4) reads config.txt, cmdline.txt and kernel
 4. CPU starts working and then boots the kernel
 
 ![Boot Sequence](img/ssos_boot_seq.png?raw=true "Boot Sequence")
