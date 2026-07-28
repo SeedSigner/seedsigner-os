@@ -1,7 +1,0 @@
-config BR2_PACKAGE_PYTHON_PICAMERA
-	bool "python-picamera"
-	help
-      This package provides a pure Python interface to the Raspberry Pi camera module for Python 2.7 (or above) or Python 3.2 (or above).
-
-	  https://pypi.org/project/picamera/
-    

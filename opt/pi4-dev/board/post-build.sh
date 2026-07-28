@@ -63,7 +63,7 @@ rm -rf ${TARGET_DIR}/usr/lib/python3/site-packages/embit/util/prebuilt/libsecp25
 
 # Dev convenience: make `python3 -m venv DIR` produce a usable venv by default.
 # This image's Python is built --without-ensurepip and carries the app's native
-# deps (PIL/numpy/embit/...) only in the system site-packages, so the two useful
+# deps (PIL/embit/...) only in the system site-packages, so the two useful
 # venv defaults here are the opposite of upstream CPython:
 #   --system-site-packages -> default ON  (venv sees the baked-in packages)
 #   pip bootstrap          -> default OFF (ensurepip is unavailable; the system

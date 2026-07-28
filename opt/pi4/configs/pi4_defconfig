@@ -1,7 +1,13 @@
 BR2_arm=y
 BR2_cortex_a72=y
 BR2_ARM_FPU_NEON_VFPV4=y
-BR2_PACKAGE_RPI_FIRMWARE_VARIANT_PI4_X=y
+# Plain start4.elf/fixup4.dat: the _X (camera) firmware variant was only
+# needed by the legacy GPU/MMAL camera stack, which libcamera replaces. The
+# cut-down variant (start4cd.elf) is expected NOT to work: on pi0 the
+# equivalent start_cd.elf lacks the firmware-side ISP service that
+# bcm2835-isp drives over VCHIQ, so the camera never enumerates
+# (hardware-tested, CameraConnectionError).
+BR2_PACKAGE_RPI_FIRMWARE_VARIANT_PI4=y
 
 BR2_DL_DIR="$(TOPDIR)/../../buildroot_dl"
 BR2_GLOBAL_PATCH_DIR="$(BR2_EXTERNAL_RPI_SEEDSIGNER_PATH)/../patches"
@@ -33,7 +39,6 @@ BR2_PACKAGE_RPI_FIRMWARE=y
 BR2_PACKAGE_RPI_FIRMWARE_BOOTCODE_BIN=y
 BR2_PACKAGE_RPI_FIRMWARE_CONFIG_FILE="../pi4/board/boot_config.txt"
 BR2_PACKAGE_RPI_FIRMWARE_CMDLINE_FILE="../pi4/board/boot_cmdline.txt"
-BR2_PACKAGE_RPI_USERLAND=y
 BR2_PACKAGE_PYTHON3=y
 BR2_PACKAGE_PYTHON3_SSL=y
 BR2_PACKAGE_PYTHON_PILLOW_EP=y
@@ -41,15 +46,21 @@ BR2_PACKAGE_PYTHON_RPI_GPIO=y
 BR2_PACKAGE_PYTHON_SPIDEV=y
 BR2_PACKAGE_FREETYPE=y
 BR2_PACKAGE_LIBRAQM=y
-BR2_PACKAGE_PYTHON_NUMPY=y
 BR2_PACKAGE_ZBAR=y
+# Camera: libcamera + RPi VC4 pipeline + python bindings (the app imports the
+# native pybind11 `libcamera` module directly -- no picamera2). Replaces the
+# legacy picamera/MMAL stack; numpy (picamera's only consumer) goes with it.
+# The VC4 pipeline selects boost, but boost is headers-only on target here
+# (no component enabled) so it adds nothing to the image.
+BR2_PACKAGE_LIBCAMERA=y
+BR2_PACKAGE_LIBCAMERA_PIPELINE_RPI_VC4=y
+BR2_PACKAGE_LIBCAMERA_PYTHON=y
 BR2_TARGET_ROOTFS_CPIO_GZIP=y
 BR2_TARGET_ROOTFS_INITRAMFS=y
 BR2_PACKAGE_HOST_MTOOLS=y
 BR2_PACKAGE_PYTHON_URTYPES=y
 BR2_PACKAGE_PYTHON_PYZBAR=y
 BR2_PACKAGE_PYTHON_EMBIT=y
-BR2_PACKAGE_PYTHON_PICAMERA=y
 BR2_PACKAGE_PYTHON_QRCODE=y
 # BR2_PACKAGE_PYTHON3_CODECSCJK is not set
 # BR2_PACKAGE_PYTHON3_PYEXPAT is not set

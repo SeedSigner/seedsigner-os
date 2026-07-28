@@ -1,14 +1,24 @@
-start_file=start4x.elf
-fixup_file=fixup4x.dat
+# Full firmware required: the cut-down start4cd.elf is expected to lack the ISP
+# service the camera pipeline drives over VCHIQ (start_cd.elf hw-tested on pi0:
+# camera never enumerates).
+start_file=start4.elf
+fixup_file=fixup4.dat
 
 # Kernel location
 kernel=zImage
 
 # How much memory in MB to assign to the GPU on Pi models having
-gpu_mem=256
+# 32: the GPU only needed the old 256MB for the legacy MMAL camera stack
+# (start_x=1), which libcamera replaces. The ARM-side camera drivers instead
+# allocate capture buffers from the kernel's 64MB CMA pool.
+gpu_mem=32
 
-# Enable Camera module
-start_x=1
+# Camera: sensor overlay for the standard SeedSigner camera module (v1 /
+# OV5647). For a v2 (IMX219) module change this line to dtoverlay=imx219 --
+# the driver is built into the kernel and the overlay ships in overlays/.
+# (The legacy stack instead set start_x=1, which boots the GPU-firmware
+# camera; that would claim the sensor and leave libcamera with no cameras.)
+dtoverlay=ov5647
 
 # Enable SPI
 dtparam=spi=on
