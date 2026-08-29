@@ -166,6 +166,8 @@ delete_unnecessary_files() {
   rm -rf ${rootfs_overlay}/opt/tools
   # files
   rm -rf ${rootfs_overlay}/opt/.git*
+  rm -rf ${rootfs_overlay}/opt/AGENTS.md
+  rm -rf ${rootfs_overlay}/opt/CLAUDE.md
   rm -rf ${rootfs_overlay}/opt/docker-compose.yml
   rm -rf ${rootfs_overlay}/opt/LICENSE.md
   rm -rf ${rootfs_overlay}/opt/MANIFEST.in
