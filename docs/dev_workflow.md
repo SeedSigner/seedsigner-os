@@ -148,18 +148,25 @@ cd seedsigner
 git submodule update --init --recursive
 python3 -m venv venv
 source venv/bin/activate
-python3 -m pip install -r tests/requirements.txt
-python3 -m pip install -r l10n/requirements-l10n.txt
-python3 -m pip install -e .
+python3 -m pip install --require-hashes -r /mnt/data/dev-reqs.txt
+python3 -m pip install --no-deps -e .
 python setup.py compile_catalog
 pytest
 seedsigner restart
 ```
 
+`dev-reqs.txt` is the hash-locked list of test + translation tools, exported from the app repo's `uv.lock` on your host (the device has no `uv`) and copied over:
+
+```bash
+# on your host, from the app checkout
+uv export --only-group test --only-group l10n --no-emit-project -o /tmp/dev-reqs.txt
+scp /tmp/dev-reqs.txt root@seedsigner.local:/mnt/data/
+```
+
 Notes:
 
 - `/mnt/data` is the persistent partition, so the checkout and venv survive reboots.
-- On this image `python3 -m venv` defaults to `--system-site-packages`, so the heavy native dependencies (Pillow, numpy, embit, pyzbar) come from the image and pip only installs the pure-Python dev/test tools into the venv. See [Installing Python packages](dev_images.md#installing-python-packages) for the details.
+- On this image `python3 -m venv` defaults to `--system-site-packages`, so the heavy native dependencies (Pillow, numpy, embit, pyzbar) come from the image and pip only installs the pure-Python dev/test tools into the venv. `--no-deps` on the editable install is required for the same reason: `pyproject.toml` declares the runtime dependencies, and without it pip would try to build Pillow on the device. See [Installing Python packages](dev_images.md#installing-python-packages) for the details.
 - `compile_catalog` builds the translation `.mo` files — skip it and the l10n tests fail.
 - `seedsigner restart` relaunches the app from your `/mnt/data/seedsigner` checkout (see [Controlling the app](#controlling-the-app)).
 

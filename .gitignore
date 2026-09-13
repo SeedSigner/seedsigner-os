@@ -2,3 +2,4 @@
 .buildroot-ccache/
 .buildroot_dl/
 .ccache/
+opt/.translation-venv/

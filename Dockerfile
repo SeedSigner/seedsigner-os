@@ -29,9 +29,16 @@ mtools \
 fdisk \
 dosfstools \
 ccache \
-python3 \
-python3-pip \
-python3-virtualenv
+python3
+
+# uv (build host only): creates the hash-verified translation venv from the app repo's
+# uv.lock in build.sh. Pinned by version and image digest. Never installed into the
+# target image.
+COPY --from=ghcr.io/astral-sh/uv:0.12.13@sha256:b485bd65cc2cf1c9a93b3554012c9c3778cf7b1b5fd3d3096ce9e1226c97e1e6 /uv /usr/local/bin/uv
+# Never download a managed CPython in the container (always use Debian's python3), and
+# copy from the uv cache instead of hardlinking: /opt is a bind mount on another filesystem.
+ENV UV_PYTHON_DOWNLOADS=never
+ENV UV_LINK_MODE=copy
 
 # Locale
 RUN locale-gen en_US.UTF-8  

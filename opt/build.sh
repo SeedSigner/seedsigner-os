@@ -40,19 +40,33 @@ tail_endless() {
 
 compile_translations_and_fonts() {
 
-  # create virtual env to compile translation files and slim down font files
-  virtualenv .translation-venv
-  source .translation-venv/bin/activate
-  cd ${rootfs_overlay}/opt
+  # Build-host virtualenv used only to compile the translation catalogs and slim down
+  # the font files. It lives outside the rootfs overlay and never ships in the image.
+  app_dir="${rootfs_overlay}/opt"
+  translation_venv="${cur_dir}/.translation-venv"
+
+  # Recreated every build so its contents are exactly what the app's uv.lock says.
+  rm -rf "${translation_venv}"
+  cd "${app_dir}"
+  # babel + setuptools come from the app repo's `l10n` dependency group:
+  #   --frozen                   use uv.lock as-is; never re-resolve or rewrite it
+  #   --only-group l10n          nothing but that group: no project, runtime or test deps
+  #   --python /usr/bin/python3  the container's interpreter (see UV_PYTHON_DOWNLOADS)
+  # uv verifies every downloaded artifact against the sha256 recorded in uv.lock and
+  # fails the build on any mismatch (the equivalent of pip --require-hashes).
+  UV_PROJECT_ENVIRONMENT="${translation_venv}" \
+    uv sync --frozen --only-group l10n --no-install-project --python /usr/bin/python3 || exit
+  # fonttools (pyftsubset) is a build-only addition pinned and hash-locked in this repo
+  # (see requirements-l10n-build.txt). Installed after uv sync, which would otherwise
+  # remove it as not being part of the lock.
+  uv pip install --python "${translation_venv}/bin/python" --require-hashes \
+    -r "${cur_dir}/requirements-l10n-build.txt" || exit
+  cd - > /dev/null
+
+  source "${translation_venv}/bin/activate"
+  cd "${app_dir}"
 
   ss_translations_repo="./src/seedsigner/resources/seedsigner-translations"
-
-  # install pinned, hash-locked dependencies: babel + setuptools come from the
-  # app repo's own l10n requirements; fonttools (pyftsubset) is a build-only
-  # addition pinned in this repo (see requirements-l10n-build.txt).
-  # --require-hashes fails the build if either file regresses to unhashed pins.
-  pip install --require-hashes -r l10n/requirements-l10n.txt || exit
-  pip install --require-hashes -r "${cur_dir}/requirements-l10n-build.txt" || exit
 
   # remove any existing binary mo files if they exist
   rm -rf ${ss_translations_repo}/l10n/**/**/*.mo
@@ -170,12 +184,14 @@ delete_unnecessary_files() {
   rm -rf ${rootfs_overlay}/opt/LICENSE.md
   rm -rf ${rootfs_overlay}/opt/MANIFEST.in
   rm -rf ${rootfs_overlay}/opt/pyproject.toml
+  rm -rf ${rootfs_overlay}/opt/.python-version
   rm -rf ${rootfs_overlay}/opt/README.md
-  rm -rf ${rootfs_overlay}/opt/requirements-raspi.txt
-  rm -rf ${rootfs_overlay}/opt/requirements.txt
   rm -rf ${rootfs_overlay}/opt/SECURITY.md
   rm -rf ${rootfs_overlay}/opt/seedsigner_pubkey.gpg
   rm -rf ${rootfs_overlay}/opt/setup.*
+  rm -rf ${rootfs_overlay}/opt/uv.lock
+  # a developer's local environment, if the checkout was populated by hand (--skip-repo)
+  rm -rf ${rootfs_overlay}/opt/.venv
 
   rm -rf ${rootfs_overlay}/opt/src/seedsigner/resources/seedsigner-translations/LICENSE
   rm -rf ${rootfs_overlay}/opt/src/seedsigner/resources/seedsigner-translations/README.md
