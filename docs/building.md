@@ -44,16 +44,24 @@ If you're unsure, most people should specify `pi0`.
 export BOARD_TYPE=pi0
 ```
 
-Set your target release version of the SeedSigner code (see: https://github.com/SeedSigner/seedsigner/releases):
+Detect the latest stable SeedSigner OS release branch:
 
 ```bash
-# e.g. 0.8.0, 0.7.0, etc
-export RELEASE_TAG=x.y.z
+export RELEASE_TAG="$(
+    git for-each-ref --sort=-version:refname \
+        --format='%(refname:lstrip=3)' 'refs/remotes/origin/[0-9]*' |
+    grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' |
+    head -n 1
+)"
+echo "Latest stable SeedSigner OS release: ${RELEASE_TAG}"
 ```
 
-Checkout the branch associated to the target release version of the SeedSigner code (e.g. 0.8.5, 0.8.0, etc)
+To build a specific historical release instead, set `RELEASE_TAG` to a tag listed on
+the [SeedSigner releases page](https://github.com/SeedSigner/seedsigner/releases).
+
+Checkout the matching SeedSigner OS release branch:
 ```bash
-git checkout $RELEASE_TAG
+git checkout "$RELEASE_TAG"
 ```
 
 Initialize and update submodules (buildroot) from the seedsigner-os repo
@@ -106,14 +114,22 @@ If you're unsure, most people should specify `pi0`.
 $env:BOARD_TYPE = 'pi0'
 ```
 
-Set your target release version of the SeedSigner code (see: https://github.com/SeedSigner/seedsigner/releases):
+Detect the latest stable SeedSigner OS release branch:
 
 ```powershell
-# e.g. "0.8.0", "0.7.0", etc
-$env:RELEASE_TAG = "x.y.z"  
+$env:RELEASE_TAG = git for-each-ref `
+    --sort=-version:refname `
+    --format='%(refname:lstrip=3)' `
+    'refs/remotes/origin/[0-9]*' | `
+    Where-Object { $_ -match '^\d+\.\d+\.\d+$' } | `
+    Select-Object -First 1
+Write-Host "Latest stable SeedSigner OS release: $env:RELEASE_TAG"
 ```
 
-Checkout the branch associated to the target release version of the SeedSigner code (e.g. 0.8.5, 0.8.0, etc)
+To build a specific historical release instead, set `RELEASE_TAG` to a tag listed on
+the [SeedSigner releases page](https://github.com/SeedSigner/seedsigner/releases).
+
+Checkout the matching SeedSigner OS release branch:
 ```powershell
 git checkout $env:RELEASE_TAG
 ```
