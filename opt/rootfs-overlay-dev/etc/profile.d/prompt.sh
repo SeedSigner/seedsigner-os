@@ -1,6 +1,6 @@
 # Dev-image shell prompt: "user@host dir %" where dir is the current working
 # directory's NAME (its basename, \W), not the full path.
-# Sourced by /etc/profile (login shells: SSH and the HDMI/serial console).
+# Sourced by /etc/profile (login shells: SSH and the console shells on tty1/tty2).
 # Only applied for interactive bash (root's shell); other shells keep the
 # default prompt. Colors: green user@host, blue directory.
 #

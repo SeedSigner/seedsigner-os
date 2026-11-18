@@ -77,3 +77,7 @@ CONFIG_EXT4_FS=y
 CONFIG_REGULATOR=y
 CONFIG_REGULATOR_FIXED_VOLTAGE=y
 CONFIG_REGULATOR_GPIO=y
+
+# Watchdog: its driver also restarts the board, so without it `reboot` halts
+CONFIG_WATCHDOG=y
+CONFIG_BCM2835_WDT=y

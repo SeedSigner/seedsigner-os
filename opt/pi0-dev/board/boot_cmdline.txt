@@ -1,1 +1,1 @@
-console=tty1 ipv6.disable=1 spidev.bufsiz=131072
+console=tty2 ipv6.disable=1 spidev.bufsiz=131072

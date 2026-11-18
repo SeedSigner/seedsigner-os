@@ -28,7 +28,8 @@ rm -f ${TARGET_DIR}/etc/init.d/S20seedrng
 rm -f ${TARGET_DIR}/etc/init.d/S40network
 rm -f ${TARGET_DIR}/etc/init.d/S50pigpio
 
-# Add a root shell on the HDMI console (tty1) and the serial console.
+# Add a root shell on the HDMI console (tty1) and on the kernel console, which
+# boot_cmdline.txt puts on tty2 so the two shells don't share a terminal.
 # These respawn a shell directly (no login), so they bypass /etc/passwd -- use
 # bash here so the console shell matches root's login shell (set below).
 if [ -e ${TARGET_DIR}/etc/inittab ]; then

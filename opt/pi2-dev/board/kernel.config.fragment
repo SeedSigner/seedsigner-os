@@ -64,3 +64,7 @@ CONFIG_AUXDISPLAY=y
 
 # Persistent ext4 data partition (/dev/mmcblk0p2)
 CONFIG_EXT4_FS=y
+
+# Watchdog: its driver also restarts the board, so without it `reboot` halts
+CONFIG_WATCHDOG=y
+CONFIG_BCM2835_WDT=y
